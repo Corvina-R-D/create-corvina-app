@@ -1,0 +1,87 @@
+{{ $PROTOCOL := (.Values.gateway.protocol | upper) }}
+{{ if and (eq $PROTOCOL "HTTPS") (or (eq .Values.gateway.appHost "exxxample.corvina.cloud") (eq .Values.gateway.appHost "exxxample.corvina.io")) }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ .Values.gateway.issuer.name }}
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    preferredChain: ISRG Root X1
+    email: "monitoring@exorint.com"
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: corvina-exxxample-acme
+    solvers:
+      - dns01:
+          cloudDNS:
+            project: corvina-networking
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: corvina-exxxample-app-certificate
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  secretName: {{ .Values.gateway.certificateSecretName }}
+  issuerRef:
+    # The issuer created previously
+    name: {{ .Values.gateway.issuer.name }}
+  dnsNames:
+  - {{ .Values.gateway.appHost | quote }}
+  - {{ printf "*.%s" .Values.gateway.appHost | quote }}
+{{ end }}
+{{ if and (eq $PROTOCOL "HTTPS") (eq .Values.gateway.appHost "exxxample.local.gd") }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Release.Name }}-selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: my-selfsigned-ca
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  isCA: true
+  commonName: my-selfsigned-ca
+  secretName: root-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: {{ .Release.Name }}-selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ .Values.gateway.issuer.name }}
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  ca:
+    secretName: root-secret
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: exxxample-crt
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  secretName: {{ .Values.gateway.certificateSecretName }}
+  dnsNames:
+  - local.gd
+  - fake.exxxample.local.gd
+  - '*.local.gd'
+  - '*.exxxample.local.gd'
+  issuerRef:
+    name: {{ .Values.gateway.issuer.name }}
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    group: cert-manager.io
+{{ end }}

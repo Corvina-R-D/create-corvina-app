@@ -1,0 +1,35 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app-host-vs
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  hosts:
+  - "{{ .Values.gateway.appHost }}"
+  - '*.{{ .Values.gateway.appHost }}'
+  gateways:
+  - exxxample-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /v1
+    - uri:
+        prefix: /swagger-ui
+    - uri:
+        regex: ^\/v2\/.*\/manifests\/.* # i need this for intercepting the docker push and apply side effects on psql db
+      method:
+        exact: PUT
+    route:
+    - destination:
+        port:
+          number: 80
+        host: service-service
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 80
+        host: app-service

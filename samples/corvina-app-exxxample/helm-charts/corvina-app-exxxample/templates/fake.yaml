@@ -1,0 +1,62 @@
+{{ if .Values.useFakeHttpServer }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fake-http-server-deployment
+  namespace: corvina-app-exxxample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fake-http-server
+  template:
+    metadata:
+      labels:
+        app: fake-http-server
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: fake-http-server
+          image: fake_http_server:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3943
+          env:
+            - name: PORT
+              value: "3943"
+            - name: FE_APP_ORIGIN
+              value: "https://exxxample.local.gd:11013"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fake-http-server-service
+  namespace: corvina-app-exxxample
+spec:
+  selector:
+    app: fake-http-server
+  ports:
+    - port: 80
+      targetPort: 3943
+      name: {{ .Values.gateway.protocol }}-service-port
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: fake-vs
+  namespace: corvina-app-exxxample
+spec:
+  hosts:
+  - "fake.exxxample.local.gd"
+  gateways:
+  - exxxample-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 80
+        host: fake-http-server-service
+{{ end }}

@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-deployment
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service
+  template:
+    metadata:
+      labels:
+        app: service
+    spec:
+      serviceAccountName: service-sa
+      initContainers:
+        - name: init
+          image: "groundnuty/k8s-wait-for:1.3"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          args:
+            - "job"
+            - "{{ .Release.Name }}-migrator-job-{{ .Release.Revision }}"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      containers:
+        - name: service
+          image: {{ .Values.service.image }}:{{ .Values.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: service-config
+          env:
+            - name: START_FEATURES
+              value: {{ .Values.service.envVar.START_FEATURES }}
+            - name: PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-exxxample-secrets
+                  key: POSTGRES_PASSWORD
+                  optional: false
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-redis
+                  key: REDIS_PASSWORD
+                  optional: false
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 3000
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 3000
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+            requests:
+              cpu: 0.25
+              memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-config
+  namespace: {{ .Values.k8sNamespace }}
+  labels:
+    app: service
+    tier: app-service-deployment
+data:
+  {{ if eq .Values.service.envVar.NODE_TLS_REJECT_UNAUTHORIZED "0" }}
+  NODE_TLS_REJECT_UNAUTHORIZED: "0"
+  {{ end }}
+  LOG_LEVEL: {{ .Values.service.envVar.LOG_LEVEL }}
+  PG_HOST: '{{ .Release.Name }}-postgresql'
+  PG_PORT: '{{ .Values.service.envVar.PG_PORT }}'
+  PG_USER: {{ .Values.postgresql.global.postgresql.auth.username }}
+  PG_DATABASE: {{ .Values.postgresql.global.postgresql.auth.database }}
+  PG_MAX_QUERY_EXEC_TIME: '{{ .Values.service.envVar.PG_MAX_QUERY_EXEC_TIME }}'
+  PG_POOL_MAX: '{{ .Values.service.envVar.PG_POOL_MAX }}'
+  PG_QUERY_LOGGING: '{{ .Values.service.envVar.PG_QUERY_LOGGING }}'
+  MANIFEST_BASE_URL: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}/v1
+  MANIFEST_ID: {{ .Values.k8sNamespace }}
+  MANIFEST_API_VERSION: '{{ .Chart.AppVersion }}'
+  MANIFEST_BASE_URL_FE_APP: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}
+  INSTALLATION_HOSTS_WHITELIST: '{{ .Values.service.envVar.INSTALLATION_HOSTS_WHITELIST }}'
+  REDIS_HOST: '{{ .Release.Name }}-redis-headless'
+  REDIS_PORT: '6379'
+  CACHE_DEFAULT_TTL: '30' # in seconds
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-service
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  selector:
+    app: service # the Service will expose all Pods with a label of app: service
+  ports:
+    - port: 80
+      targetPort: 3000
+      name: {{ .Values.gateway.protocol }}-service-port
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: service-sa
+  namespace: {{ .Values.k8sNamespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: service-sa-watch-jobs-rb
+  namespace: {{ .Values.k8sNamespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: watch-jobs
+subjects:
+- kind: ServiceAccount
+  name: service-sa
+  namespace: {{ .Values.k8sNamespace }}
