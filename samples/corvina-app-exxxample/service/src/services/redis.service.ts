@@ -24,9 +24,10 @@ export class RedisService implements IRedisService, OnApplicationBootstrap, OnAp
     }
 
     const password = REDIS_PASSWORD ? `:${REDIS_PASSWORD}` : '';
+    const db = REDIS_DB || 0;
 
     this._client = createClient({
-      url: `redis://${password}@${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}`,
+      url: `redis://${password}@${REDIS_HOST}:${REDIS_PORT}/${db}`,
       isolationPoolOptions: {
         min: REDIS_POOL_MIN ? Number(REDIS_POOL_MIN) : 1,
         max: REDIS_POOL_MAX ? Number(REDIS_POOL_MAX) : 20,
