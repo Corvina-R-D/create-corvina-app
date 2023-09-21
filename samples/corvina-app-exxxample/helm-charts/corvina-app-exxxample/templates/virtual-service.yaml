@@ -3,7 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: app-host-vs
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   hosts:
   - "{{ .Values.gateway.appHost }}"

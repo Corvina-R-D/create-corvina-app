@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app-deployment
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -52,7 +52,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app-service
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     app: app # the Service will expose all Pods with a label of app: app
@@ -66,13 +66,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: app-sa
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: app-sa-watch-jobs-rb
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -80,4 +80,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: app-sa
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}

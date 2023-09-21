@@ -4,15 +4,12 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: exxxample-gateway
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     istio: '{{ $ISTIO_GATEWAY.name | replace "istio-" "" }}'
   servers:
     - hosts:
-      {{ if .Values.useFakeHttpServer }}
-        - 'fake.exxxample.local.gd'
-      {{ end }}
         - '{{ .Values.gateway.appHost }}'
         - '*.{{ .Values.gateway.appHost }}'
       port:

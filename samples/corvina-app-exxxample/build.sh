@@ -17,16 +17,3 @@ cd $current_directory/service/
 docker build -t exxxample_service .
 docker tag exxxample_service:latest exxxample_service:local
 
-# --------------------------- #
-# build docker image for fake http service
-# --------------------------- #
-cd $current_directory/fake-http-server/
-docker build -t fake_http_server .
-docker tag fake_http_server:latest fake_http_server:local
-
-# --------------------------- #
-# build docker image for external auth service
-# --------------------------- #
-cd $current_directory/authz_server/
-docker build -t authz .
-docker tag authz:latest authz:local

@@ -2,12 +2,11 @@
 
 ## How to start this project with docker-compose for developing
 
-* add to your `/etc/hosts` the following line `127.0.0.1 fake.exxxample.local.gd  exxxample.local.gd`
+* add to your `/etc/hosts` the following line `127.0.0.1 exxxample.local.gd`
 * follow instruction in [How to start this project with minikube](#how-to-start-this-project-with-minikube) till minikube tunnel
 * run in a shell `docker-compose up postgresql redis` and leave it running
 * run in a shell `cd app && cp -n ./.env.dist ./.env || true && npm i && npm run dev` and leave it running
 * run in a shell `cd service && cp -n ./.env.dist ./.env || true && npm i && npm run start:dev` and leave it running
-* run in a shell `cd fake-http-server && npm i && node index.js` and leave it running
 * install the app locally, run
 
   ```sh
@@ -50,9 +49,9 @@
 * install the app locally, run
 
   ```sh
-  export TOKEN=$(curl -k https://fake.exxxample.local.gd:11013/auth/realms/sample1/protocol/openid-connect/token -s | jq -r .access_token)
+  export TOKEN=$(curl -k https://fake.exxxample.local.gd:11073/auth/realms/sample1/protocol/openid-connect/token -s | jq -r .access_token)
   curl -k -X 'POST' \
-    'https://exxxample.local.gd:11013/v1/installed' \
+    'https://exxxample.local.gd:11073/v1/installed' \
     -H 'accept: */*' \
     -H 'Content-Type: application/json' \
     -H "Authorization: Bearer $TOKEN" \
@@ -61,7 +60,7 @@
       "apiVersion": "1.0.0",
       "clientId": "user-service-exxxampleadmin@exor",
       "clientSecret": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
-      "baseUrl": "https://fake.exxxample.local.gd:11013",
+      "baseUrl": "https://fake.exxxample.local.gd:11073",
       "apiBaseUrl": "https://app.corvina.fog:10443",
       "authBaseUrl": "https://auth.corvina.fog:10443",
       "openIdConfigurationUrl": "http://fake-http-server-service/auth/realms/sample1/.well-known/openid-configuration",
@@ -74,7 +73,7 @@
     }'
   ```
 
-* browse to <https://fake.exxxample.local.gd:11013/index> to emulated to be inside the corvina app
+* browse to <https://fake.exxxample.local.gd:11073/index> to emulated to be inside the corvina app
 
 ## How to test this project inside corvina in localhost (TODO: check if needed)
 
@@ -101,7 +100,7 @@
 
   ```sh
   curl -k -X 'POST' \
-    'https://exxxample.local.gd:11013/v1/installed' \
+    'https://exxxample.local.gd:11073/v1/installed' \
     -H 'accept: */*' \
     -H 'Content-Type: application/json' \
     -d '{

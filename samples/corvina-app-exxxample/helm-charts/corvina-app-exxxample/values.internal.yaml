@@ -9,12 +9,8 @@ istio-gateway:
       port: 443
       protocol: TCP
 
-k8sNamespace: corvina-app-exxxample
-
 imagePullPolicy: Always
 tag: 
-
-useFakeHttpServer: false
 
 gateway:
   appHost: "exxxample.corvina.io"
@@ -41,10 +37,6 @@ postgresql:
       auth:
         username: corvina_app_exxxample
         database: corvina_app_exxxample
-        existingSecret: postgresql-exxxample-secrets
-        secretKeys:
-          adminPasswordKey: POSTGRES_PASSWORD
-          userPasswordKey: POSTGRES_PASSWORD
 
 app:  
   image: europe-west1-docker.pkg.dev/corvina-app-exxxample/images/corvina-app-exxxample-frontend
@@ -68,10 +60,6 @@ migrator:
 redis:
   global:
     storageClass: "ssd-retain"
-  auth:
-    enabled: true
-    existingSecret: corvina-app-exxxample-redis
-    existingSecretPasswordKey: REDIS_PASSWORD
   architecture: standalone
   replica:
     replicaCount: 0

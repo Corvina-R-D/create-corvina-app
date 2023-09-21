@@ -6,20 +6,16 @@ istio-gateway:
     externalTrafficPolicy: Local
     ports:
     - name: https
-      port: 11013
+      port: 11073
       protocol: TCP
-
-k8sNamespace: corvina-app-exxxample
 
 imagePullPolicy: IfNotPresent
 tag: local
 
-useFakeHttpServer: true
-
 gateway:
   appHost: "exxxample.local.gd"
   protocol: "https"
-  port: 11013
+  port: 11073
   certificateSecretName: "exxxample-crt-secret"
   issuer: 
     name: "my-ca-issuer"
@@ -41,16 +37,9 @@ postgresql:
       auth:
         username: corvina_app_exxxample
         database: corvina_app_exxxample
-        existingSecret: postgresql-exxxample-secrets
-        secretKeys:
-          adminPasswordKey: POSTGRES_PASSWORD
-          userPasswordKey: POSTGRES_PASSWORD
 
 app:  
   image: exxxample_app
-
-authz:
-  image: authz
 
 service:
   image: exxxample_service
@@ -69,10 +58,6 @@ migrator:
     START_FEATURES: migrator.up,quit
 
 redis:
-  auth:
-    enabled: true
-    existingSecret: exxxample-redis
-    existingSecretPasswordKey: REDIS_PASSWORD
   architecture: standalone
   replica:
     replicaCount: 0

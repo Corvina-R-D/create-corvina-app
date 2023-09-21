@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}-migrator-job-{{ .Release.Revision }}
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   template:
     metadata:
@@ -30,8 +30,8 @@ spec:
           - name: PG_PASS
             valueFrom:
               secretKeyRef:
-                name: postgresql-exxxample-secrets
-                key: POSTGRES_PASSWORD
+                name: {{ .Release.Name }}-postgresql
+                key: password
                 optional: false   
       restartPolicy: OnFailure
   backoffLimit: 3
@@ -40,12 +40,12 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: migrator-sa
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
   name: migrator-role
 rules:
 - apiGroups: [""]
@@ -56,7 +56,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: migrator-rb
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -64,4 +64,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: migrator-sa
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}

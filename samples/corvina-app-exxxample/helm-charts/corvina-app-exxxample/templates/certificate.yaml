@@ -4,7 +4,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ .Values.gateway.issuer.name }}
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -22,7 +22,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: corvina-exxxample-app-certificate
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   secretName: {{ .Values.gateway.certificateSecretName }}
   issuerRef:
@@ -44,7 +44,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: my-selfsigned-ca
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   isCA: true
   commonName: my-selfsigned-ca
@@ -61,7 +61,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ .Values.gateway.issuer.name }}
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ca:
     secretName: root-secret
@@ -70,12 +70,11 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: exxxample-crt
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   secretName: {{ .Values.gateway.certificateSecretName }}
   dnsNames:
   - local.gd
-  - fake.exxxample.local.gd
   - '*.local.gd'
   - '*.exxxample.local.gd'
   issuerRef:

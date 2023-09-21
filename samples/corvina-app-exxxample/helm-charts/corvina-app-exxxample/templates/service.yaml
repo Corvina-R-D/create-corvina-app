@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: service-deployment
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -40,14 +40,14 @@ spec:
             - name: PG_PASS
               valueFrom:
                 secretKeyRef:
-                  name: postgresql-exxxample-secrets
-                  key: POSTGRES_PASSWORD
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
                   optional: false
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-redis
-                  key: REDIS_PASSWORD
+                  key: redis-password
                   optional: false
           readinessProbe:
             httpGet:
@@ -69,7 +69,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: service-config
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: service
     tier: app-service-deployment
@@ -86,7 +86,7 @@ data:
   PG_POOL_MAX: '{{ .Values.service.envVar.PG_POOL_MAX }}'
   PG_QUERY_LOGGING: '{{ .Values.service.envVar.PG_QUERY_LOGGING }}'
   MANIFEST_BASE_URL: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}/v1
-  MANIFEST_ID: {{ .Values.k8sNamespace }}
+  MANIFEST_ID: {{ .Release.Namespace }}
   MANIFEST_API_VERSION: '{{ .Chart.AppVersion }}'
   MANIFEST_BASE_URL_FE_APP: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}
   INSTALLATION_HOSTS_WHITELIST: '{{ .Values.service.envVar.INSTALLATION_HOSTS_WHITELIST }}'
@@ -98,7 +98,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: service-service
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     app: service # the Service will expose all Pods with a label of app: service
@@ -111,13 +111,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: service-sa
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: service-sa-watch-jobs-rb
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -125,4 +125,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: service-sa
-  namespace: {{ .Values.k8sNamespace }}
+  namespace: {{ .Release.Namespace }}
