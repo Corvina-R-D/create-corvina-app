@@ -1,0 +1,73 @@
+
+istio-gateway:
+  name: istio-exxxamplegateway
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    ports:
+    - name: https
+      port: 443
+      protocol: TCP
+
+imagePullPolicy: Always
+tag: 
+
+gateway:
+  appHost: "exxxample.corvina.io"
+  protocol: "https"
+  port: 443
+  certificateSecretName: "corvina-app-exxxample-prod-tls"
+  issuer: 
+    name: "letsencrypt-issuer"
+
+postgresql:
+  primary:
+    persistence:
+      size: 20Gi
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+  global:
+    storageClass: "ssd-retain"
+    postgresql:
+      auth:
+        username: corvina_app_exxxample
+        database: corvina_app_exxxample
+
+app:  
+  image: europe-west1-docker.pkg.dev/corvina-app-exxxample/images/corvina-app-exxxample-frontend
+
+service:
+  image: europe-west1-docker.pkg.dev/corvina-app-exxxample/images/corvina-app-exxxample-backend
+  envVar:
+    LOG_LEVEL: info
+    PG_PORT: 5432
+    PG_MAX_QUERY_EXEC_TIME: 5000
+    PG_POOL_MAX: 10
+    PG_QUERY_LOGGING: false
+    INSTALLATION_HOSTS_WHITELIST: '*'
+    START_FEATURES: app.listen
+    NODE_TLS_REJECT_UNAUTHORIZED: ''
+
+migrator:
+  envVar: 
+    START_FEATURES: migrator.up,quit
+
+redis:
+  global:
+    storageClass: "ssd-retain"
+  architecture: standalone
+  replica:
+    replicaCount: 0
+  master:
+    resources:
+      limits:
+        cpu: "1"
+        memory: "2Gi"
+      requests:
+        cpu: "500m"
+        memory: "512Mi"

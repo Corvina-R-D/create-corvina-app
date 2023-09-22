@@ -1,0 +1,35 @@
+{{ $PROTOCOL := (.Values.gateway.protocol | upper) }}
+{{ $ISTIO_GATEWAY := index .Values "istio-gateway" }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: exxxample-gateway
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    istio: '{{ $ISTIO_GATEWAY.name | replace "istio-" "" }}'
+  servers:
+    - hosts:
+        - '{{ .Values.gateway.appHost }}'
+        - '*.{{ .Values.gateway.appHost }}'
+      port:
+        name: exxxample-app
+        number: {{ .Values.gateway.port }}
+        protocol: {{ $PROTOCOL }}
+      {{ if eq $PROTOCOL "HTTPS" }}
+      tls:
+        mode: SIMPLE
+        credentialName: {{ .Values.gateway.certificateSecretName }}
+      {{ end }}
+---
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: mesh-default
+  namespace: {{ .Release.Namespace }}
+spec:
+  # enable access logging (you can see those logs in the $ISTIO_GATEWAY.name pod)
+  accessLogging:
+    - providers:
+      - name: envoy
+---

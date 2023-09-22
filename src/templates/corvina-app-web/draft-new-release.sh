@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# check if current branch is master
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$current_branch" != "master" ]; then
+    echo "Current branch is not master"
+    exit 1
+fi
+# check if yq is installed
+if ! command -v yq &> /dev/null
+then
+    echo "yq could not be found"
+    exit 1
+fi
+# check if semver is installed
+if ! command -v semver &> /dev/null
+then
+    echo "semver could not be found"
+    exit 1
+fi
+# retrieve the current appVersion of the chart
+current_app_version=$(yq '.appVersion' helm-charts/corvina-app-exxxample/Chart.yaml)
+# remove prefix chart-
+current_app_version=${current_app_version//chart-/}
+# read first argument as minor/major/patch
+version_type=$1
+# check if argument is valid
+if [ "$version_type" != "minor" ] && [ "$version_type" != "major" ] && [ "$version_type" != "patch" ]; then
+    echo "Invalid first argument. Use major/minor/patch"
+    exit 1
+fi
+# increment the version
+new_app_version=$(semver bump $version_type $current_app_version)
+# update the appVersion in the chart
+yq eval ".appVersion = \"chart-${new_app_version}\"" -i helm-charts/corvina-app-exxxample/Chart.yaml
+# commit all the changes
+git add .
+git commit -m "Release chart-${new_app_version}"
+git push
+# create a new tag
+git tag chart-${new_app_version}
+git push origin chart-${new_app_version}
+
+

@@ -1,0 +1,19 @@
+version: '3.1'
+services:
+  postgresql:
+    image: postgres:15-alpine
+    # command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
+    environment:
+      POSTGRES_USER: "corvina_app_exxxample" # this variable will create the specified user with superuser power and a database with the same name
+      POSTGRES_PASSWORD: "corvina_app_exxxample"
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+      - ./infrastructure/postgresql/:/docker-entrypoint-initdb.d
+    ports:
+      - "5434:5432" # expose port for localdevelpment
+    restart: always
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    restart: always

@@ -2,7 +2,14 @@ package cmd
 
 import (
 	"context"
+	"corvina/create-corvina-app/src/templates"
 	"errors"
+	"fmt"
+	"html/template"
+	"io"
+	"io/fs"
+	"os"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 )
@@ -56,6 +63,65 @@ func askName() (string, error) {
 	return result, nil
 }
 
+func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
+	err := fs.WalkDir(templates.CorvinaAppWeb, ".", fn)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
 func createWebApp(ctx context.Context) error {
+	name := ctx.Value(Name).(string)
+
+	// create folder called carvina-app-{name}
+	destinationFolder := fmt.Sprintf("corvina-app-%s", name)
+	os.Mkdir(destinationFolder, 0755)
+
+	projectInfo := ProjectInfo{Name: name}
+
+	walkThroughWebAppTemplate(func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		fmt.Printf("path=%q, isDir=%v\n", path, d.IsDir())
+		if d.IsDir() {
+			os.Mkdir(strings.Replace(path, "corvina-app-web", destinationFolder, 1), 0755)
+			return nil
+		}
+
+		file, err := os.Create(strings.Replace(path, "corvina-app-web", destinationFolder, 1))
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		err = ParseFileAndExecuteTemplate(path, projectInfo, file)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	return nil
+}
+
+type ProjectInfo struct {
+	Name string
+}
+
+func ParseFileAndExecuteTemplate(file string, projectInfo ProjectInfo, writer io.Writer) error {
+	tmpl, err := template.ParseFiles(file)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("%v", tmpl)
+
+	err = tmpl.Execute(writer, projectInfo)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

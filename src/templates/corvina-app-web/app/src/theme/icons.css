@@ -1,0 +1,655 @@
+@font-face {
+  font-family: 'ExorFontIcon';
+  src:  url('fonts/ExorFontIcon.eot?n4jcwp');
+  src:  url('fonts/ExorFontIcon.eot?n4jcwp#iefix') format('embedded-opentype'),
+    url('fonts/ExorFontIcon.ttf?n4jcwp') format('truetype'),
+    url('fonts/ExorFontIcon.woff?n4jcwp') format('woff'),
+    url('fonts/ExorFontIcon.svg?n4jcwp#ExorFontIcon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="ecc-"]:before, [class*=" ecc-"]:before, .ecc:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'ExorFontIcon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ecc-D-Camera:before {
+  content: "\e9d5";
+  color: #4c4c4d;
+}
+.ecc-empty:before {
+  content: "\e9c6";
+}
+.ecc-FL-forward:before {
+  content: "\e9cd";
+}
+.ecc-FL-menuSmall:before {
+  content: "\e9ce";
+}
+.ecc-FL-back:before {
+  content: "\e9cf";
+}
+.ecc-FL-expandAll:before {
+  content: "\e9c2";
+}
+.ecc-FL-menu:before {
+  content: "\e9c3";
+}
+.ecc-FL-collapseAll:before {
+  content: "\e9c4";
+}
+.ecc-MP-add:before {
+  content: "\e9b9";
+}
+.ecc-MP-addBuy:before {
+  content: "\e9ba";
+}
+.ecc-MP-allWidget:before {
+  content: "\e9bb";
+}
+.ecc-MP-app:before {
+  content: "\e9bc";
+}
+.ecc-MP-cart:before {
+  content: "\e9bd";
+}
+.ecc-MP-myWidget:before {
+  content: "\e9be";
+}
+.ecc-MP-next:before {
+  content: "\e9bf";
+}
+.ecc-MP-primoPiano:before {
+  content: "\e9c0";
+}
+.ecc-MP-try:before {
+  content: "\e9c1";
+}
+.ecc-W-close:before {
+  content: "\e9b5";
+}
+.ecc-W-enlarge:before {
+  content: "\e9b6";
+}
+.ecc-W-pinOn:before {
+  content: "\e9b7";
+}
+.ecc-W-pinOff:before {
+  content: "\e9b8";
+}
+.ecc-VPN-Allert:before {
+  content: "\e9b2";
+}
+.ecc-VPN-Download:before {
+  content: "\e9b3";
+}
+.ecc-MP-Search:before {
+  content: "\e989";
+}
+.ecc-MP-Size:before {
+  content: "\e98a";
+}
+.ecc-MP-Square:before {
+  content: "\e98b";
+}
+.ecc-MP-ZoomIN:before {
+  content: "\e98c";
+}
+.ecc-MP-ZoomOUT:before {
+  content: "\e98d";
+}
+.ecc-ALLARM-DeviceHight:before {
+  content: "\e915";
+}
+.ecc-ALLARM-DeviceLow:before {
+  content: "\e916";
+}
+.ecc-ALLARM-Hight:before {
+  content: "\e91a";
+}
+.ecc-ALLARM-Low:before {
+  content: "\e91b";
+}
+.ecc-B-Pin:before {
+  content: "\e9b4";
+}
+.ecc-B-Trial:before {
+  content: "\e9ae";
+}
+.ecc-B-VPN:before {
+  content: "\e99f";
+}
+.ecc-B-Limits:before {
+  content: "\e990";
+}
+.ecc-B-Imp:before {
+  content: "\e98f";
+}
+.ecc-B-Carrello:before {
+  content: "\e978";
+}
+.ecc-B-Check:before {
+  content: "\e979";
+}
+.ecc-B-Credits:before {
+  content: "\e97a";
+}
+.ecc-B-Devices-98:before {
+  content: "\e97b";
+}
+.ecc-B-Exp:before {
+  content: "\e97c";
+}
+.ecc-B-Orga:before {
+  content: "\e97d";
+}
+.ecc-B-OrgaBig:before {
+  content: "\e97e";
+}
+.ecc-B-Plus:before {
+  content: "\e97f";
+}
+.ecc-B-PlusBig:before {
+  content: "\e980";
+}
+.ecc-B-Product:before {
+  content: "\e981";
+}
+.ecc-B-ProductBig:before {
+  content: "\e982";
+}
+.ecc-B-Users:before {
+  content: "\e983";
+}
+.ecc-AC-Account:before {
+  content: "\e96c";
+}
+.ecc-AC-Applications:before {
+  content: "\e96d";
+}
+.ecc-AC-Auth:before {
+  content: "\e96e";
+}
+.ecc-AC-Password:before {
+  content: "\e96f";
+}
+.ecc-AC-Session:before {
+  content: "\e970";
+}
+.ecc-AC-V:before {
+  content: "\e971";
+}
+.ecc-TC-Link:before {
+  content: "\e977";
+}
+.ecc-TC-Reset:before {
+  content: "\e972";
+}
+.ecc-TC-Riduci:before {
+  content: "\e973";
+}
+.ecc-TC-Undo:before {
+  content: "\e974";
+}
+.ecc-TC-Upload-copia:before {
+  content: "\e975";
+}
+.ecc-TC-Upload:before {
+  content: "\e976";
+}
+.ecc-A-ArrayB:before {
+  content: "\e9aa";
+}
+.ecc-A-ArrayD:before {
+  content: "\e9ab";
+}
+.ecc-A-ArrayI:before {
+  content: "\e9ac";
+}
+.ecc-A-Blob:before {
+  content: "\e9ad";
+}
+.ecc-A-Array:before {
+  content: "\e999";
+}
+.ecc-A-object:before {
+  content: "\e99a";
+}
+.ecc-A-Structure:before {
+  content: "\e99b";
+}
+.ecc-A-Credits:before {
+  content: "\e984";
+}
+.ecc-A-Add:before {
+  content: "\e957";
+}
+.ecc-A-Clona:before {
+  content: "\e958";
+}
+.ecc-A-Device:before {
+  content: "\e959";
+}
+.ecc-A-Empty:before {
+  content: "\e95a";
+}
+.ecc-A-ID:before {
+  content: "\e95b";
+}
+.ecc-A-Back:before {
+  content: "\e954";
+}
+.ecc-A-V:before {
+  content: "\e955";
+}
+.ecc-A-X:before {
+  content: "\e956";
+}
+.ecc-A-Boolean:before {
+  content: "\e94f";
+}
+.ecc-A-Double:before {
+  content: "\e950";
+}
+.ecc-A-Model:before {
+  content: "\e951";
+}
+.ecc-A-Number:before {
+  content: "\e952";
+}
+.ecc-A-String:before {
+  content: "\e953";
+}
+.ecc-D-S-Dash:before {
+  content: "\e91e";
+}
+.ecc-D-S-DashSmall:before {
+  content: "\e91f";
+}
+.ecc-D-S-Save:before {
+  content: "\e920";
+}
+.ecc-D-S-SaveCrono:before {
+  content: "\e921";
+}
+.ecc-D-S-SaveSmall:before {
+  content: "\e923";
+}
+.ecc-ED-Hierarchy:before {
+  content: "\e9a5";
+}
+.ecc-ED-SidePanel:before {
+  content: "\e9a6";
+}
+.ecc-ED-VPsize:before {
+  content: "\e99c";
+}
+.ecc-ED-Desktop:before {
+  content: "\e991";
+}
+.ecc-ED-Phone:before {
+  content: "\e992";
+}
+.ecc-ED-Rules:before {
+  content: "\e993";
+}
+.ecc-ED-Tablet:before {
+  content: "\e994";
+}
+.ecc-ED-VPlist:before {
+  content: "\e995";
+}
+.ecc-ED-VPmove:before {
+  content: "\e996";
+}
+.ecc-ED-VPup:before {
+  content: "\e997";
+}
+.ecc-ED-Back:before {
+  content: "\e96a";
+}
+.ecc-ED-Slot:before {
+  content: "\e967";
+}
+.ecc-ED-Annulla:before {
+  content: "\e964";
+}
+.ecc-ED-Salva:before {
+  content: "\e965";
+}
+.ecc-ED-E:before {
+  content: "\e95c";
+}
+.ecc-ED-Etichetta:before {
+  content: "\e95d";
+}
+.ecc-ED-Saved:before {
+  content: "\e95e";
+}
+.ecc-ED-Preview:before {
+  content: "\e95f";
+}
+.ecc-ED-Settings:before {
+  content: "\e960";
+}
+.ecc-ED-01:before {
+  content: "\e93b";
+}
+.ecc-ED-02:before {
+  content: "\e93c";
+}
+.ecc-ED-03:before {
+  content: "\e93d";
+}
+.ecc-ED-04:before {
+  content: "\e93e";
+}
+.ecc-ED-05:before {
+  content: "\e93f";
+}
+.ecc-ED-06:before {
+  content: "\e940";
+}
+.ecc-ED-07:before {
+  content: "\e941";
+}
+.ecc-ED-08:before {
+  content: "\e942";
+}
+.ecc-ED-09:before {
+  content: "\e943";
+}
+.ecc-ED-10:before {
+  content: "\e944";
+}
+.ecc-ED-11:before {
+  content: "\e945";
+}
+.ecc-ED-12:before {
+  content: "\e946";
+}
+.ecc-ED-13:before {
+  content: "\e947";
+}
+.ecc-ED-14:before {
+  content: "\e948";
+}
+.ecc-ED-15:before {
+  content: "\e949";
+}
+.ecc-ED-16:before {
+  content: "\e94a";
+}
+.ecc-D-Slot:before {
+  content: "\e924";
+}
+.ecc-D-Delete:before {
+  content: "\e931";
+}
+.ecc-D-Edit:before {
+  content: "\e932";
+}
+.ecc-D-IconDash:before {
+  content: "\e933";
+}
+.ecc-D-Preview:before {
+  content: "\e934";
+}
+.ecc-D-Privilege:before {
+  content: "\e935";
+}
+.ecc-D-QuadOFF:before {
+  content: "\e936";
+}
+.ecc-D-QuadON:before {
+  content: "\e937";
+}
+.ecc-D-SelectAll:before {
+  content: "\e938";
+}
+.ecc-D-Share:before {
+  content: "\e939";
+}
+.ecc-D-Shared:before {
+  content: "\e93a";
+}
+.ecc-E-Picker:before {
+  content: "\e9c7";
+}
+.ecc-E-StarOff:before {
+  content: "\e9c8";
+}
+.ecc-E-StarOn:before {
+  content: "\e9c9";
+}
+.ecc-E-TriOFF:before {
+  content: "\e9ca";
+}
+.ecc-E-TriON:before {
+  content: "\e9cb";
+}
+.ecc-E-UpLoad:before {
+  content: "\e9cc";
+}
+.ecc-E-Flow:before {
+  content: "\e9c5";
+}
+.ecc-E-At:before {
+  content: "\e99e";
+}
+.ecc-E-DeviceInfo:before {
+  content: "\e985";
+}
+.ecc-E-Notification:before {
+  content: "\e986";
+}
+.ecc-E-Forw:before {
+  content: "\e914";
+}
+.ecc-E-DeselectAll:before {
+  content: "\e968";
+}
+.ecc-E-SelectAll:before {
+  content: "\e969";
+}
+.ecc-E-Tag:before {
+  content: "\e966";
+}
+.ecc-E-PinLoc:before {
+  content: "\e962";
+}
+.ecc-E-Rename:before {
+  content: "\e963";
+}
+.ecc-E-SharingD:before {
+  content: "\e94e";
+}
+.ecc-E-Copy-copia-2:before {
+  content: "\e94b";
+}
+.ecc-E-Copy:before {
+  content: "\e94c";
+}
+.ecc-E-DeActive:before {
+  content: "\e94d";
+}
+.ecc-E-QuadOFF:before {
+  content: "\e92d";
+}
+.ecc-E-QuadON:before {
+  content: "\e92e";
+}
+.ecc-E-RadioOFF:before {
+  content: "\e92f";
+}
+.ecc-E-RadioON:before {
+  content: "\e930";
+}
+.ecc-E-Device:before {
+  content: "\e91d";
+}
+.ecc-E-Edit:before {
+  content: "\e925";
+}
+.ecc-E-V:before {
+  content: "\e917";
+}
+.ecc-E-X:before {
+  content: "\e918";
+}
+.ecc-E-User:before {
+  content: "\e919";
+}
+.ecc-E-UserGroup:before {
+  content: "\e913";
+}
+.ecc-TB-Lang:before {
+  content: "\e9b0";
+}
+.ecc-TB-Avviso01:before {
+  content: "\e9a7";
+}
+.ecc-TB-Avviso02:before {
+  content: "\e9a8";
+}
+.ecc-TB-Avviso03:before {
+  content: "\e9a9";
+}
+.ecc-TB-Enter:before {
+  content: "\e99d";
+}
+.ecc-TB-Sort:before {
+  content: "\e998";
+}
+.ecc-TB-Filter:before {
+  content: "\e98e";
+}
+.ecc-TB-Find:before {
+  content: "\e900";
+}
+.ecc-TB-User:before {
+  content: "\e901";
+}
+.ecc-TB-Org:before {
+  content: "\e902";
+}
+.ecc-TB-Menu:before {
+  content: "\e903";
+}
+.ecc-T-shareTOme:before {
+  content: "\e9b1";
+}
+.ecc-T-Active:before {
+  content: "\e9a0";
+}
+.ecc-T-AppRole:before {
+  content: "\e9a1";
+}
+.ecc-T-DataRole:before {
+  content: "\e9a2";
+}
+.ecc-T-DeActive:before {
+  content: "\e9a3";
+}
+.ecc-T-VPNRole:before {
+  content: "\e9a4";
+}
+.ecc-T-MappNotApply:before {
+  content: "\e987";
+}
+.ecc-T-MappNotSent:before {
+  content: "\e988";
+}
+.ecc-T-DeviceGroupList:before {
+  content: "\e96b";
+}
+.ecc-T-More:before {
+  content: "\e961";
+}
+.ecc-T-Device:before {
+  content: "\e926";
+}
+.ecc-T-DeviceGroup:before {
+  content: "\e927";
+}
+.ecc-T-Status:before {
+  content: "\e928";
+}
+.ecc-T-Suser:before {
+  content: "\e929";
+}
+.ecc-T-User:before {
+  content: "\e92a";
+}
+.ecc-T-UserGroup:before {
+  content: "\e92b";
+}
+.ecc-T-UserGroupUser:before {
+  content: "\e92c";
+}
+.ecc-T-System:before {
+  content: "\e91c";
+}
+.ecc-T-Delete:before {
+  content: "\e904";
+}
+.ecc-T-Edit:before {
+  content: "\e905";
+}
+.ecc-T-Help:before {
+  content: "\e906";
+}
+.ecc-T-Add:before {
+  content: "\e907";
+}
+.ecc-B-Data:before {
+  content: "\e908";
+}
+.ecc-B-IAM:before {
+  content: "\e909";
+}
+.ecc-B-Devices:before {
+  content: "\e90a";
+}
+.ecc-B-Dashboard:before {
+  content: "\e90b";
+}
+.ecc-B-Home:before {
+  content: "\e90c";
+}
+.ecc-M-Audit:before {
+  content: "\e9af";
+}
+.ecc-M-Freccia:before {
+  content: "\e922";
+}
+.ecc-M-Chiudi:before {
+  content: "\e90d";
+}
+.ecc-M-Data:before {
+  content: "\e90e";
+}
+.ecc-M-IAM:before {
+  content: "\e90f";
+}
+.ecc-M-Devices:before {
+  content: "\e910";
+}
+.ecc-M-Dashboard:before {
+  content: "\e911";
+}
+.ecc-M-Home:before {
+  content: "\e912";
+}
