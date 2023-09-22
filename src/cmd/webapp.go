@@ -5,13 +5,14 @@ import (
 	"corvina/create-corvina-app/src/templates"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"io/fs"
 	"os"
 	"strings"
+	"text/template"
 
 	"github.com/manifoldco/promptui"
+	"github.com/rs/zerolog/log"
 )
 
 type CtxKey string
@@ -88,18 +89,32 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
+		log.Info().Str("path", path).Bool("isDir", d.IsDir()).Msg("Processing file")
+
 		if d.IsDir() {
-			os.Mkdir(strings.Replace(path, "corvina-app-web", destinationFolder, 2), 0755)
+			dirName := strings.Replace(path, "corvina-app-web", destinationFolder, 2)
+			log.Info().Str("path", dirName).Msg("Creating folder")
+
+			if _, err := os.Stat(dirName); os.IsNotExist(err) {
+				return os.Mkdir(dirName, 0755)
+			}
+
 			return nil
 		}
 
-		file, err := os.Create(strings.Replace(path, "corvina-app-web", destinationFolder, 1))
+		file, err := os.Create(strings.Replace(path, "corvina-app-web", destinationFolder, 2))
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 
-		fmt.Printf("path=%q, isDir=%v\n", path, d.IsDir())
+		if isFileToCopyAsIs(path) {
+			err = CopyAsIs(path, file)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
 
 		err = ParseFileAndExecuteTemplate(path, projectInfo, file)
 		if err != nil {
@@ -108,6 +123,31 @@ func createWebApp(ctx context.Context) error {
 
 		return nil
 	})
+	return nil
+}
+
+var (
+	extensionsToCopyAsIs = []string{".vue", ".eot", ".ttf", ".woff", ".woff2", ".tgz"}
+)
+
+func isFileToCopyAsIs(path string) bool {
+	for _, extension := range extensionsToCopyAsIs {
+		if strings.HasSuffix(path, extension) {
+			return true
+		}
+	}
+	return false
+}
+
+func CopyAsIs(path string, writer *os.File) error {
+	originalFile, err := templates.CorvinaAppWeb.Open(path)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(writer, originalFile)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
