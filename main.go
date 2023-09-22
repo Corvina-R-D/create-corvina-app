@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"corvina/create-corvina-app/src/cmd"
 	"corvina/create-corvina-app/src/utils"
 	"fmt"
@@ -37,8 +38,17 @@ func main() {
 			Name:  "webapp",
 			Usage: "Create a web application that can be installed in corvina app store",
 			Action: func(c *cli.Context) error {
+				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
+
 				cmd.WebApp(c.Context)
 				return nil
+			},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "name",
+					Aliases: []string{"n"},
+					Usage:   "Name of the application",
+				},
 			},
 		},
 	}

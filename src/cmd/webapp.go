@@ -30,7 +30,7 @@ func WebApp(ctx context.Context) error {
 func takeNameFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 	name := ctx.Value(Name)
 
-	if name == nil {
+	if name == nil || name == "" {
 		result, err := askName()
 		if err != nil {
 			return ctx, err
@@ -84,9 +84,12 @@ func createWebApp(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("path=%q, isDir=%v\n", path, d.IsDir())
+		if path == "." {
+			return nil
+		}
+
 		if d.IsDir() {
-			os.Mkdir(strings.Replace(path, "corvina-app-web", destinationFolder, 1), 0755)
+			os.Mkdir(strings.Replace(path, "corvina-app-web", destinationFolder, 2), 0755)
 			return nil
 		}
 
@@ -95,6 +98,8 @@ func createWebApp(ctx context.Context) error {
 			return err
 		}
 		defer file.Close()
+
+		fmt.Printf("path=%q, isDir=%v\n", path, d.IsDir())
 
 		err = ParseFileAndExecuteTemplate(path, projectInfo, file)
 		if err != nil {
@@ -110,13 +115,11 @@ type ProjectInfo struct {
 	Name string
 }
 
-func ParseFileAndExecuteTemplate(file string, projectInfo ProjectInfo, writer io.Writer) error {
-	tmpl, err := template.ParseFiles(file)
+func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {
+	tmpl, err := template.ParseFS(templates.CorvinaAppWeb, name)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println("%v", tmpl)
 
 	err = tmpl.Execute(writer, projectInfo)
 	if err != nil {
