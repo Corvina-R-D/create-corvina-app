@@ -1,6 +1,6 @@
 
 istio-gateway:
-  name: istio-{{ .Name }}gateway
+  name: istio-[| .Name |]gateway
   service:
     type: LoadBalancer
     externalTrafficPolicy: Local
@@ -13,10 +13,10 @@ imagePullPolicy: Always
 tag: 
 
 gateway:
-  appHost: "{{ .Name }}.corvina.io"
+  appHost: "[| .Name |].corvina.io"
   protocol: "https"
   port: 443
-  certificateSecretName: "corvina-app-{{ .Name }}-prod-tls"
+  certificateSecretName: "corvina-app-[| .Name |]-prod-tls"
   issuer: 
     name: "letsencrypt-issuer"
 
@@ -35,14 +35,14 @@ postgresql:
     storageClass: "ssd-retain"
     postgresql:
       auth:
-        username: corvina_app_{{ .Name }}
-        database: corvina_app_{{ .Name }}
+        username: corvina_app_[| .Name |]
+        database: corvina_app_[| .Name |]
 
 app:  
-  image: europe-west1-docker.pkg.dev/corvina-app-{{ .Name }}/images/corvina-app-{{ .Name }}-frontend
+  image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
 
 service:
-  image: europe-west1-docker.pkg.dev/corvina-app-{{ .Name }}/images/corvina-app-{{ .Name }}-backend
+  image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
   envVar:
     LOG_LEVEL: info
     PG_PORT: 5432

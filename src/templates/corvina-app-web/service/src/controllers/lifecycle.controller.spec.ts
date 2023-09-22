@@ -104,7 +104,7 @@ describe('LifecycleController', () => {
     } catch (error) {
       expect(error).toBeInstanceOf(CustomError);
       expect(error.code).toBe(505);
-      expect(error.message).toBe("I'm corvina-app-{{ .Name }} application, I cannot process ANOTHER APP NOT VALID");
+      expect(error.message).toBe("I'm corvina-app-[| .Name |] application, I cannot process ANOTHER APP NOT VALID");
     }
   });
 

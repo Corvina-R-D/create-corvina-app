@@ -19,7 +19,7 @@ then
     exit 1
 fi
 # retrieve the current appVersion of the chart
-current_app_version=$(yq '.appVersion' helm-charts/corvina-app-{{ .Name }}/Chart.yaml)
+current_app_version=$(yq '.appVersion' helm-charts/corvina-app-[| .Name |]/Chart.yaml)
 # remove prefix chart-
 current_app_version=${current_app_version//chart-/}
 # read first argument as minor/major/patch
@@ -32,7 +32,7 @@ fi
 # increment the version
 new_app_version=$(semver bump $version_type $current_app_version)
 # update the appVersion in the chart
-yq eval ".appVersion = \"chart-${new_app_version}\"" -i helm-charts/corvina-app-{{ .Name }}/Chart.yaml
+yq eval ".appVersion = \"chart-${new_app_version}\"" -i helm-charts/corvina-app-[| .Name |]/Chart.yaml
 # commit all the changes
 git add .
 git commit -m "Release chart-${new_app_version}"

@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"strings"
 	"text/template"
 
@@ -127,7 +128,7 @@ func createWebApp(ctx context.Context) error {
 }
 
 var (
-	extensionsToCopyAsIs = []string{".vue", ".eot", ".ttf", ".woff", ".woff2", ".tgz"}
+	extensionsToCopyAsIs = []string{".vue", ".eot", ".ttf", ".woff", ".woff2", ".tgz", ".jpeg"}
 )
 
 func isFileToCopyAsIs(path string) bool {
@@ -156,7 +157,8 @@ type ProjectInfo struct {
 }
 
 func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {
-	tmpl, err := template.ParseFS(templates.CorvinaAppWeb, name)
+
+	tmpl, err := template.New(path.Base(name)).Delims("[|", "|]").ParseFS(templates.CorvinaAppWeb, name)
 	if err != nil {
 		return err
 	}

@@ -33,9 +33,9 @@ export class InstallationServiceMock implements IInstallationService {
   }
   getOpenIdConfiguration(input: string): Promise<IOpenIDConfiguration> {
     return Promise.resolve({
-      jwks_uri: 'https://{{ .Name }}.test/jwks.json',
-      issuer: 'https://{{ .Name }}.test',
-      authorization_endpoint: 'https://{{ .Name }}.test/oauth2/authorize',
+      jwks_uri: 'https://[| .Name |].test/jwks.json',
+      issuer: 'https://[| .Name |].test',
+      authorization_endpoint: 'https://[| .Name |].test/oauth2/authorize',
     } as unknown as IOpenIDConfiguration);
   }
   create(input: IInstallInstallationInput): Promise<Installation> {

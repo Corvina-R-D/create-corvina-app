@@ -109,7 +109,7 @@ export default defineComponent({
       sizeAllKey: 0,
       activeTab: 0,
       breadcrumb: {
-        path: ["{{ .Name }}", 'Your Entity'],
+        path: ["[| .Name |]", 'Your Entity'],
         icon: "ecc-B-Dashboard",
         searchTitle: "Search...",
         sortQueryKeys: {

@@ -1,6 +1,6 @@
 
 istio-gateway:
-  name: istio-{{ .Name }}gateway
+  name: istio-[| .Name |]gateway
   service:
     type: LoadBalancer
     externalTrafficPolicy: Local
@@ -13,10 +13,10 @@ imagePullPolicy: IfNotPresent
 tag: local
 
 gateway:
-  appHost: "{{ .Name }}.local.gd"
+  appHost: "[| .Name |].local.gd"
   protocol: "https"
   port: 11073
-  certificateSecretName: "{{ .Name }}-crt-secret"
+  certificateSecretName: "[| .Name |]-crt-secret"
   issuer: 
     name: "my-ca-issuer"
 
@@ -35,14 +35,14 @@ postgresql:
     #storageClass: "ssd-retain"
     postgresql:
       auth:
-        username: corvina_app_{{ .Name }}
-        database: corvina_app_{{ .Name }}
+        username: corvina_app_[| .Name |]
+        database: corvina_app_[| .Name |]
 
 app:  
-  image: {{ .Name }}_app
+  image: [| .Name |]_app
 
 service:
-  image: {{ .Name }}_service
+  image: [| .Name |]_service
   envVar:
     LOG_LEVEL: debug
     PG_PORT: 5432

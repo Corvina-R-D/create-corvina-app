@@ -3,7 +3,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ .Name }}-gateway
+  name: [| .Name |]-gateway
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
@@ -13,7 +13,7 @@ spec:
         - '{{ .Values.gateway.appHost }}'
         - '*.{{ .Values.gateway.appHost }}'
       port:
-        name: {{ .Name }}-app
+        name: [| .Name |]-app
         number: {{ .Values.gateway.port }}
         protocol: {{ $PROTOCOL }}
       {{ if eq $PROTOCOL "HTTPS" }}

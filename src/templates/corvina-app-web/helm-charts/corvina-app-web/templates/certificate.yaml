@@ -1,5 +1,5 @@
 {{ $PROTOCOL := (.Values.gateway.protocol | upper) }}
-{{ if and (eq $PROTOCOL "HTTPS") (or (eq .Values.gateway.appHost "{{ .Name }}.corvina.cloud") (eq .Values.gateway.appHost "{{ .Name }}.corvina.io")) }}
+{{ if and (eq $PROTOCOL "HTTPS") (or (eq .Values.gateway.appHost "[| .Name |].corvina.cloud") (eq .Values.gateway.appHost "[| .Name |].corvina.io")) }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -12,7 +12,7 @@ spec:
     email: "monitoring@exorint.com"
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: corvina-{{ .Name }}-acme
+      name: corvina-[| .Name |]-acme
     solvers:
       - dns01:
           cloudDNS:
@@ -21,7 +21,7 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: corvina-{{ .Name }}-app-certificate
+  name: corvina-[| .Name |]-app-certificate
   namespace: {{ .Release.Namespace }}
 spec:
   secretName: {{ .Values.gateway.certificateSecretName }}
@@ -32,7 +32,7 @@ spec:
   - {{ .Values.gateway.appHost | quote }}
   - {{ printf "*.%s" .Values.gateway.appHost | quote }}
 {{ end }}
-{{ if and (eq $PROTOCOL "HTTPS") (eq .Values.gateway.appHost "{{ .Name }}.local.gd") }}
+{{ if and (eq $PROTOCOL "HTTPS") (eq .Values.gateway.appHost "[| .Name |].local.gd") }}
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -69,14 +69,14 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ .Name }}-crt
+  name: [| .Name |]-crt
   namespace: {{ .Release.Namespace }}
 spec:
   secretName: {{ .Values.gateway.certificateSecretName }}
   dnsNames:
   - local.gd
   - '*.local.gd'
-  - '*.{{ .Name }}.local.gd'
+  - '*.[| .Name |].local.gd'
   issuerRef:
     name: {{ .Values.gateway.issuer.name }}
     # We can reference ClusterIssuers by changing the kind here.
