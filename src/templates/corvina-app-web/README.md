@@ -1,8 +1,8 @@
-# corvina app exxxample
+# corvina app {{ .Name }}
 
 ## How to start this project with docker-compose for developing
 
-* add to your `/etc/hosts` the following line `127.0.0.1 exxxample.local.gd`
+* add to your `/etc/hosts` the following line `127.0.0.1 {{ .Name }}.local.gd`
 * follow instruction in [How to start this project with minikube](#how-to-start-this-project-with-minikube) till minikube tunnel
 * run in a shell `docker-compose up postgresql redis` and leave it running
 * run in a shell `cd app && cp -n ./.env.dist ./.env || true && npm i && npm run dev` and leave it running
@@ -17,9 +17,9 @@
     -H 'Content-Type: application/json' \
     -H "Authorization: Bearer $TOKEN" \
     -d '{
-      "key": "corvina-app-exxxample",
+      "key": "corvina-app-{{ .Name }}",
       "apiVersion": "1.0.0",
-      "clientId": "user-service-exxxampleadmin@exor",
+      "clientId": "user-service-{{ .Name }}admin@exor",
       "clientSecret": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
       "baseUrl": "http://127.0.0.1:3943",
       "apiBaseUrl": "https://app.corvina.fog:10443",
@@ -30,7 +30,7 @@
       "instanceId": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
       "eventType": "installed",
       "realm": "exor",
-      "realmValidationRole": "monitoring.roles.app_exxxample_administrator"
+      "realmValidationRole": "monitoring.roles.app_{{ .Name }}_administrator"
     }'
   ```
 
@@ -41,7 +41,7 @@
 * run `minikube start`
 * install istioctl, run `istioctl install --set profile=minimal`
 * install cert-manager, run `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml`
-* execute `helm --kube-context=minikube dependency update helm-charts/corvina-app-exxxample/`
+* execute `helm --kube-context=minikube dependency update helm-charts/corvina-app-{{ .Name }}/`
 * run the script `./start-all-locally.minikube.sh` (istall docker with snap? <https://stackoverflow.com/questions/55316850/docker-build-result-could-not-read-ca-certificate-permission-denied-via>)
 * run `minikube tunnel --bind-address=0.0.0.0` and leave it running
 * install certificates `./install-certificate-locally.sh`
@@ -49,18 +49,18 @@
 * install the app locally, run
 
   ```sh
-  export TOKEN=$(curl -k https://fake.exxxample.local.gd:11073/auth/realms/sample1/protocol/openid-connect/token -s | jq -r .access_token)
+  export TOKEN=$(curl -k https://fake.{{ .Name }}.local.gd:11073/auth/realms/sample1/protocol/openid-connect/token -s | jq -r .access_token)
   curl -k -X 'POST' \
-    'https://exxxample.local.gd:11073/v1/installed' \
+    'https://{{ .Name }}.local.gd:11073/v1/installed' \
     -H 'accept: */*' \
     -H 'Content-Type: application/json' \
     -H "Authorization: Bearer $TOKEN" \
     -d '{
-      "key": "corvina-app-exxxample",
+      "key": "corvina-app-{{ .Name }}",
       "apiVersion": "1.0.0",
-      "clientId": "user-service-exxxampleadmin@exor",
+      "clientId": "user-service-{{ .Name }}admin@exor",
       "clientSecret": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
-      "baseUrl": "https://fake.exxxample.local.gd:11073",
+      "baseUrl": "https://fake.{{ .Name }}.local.gd:11073",
       "apiBaseUrl": "https://app.corvina.fog:10443",
       "authBaseUrl": "https://auth.corvina.fog:10443",
       "openIdConfigurationUrl": "http://fake-http-server-service/auth/realms/sample1/.well-known/openid-configuration",
@@ -69,11 +69,11 @@
       "instanceId": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
       "eventType": "installed",
       "realm": "exor",
-      "realmValidationRole": "monitoring.roles.app_exxxample_administrator"
+      "realmValidationRole": "monitoring.roles.app_{{ .Name }}_administrator"
     }'
   ```
 
-* browse to <https://fake.exxxample.local.gd:11073/index> to emulated to be inside the corvina app
+* browse to <https://fake.{{ .Name }}.local.gd:11073/index> to emulated to be inside the corvina app
 
 ## How to test this project inside corvina in localhost (TODO: check if needed)
 
@@ -92,21 +92,21 @@
 * checkout the repo corvina-app/frontend-new and start it `yarn run dev` (branch feature/ECC-1547 at the time writing)
 * login with admin@exor
 * enable experimental feature Ctrl+Shift+Alt+S: serviceAccounts, apps and store
-* create a serviceAccount called exxxampleadmin@exor
+* create a serviceAccount called {{ .Name }}admin@exor
 * copy the "Client Secret"
-* create a role called monitoringrolesappexxxampleadministrator
-* add the "Application Role" monitoringrolesappexxxampleadministrator to the user admin@exor
+* create a role called monitoringrolesapp{{ .Name }}administrator
+* add the "Application Role" monitoringrolesapp{{ .Name }}administrator to the user admin@exor
 * run this in terminal (filling the "Client Secret" previously copied)
 
   ```sh
   curl -k -X 'POST' \
-    'https://exxxample.local.gd:11073/v1/installed' \
+    'https://{{ .Name }}.local.gd:11073/v1/installed' \
     -H 'accept: */*' \
     -H 'Content-Type: application/json' \
     -d '{
-    "key": "corvina-app-exxxample",
+    "key": "corvina-app-{{ .Name }}",
     "apiVersion": "1.0.0",
-    "clientId": "user-service-exxxampleadmin@exor",
+    "clientId": "user-service-{{ .Name }}admin@exor",
     "clientSecret": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
     "baseUrl": "http://localhost:8080",
     "apiBaseUrl": "https://app.corvina.fog:10443",
@@ -117,7 +117,7 @@
     "instanceId": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
     "eventType": "installed",
     "realm": "exor",
-    "realmValidationRole": "exor.roles.app_monitoringrolesappexxxampleadministrator"
+    "realmValidationRole": "exor.roles.app_monitoringrolesapp{{ .Name }}administrator"
   }'
   ```
 

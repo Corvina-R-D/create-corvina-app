@@ -1,2 +1,2 @@
-helm --kube-context=minikube uninstall exxxample
-kubectl --context minikube delete ns corvina-app-exxxample
+helm --kube-context=minikube uninstall {{ .Name }}
+kubectl --context minikube delete ns corvina-app-{{ .Name }}

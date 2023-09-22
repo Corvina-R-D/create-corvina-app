@@ -9,7 +9,7 @@ spec:
   - "{{ .Values.gateway.appHost }}"
   - '*.{{ .Values.gateway.appHost }}'
   gateways:
-  - exxxample-gateway
+  - {{ .Name }}-gateway
   http:
   - match:
     - uri:

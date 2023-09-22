@@ -35,7 +35,7 @@ async function bootstrap() {
   app.useBodyParser('json', { type: 'application/json' });
 
   const config = new DocumentBuilder()
-    .setTitle('corvina app exxxample')
+    .setTitle('corvina app {{ .Name }}')
     .setDescription('You can find here the API description')
     .setVersion('1.0')
     .addBearerAuth({

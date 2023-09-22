@@ -8,7 +8,7 @@ export class ManifestController {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private readonly MANIFEST: object = {
     key: process.env.MANIFEST_ID,
-    name: 'exxxample',
+    name: '{{ .Name }}',
     description: 'This app enables you to handle a list of repositories. You can upload and download an artifact identified by name and tag version.',
     status: 'ACTIVE',
     images: [
@@ -37,7 +37,7 @@ export class ManifestController {
     hooks: {
       globalPage: {
         id: `${process.env.MANIFEST_ID}-globalPage`,
-        title: 'exxxample',
+        title: '{{ .Name }}',
         url: `${process.env.MANIFEST_BASE_URL_FE_APP}/#/`,
         iconUrl: '/static/icon.svg',
       },
