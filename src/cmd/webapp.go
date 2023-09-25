@@ -94,7 +94,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
-		log.Info().Str("path", path).Bool("isDir", d.IsDir()).Msg("Processing file")
+		log.Info().Str("path", path).Msg("Processing file")
 
 		if d.IsDir() {
 			dirName := strings.Replace(path, "corvina-app-web", destinationFolder, 2)
@@ -114,6 +114,7 @@ func createWebApp(ctx context.Context) error {
 		defer file.Close()
 
 		if isFileToCopyAsIs(path) {
+			log.Info().Str("path", path).Msg("Copying file as is")
 			err = CopyAsIs(path, file)
 			if err != nil {
 				return err
@@ -121,6 +122,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
+		log.Info().Str("path", path).Msg("Parsing file and executing template")
 		err = ParseFileAndExecuteTemplate(path, projectInfo, file)
 		if err != nil {
 			return err
