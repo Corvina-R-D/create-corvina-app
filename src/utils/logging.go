@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -35,8 +36,10 @@ func formatMessage(i interface{}) string {
 
 func setLoggingLevel(level string) {
 	if level == "" {
-		level = "INFO"
+		level = "WARN"
 	}
+
+	level = strings.ToUpper(level)
 
 	switch level {
 	case "ERROR":
@@ -47,7 +50,16 @@ func setLoggingLevel(level string) {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	case "DEBUG":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "ALL":
+	case "TRACE":
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
 	}
+}
+
+func VerboseLog() {
+	zerolog.SetGlobalLevel(zerolog.TraceLevel)
 }
 
 func InitLog() {

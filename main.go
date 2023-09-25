@@ -11,6 +11,12 @@ import (
 	cli "github.com/urfave/cli/v2"
 )
 
+var verboseFlag *cli.BoolFlag = &cli.BoolFlag{
+	Name:    "verbose",
+	Aliases: []string{"v"},
+	Usage:   "Enable verbose mode",
+}
+
 func main() {
 	utils.InitLog()
 
@@ -22,6 +28,9 @@ func main() {
 	- version: Print the current cli version
 	- webapp: Create a web application that can be installed in corvina app store`)
 			return nil
+		},
+		Flags: []cli.Flag{
+			verboseFlag,
 		},
 	}
 
@@ -38,6 +47,10 @@ func main() {
 			Name:  "webapp",
 			Usage: "Create a web application that can be installed in corvina app store",
 			Action: func(c *cli.Context) error {
+				if c.Bool("verbose") {
+					utils.VerboseLog()
+				}
+
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
 
 				cmd.WebApp(c.Context)
@@ -49,6 +62,7 @@ func main() {
 					Aliases: []string{"n"},
 					Usage:   "Name of the application",
 				},
+				verboseFlag,
 			},
 		},
 	}

@@ -19,12 +19,17 @@ import (
 type CtxKey string
 
 const Name CtxKey = "name"
+const DestinationFolder CtxKey = "destinationFolder"
 
 func WebApp(ctx context.Context) error {
 	ctx, err := takeNameFromCtxOrAskIt(ctx)
 	if err != nil {
 		return nil
 	}
+
+	ctx = context.WithValue(ctx, DestinationFolder, fmt.Sprintf("corvina-app-%s", ctx.Value(Name)))
+
+	stopIfDestinationFolderIsNotEmpty(ctx)
 
 	return createWebApp(ctx)
 }
@@ -75,9 +80,8 @@ func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
 
 func createWebApp(ctx context.Context) error {
 	name := ctx.Value(Name).(string)
+	destinationFolder := ctx.Value(DestinationFolder).(string)
 
-	// create folder called carvina-app-{name}
-	destinationFolder := fmt.Sprintf("corvina-app-%s", name)
 	os.Mkdir(destinationFolder, 0755)
 
 	projectInfo := ProjectInfo{Name: name}
@@ -173,4 +177,26 @@ func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io
 	}
 
 	return nil
+}
+
+func stopIfDestinationFolderIsNotEmpty(ctx context.Context) {
+	if !destinationFolderIsEmptyOrNotPresent(ctx) {
+		log.Warn().Str("folder", ctx.Value(DestinationFolder).(string)).Msg("The folder is not empty, please delete it or choose another name")
+		os.Exit(0)
+	}
+}
+
+func destinationFolderIsEmptyOrNotPresent(ctx context.Context) bool {
+	destinationFolder := ctx.Value(DestinationFolder).(string)
+
+	if _, err := os.Stat(destinationFolder); os.IsNotExist(err) {
+		return true
+	}
+
+	files, err := os.ReadDir(destinationFolder)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Error reading the destination folder")
+	}
+
+	return len(files) == 0
 }
