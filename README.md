@@ -7,7 +7,7 @@ Setup a corvina web app in one command!
 You can create a new corvina web app by running the following command:
 
 ```bash
-npx create-corvina-app@latest webapp
+npx @corvina/create-corvina-app@latest webapp
 ```
 
 This will prompt you to select a name for your app, and then create a new directory called `corvina-app-{name}`. Inside the directory, it will generate the initial project structure.
