@@ -1,17 +1,20 @@
 {
   "name": "@corvina/create-corvina-app",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.12",
   "description": "Setup a corvina web app in one command!",
-  "bin": "main",
+  "bin": {
+    "create-corvina-app": "/bin/index.js"
+  },
+  "files": [
+    "/build",
+    "/bin/index.js"
+  ],
   "scripts": {
-    "clean": "rm -rf main",
-    "build": "go build -o main",
+    "clean": "rm -rf main && rm -rf build/",
+    "build": "cross-arch-compiler.sh",
     "deploy": "npm publish --access public",
     "prepublish": "npm run clean && npm run build"
   },
-  "files": [
-    "main"
-  ],
   "keywords": [
     "corvina"
   ],
