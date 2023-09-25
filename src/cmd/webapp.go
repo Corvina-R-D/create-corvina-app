@@ -158,7 +158,11 @@ type ProjectInfo struct {
 
 func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {
 
-	tmpl, err := template.New(path.Base(name)).Delims("[|", "|]").ParseFS(templates.CorvinaAppWeb, name)
+	tmpl, err := template.
+		New(path.Base(name)).
+		Delims("[|", "|]"). // change the default delimiters to avoid conflicts with vue and helm
+		ParseFS(templates.CorvinaAppWeb, name)
+
 	if err != nil {
 		return err
 	}
