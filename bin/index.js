@@ -11,13 +11,15 @@ const os = require("os");
 const platform = os.platform();
 const arch = os.arch();
 
-const supportedPlatforms = ["linux", "darwin", "windows"];
+const supportedEnvs = [
+  'linux/x64',
+  'darwin/x64',
+  'darwin/arm64',
+  'win32/x64',
+  'win32/arm64',
+]
 
-const supportedArchitectures = ["x64", "arm64"];
-
-const supported =
-  supportedPlatforms.includes(platform) &&
-  supportedArchitectures.includes(arch);
+const supported = supportedEnvs.includes(`${platform}/${arch}`);
 
 if (!supported) {
   throw new Error(`Unsupported platform: ${platform} ${arch}`);
