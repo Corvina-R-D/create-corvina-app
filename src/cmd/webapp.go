@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"corvina/create-corvina-app/src/templates"
+	"corvina/create-corvina-app/src/utils"
 	"errors"
 	"fmt"
 	"io"
@@ -31,7 +32,16 @@ func WebApp(ctx context.Context) error {
 
 	stopIfDestinationFolderIsNotEmpty(ctx)
 
-	return createWebApp(ctx)
+	err = createWebApp(ctx)
+	if err != nil {
+		return err
+	}
+
+	utils.PrintlnGreen("Corvina web app created successfully!")
+	utils.PrintlnCyan(fmt.Sprintf("- cd %s", ctx.Value(DestinationFolder)))
+	utils.PrintlnCyan("- follow the instructions in the README.md file to run the app")
+
+	return nil
 }
 
 func takeNameFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
@@ -183,7 +193,7 @@ func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io
 
 func stopIfDestinationFolderIsNotEmpty(ctx context.Context) {
 	if !destinationFolderIsEmptyOrNotPresent(ctx) {
-		log.Warn().Str("folder", ctx.Value(DestinationFolder).(string)).Msg("The folder is not empty, please delete it or choose another name")
+		utils.PrintlnYellow(fmt.Sprintf("The folder %s is not empty, please delete it or choose another name", ctx.Value(DestinationFolder).(string)))
 		os.Exit(0)
 	}
 }
