@@ -19,8 +19,8 @@ func main() {
 		Usage: "make an explosive entrance",
 		Action: func(*cli.Context) error {
 			fmt.Println(`List of available commands:
-	- version
-	- webapp`)
+	- version: Print the current cli version
+	- webapp: Create a web application that can be installed in corvina app store`)
 			return nil
 		},
 	}
