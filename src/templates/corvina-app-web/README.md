@@ -75,54 +75,6 @@
 
 * browse to <https://fake.[| .Name |].local.gd:11073/index> to emulated to be inside the corvina app
 
-## How to test this project inside corvina in localhost (TODO: check if needed)
-
-* follow the previous istruction ([How to start this project with minikube](#how-to-start-this-project-with-minikube))
-* edit the configmap called coredns in kube-system namespace adding the corvina hosts, something link this
-
-  ```conf
-  hosts {
-      192.168.49.1 host.minikube.internal
-      192.168.49.1 corvina.fog app.corvina.fog auth.corvina.fog licenses.corvina.fog pairing.corvina.fog broker.corvina.fog appengine.api.platform.corvina.fog api.platform.corvina.fog localhost
-      fallthrough
-  }
-  ```
-
-* bootstrap corvina from the repo corvina-k8s
-* checkout the repo corvina-app/frontend-new and start it `yarn run dev` (branch feature/ECC-1547 at the time writing)
-* login with admin@exor
-* enable experimental feature Ctrl+Shift+Alt+S: serviceAccounts, apps and store
-* create a serviceAccount called [| .Name |]admin@exor
-* copy the "Client Secret"
-* create a role called monitoringrolesapp[| .Name |]administrator
-* add the "Application Role" monitoringrolesapp[| .Name |]administrator to the user admin@exor
-* run this in terminal (filling the "Client Secret" previously copied)
-
-  ```sh
-  curl -k -X 'POST' \
-    'https://[| .Name |].local.gd:11073/v1/installed' \
-    -H 'accept: */*' \
-    -H 'Content-Type: application/json' \
-    -d '{
-    "key": "corvina-app-[| .Name |]",
-    "apiVersion": "1.0.0",
-    "clientId": "user-service-[| .Name |]admin@exor",
-    "clientSecret": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
-    "baseUrl": "http://localhost:8080",
-    "apiBaseUrl": "https://app.corvina.fog:10443",
-    "authBaseUrl": "https://auth.corvina.fog:10443",
-    "openIdConfigurationUrl": "https://auth.corvina.fog:10443/auth/realms/exor/.well-known/openid-configuration",
-    "wsBaseUrl": "wss://app.corvina.fog:10443",
-    "organizationId": 36,
-    "instanceId": "43024c91-cd1e-4877-bc21-6e61b2d80a49",
-    "eventType": "installed",
-    "realm": "exor",
-    "realmValidationRole": "exor.roles.app_monitoringrolesapp[| .Name |]administrator"
-  }'
-  ```
-
-* navigate to application
-
 ## How to stop this project  
 
 * run the script cleanup.sh
