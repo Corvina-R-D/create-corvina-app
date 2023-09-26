@@ -34,6 +34,7 @@ func main() {
 		},
 	}
 
+	var count int
 	app.Commands = []*cli.Command{
 		{
 			Name:  "version",
@@ -52,6 +53,7 @@ func main() {
 				}
 
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
+				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(count, c))
 
 				cmd.WebApp(c.Context)
 				return nil
@@ -62,6 +64,12 @@ func main() {
 					Aliases: []string{"n"},
 					Usage:   "Name of the application",
 				},
+				&cli.BoolFlag{
+					Name:    "kubernetes",
+					Aliases: []string{"k8s"},
+					Usage:   "Do you plan to deploy on kubernetes?",
+					Count:   &count,
+				},
 				verboseFlag,
 			},
 		},
@@ -70,4 +78,14 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal().Err(err).Msg("Error running the app")
 	}
+}
+
+func getK8sValueFromCliContext(count int, c *cli.Context) cmd.KubernetesValue {
+	k8sContextValue := cmd.KubernetesAsk
+	if count == 1 && c.Bool("kubernetes") {
+		k8sContextValue = cmd.KubernetesTrue
+	} else if count == 1 && !c.Bool("kubernetes") {
+		k8sContextValue = cmd.KubernetesFalse
+	}
+	return k8sContextValue
 }

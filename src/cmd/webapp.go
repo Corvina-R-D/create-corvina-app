@@ -20,7 +20,17 @@ import (
 type CtxKey string
 
 const Name CtxKey = "name"
-const DestinationFolder CtxKey = "destinationFolder"
+const Kubernetes CtxKey = "kubernetes"
+const KubernetesBool CtxKey = "kubernetesBool"
+const destinationFolder CtxKey = "destinationFolder"
+
+type KubernetesValue string
+
+const (
+	KubernetesTrue  KubernetesValue = "true"
+	KubernetesFalse KubernetesValue = "false"
+	KubernetesAsk   KubernetesValue = "ask"
+)
 
 func WebApp(ctx context.Context) error {
 	ctx, err := takeNameFromCtxOrAskIt(ctx)
@@ -28,7 +38,12 @@ func WebApp(ctx context.Context) error {
 		return nil
 	}
 
-	ctx = context.WithValue(ctx, DestinationFolder, fmt.Sprintf("corvina-app-%s", ctx.Value(Name)))
+	ctx, err = takeKubernetesFromCtxOrAskIt(ctx)
+	if err != nil {
+		return nil
+	}
+
+	ctx = context.WithValue(ctx, destinationFolder, fmt.Sprintf("corvina-app-%s", ctx.Value(Name)))
 
 	stopIfDestinationFolderIsNotEmpty(ctx)
 
@@ -38,7 +53,7 @@ func WebApp(ctx context.Context) error {
 	}
 
 	utils.PrintlnGreen("Corvina web app created successfully!")
-	utils.PrintlnCyan(fmt.Sprintf("- cd %s", ctx.Value(DestinationFolder)))
+	utils.PrintlnCyan(fmt.Sprintf("- cd %s", ctx.Value(destinationFolder)))
 	utils.PrintlnCyan("- follow the instructions in the README.md file to run the app")
 
 	return nil
@@ -80,6 +95,38 @@ func askName() (string, error) {
 	return result, nil
 }
 
+func takeKubernetesFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
+	k8s := ctx.Value(Kubernetes).(KubernetesValue)
+
+	switch k8s {
+	case KubernetesTrue:
+		return context.WithValue(ctx, KubernetesBool, true), nil
+	case KubernetesFalse:
+		return context.WithValue(ctx, KubernetesBool, false), nil
+	default:
+		result, err := askKubernetes()
+		if err != nil {
+			return ctx, err
+		}
+
+		return context.WithValue(ctx, KubernetesBool, result), nil
+	}
+}
+
+func askKubernetes() (bool, error) {
+	prompt := promptui.Select{
+		Label: "Do you plan to deploy on kubernetes? We will add a helm chart for you",
+		Items: []string{"Yes", "No"},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return false, err
+	}
+
+	return result == "Yes", nil
+}
+
 func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
 	err := fs.WalkDir(templates.CorvinaAppWeb, ".", fn)
 
@@ -90,7 +137,8 @@ func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
 
 func createWebApp(ctx context.Context) error {
 	name := ctx.Value(Name).(string)
-	destinationFolder := ctx.Value(DestinationFolder).(string)
+	destinationFolder := ctx.Value(destinationFolder).(string)
+	k8s := ctx.Value(KubernetesBool).(bool)
 
 	os.Mkdir(destinationFolder, 0755)
 
@@ -107,6 +155,10 @@ func createWebApp(ctx context.Context) error {
 		log.Info().Str("path", path).Msg("Processing file")
 
 		if d.IsDir() {
+			if skipThisFolder(path, k8s) {
+				return fs.SkipDir
+			}
+
 			dirName := strings.Replace(path, "corvina-app-web", destinationFolder, 2)
 			log.Info().Str("path", dirName).Msg("Creating folder")
 
@@ -114,6 +166,10 @@ func createWebApp(ctx context.Context) error {
 				return os.Mkdir(dirName, 0755)
 			}
 
+			return nil
+		}
+
+		if skipThisFile(path, k8s) {
 			return nil
 		}
 
@@ -141,6 +197,36 @@ func createWebApp(ctx context.Context) error {
 		return nil
 	})
 	return nil
+}
+
+func skipThisFolder(path string, k8s bool) bool {
+	if k8s {
+		return false
+	}
+
+	return strings.Contains(path, "helm-charts")
+}
+
+var filesToExclude = []string{
+	"corvina-app-web/build.sh",
+	"corvina-app-web/deploy.internal-qa.sh",
+	"corvina-app-web/deploy.internal.sh",
+	"corvina-app-web/draft-new-release.sh",
+	"corvina-app-web/install-certificate-locally.sh",
+}
+
+func skipThisFile(path string, k8s bool) bool {
+	if k8s {
+		return false
+	}
+
+	for _, file := range filesToExclude {
+		if strings.Contains(path, file) {
+			return true
+		}
+	}
+
+	return strings.Contains(path, ".minikube.sh")
 }
 
 var (
@@ -193,13 +279,13 @@ func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io
 
 func stopIfDestinationFolderIsNotEmpty(ctx context.Context) {
 	if !destinationFolderIsEmptyOrNotPresent(ctx) {
-		utils.PrintlnYellow(fmt.Sprintf("The folder %s is not empty, please delete it or choose another name", ctx.Value(DestinationFolder).(string)))
+		utils.PrintlnYellow(fmt.Sprintf("The folder %s is not empty, please delete it or choose another name", ctx.Value(destinationFolder).(string)))
 		os.Exit(0)
 	}
 }
 
 func destinationFolderIsEmptyOrNotPresent(ctx context.Context) bool {
-	destinationFolder := ctx.Value(DestinationFolder).(string)
+	destinationFolder := ctx.Value(destinationFolder).(string)
 
 	if _, err := os.Stat(destinationFolder); os.IsNotExist(err) {
 		return true
