@@ -2,5 +2,5 @@ package templates
 
 import "embed"
 
-//go:embed corvina-app-web/*
+//go:embed all:corvina-app-web/*
 var CorvinaAppWeb embed.FS
