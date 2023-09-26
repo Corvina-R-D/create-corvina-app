@@ -44,30 +44,6 @@ corvina-app-{name}
 │   │   ├── ...
 ```
 
-### Running the app ###
-
-The app is a vuejs application written in typescript. It is located in the `app` directory. To run the app, you can run the following commands:
-
-```bash
-cd app && cp -n ./.env.dist ./.env || true && npm i && npm run dev
-```
-
-This will start the app in development mode. This frontend application is built to be embedded in the Corvina platform.
-
-### Running the service ###
-
-The service is a nestjs application written in typescript. It is located in the `service` directory. To run the service, you can run the following commands:
-
-```bash
-cd service && cp -n ./.env.dist ./.env || true && npm i && npm run start:dev
-```
-
-This will start the service in development mode. This backend application connects to a postgresql database and a redis key-value store. You can start those services by running the following command (in a separate shell at the root of the project):
-
-```bash
-docker-compose up -d
-```
-
 ### Meaning of helm charts ###
 
 The helm charts are used to deploy the application in a kubernetes cluster. The `corvina-app-{name}` chart is used to deploy the application in the Corvina platform. We provide this structure as an example of how we build and deploy our applications in Corvina. You can use this structure as a starting point for your own application or you can use your own structure (there is no need to deploy on kubernetes).
