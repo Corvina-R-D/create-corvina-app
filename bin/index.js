@@ -30,7 +30,13 @@ const mapNodejsArchToGo = {
   arm64: "arm64",
 };
 
-const script = `main.go-${platform}-${mapNodejsArchToGo[arch]}${platform === "windows" ? ".exe" : ""}`;
+const mapPlatformToGo = {
+  linux: "linux",
+  darwin: "macos",
+  win32: "windows",
+};
+
+const script = `main.go-${mapPlatformToGo[platform]}-${mapNodejsArchToGo[arch]}${platform === "win32" ? ".exe" : ""}`;
 
 const binPath = join(__dirname, "..", "build", script);
 const allArgs = process.argv.slice(2).join(" ");
