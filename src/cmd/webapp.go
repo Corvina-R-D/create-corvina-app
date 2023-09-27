@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -35,12 +36,12 @@ const (
 func WebApp(ctx context.Context) error {
 	ctx, err := takeNameFromCtxOrAskIt(ctx)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	ctx, err = takeKubernetesFromCtxOrAskIt(ctx)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	ctx = context.WithValue(ctx, destinationFolder, fmt.Sprintf("corvina-app-%s", ctx.Value(Name)))
@@ -71,20 +72,37 @@ func takeNameFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 		return context.WithValue(ctx, Name, result), nil
 	}
 
+	err := validateName(name.(string))
+	if err != nil {
+		return ctx, err
+	}
+
 	return ctx, nil
 }
 
-func askName() (string, error) {
-	validate := func(input string) error {
-		if len(input) < 3 {
-			return errors.New("assign a name with at list 3 characters")
-		}
-		return nil
+func validateName(name string) error {
+	// at least 3 characters
+	if len(name) < 3 {
+		return errors.New("assign a name with at least 3 characters")
 	}
 
+	// only letters and numbers (but not in the first position)
+	mateched, err := regexp.MatchString("^[a-z][a-z0-9]{0,14}$", name)
+	if err != nil {
+		return err
+	}
+
+	if !mateched {
+		return errors.New("assign a name only letters and numbers are allowed, but not in the first position, and with a maximum of 15 characters")
+	}
+
+	return nil
+}
+
+func askName() (string, error) {
 	prompt := promptui.Prompt{
 		Label:    "Name",
-		Validate: validate,
+		Validate: validateName,
 	}
 
 	result, err := prompt.Run()

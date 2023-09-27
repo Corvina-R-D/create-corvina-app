@@ -44,6 +44,12 @@ corvina-app-{name}
 │   │   ├── ...
 ```
 
+You can also create the app without prompting:
+
+```bash
+npx @corvina/create-corvina-app@latest webapp --name myapp --kubernetes
+```
+
 ### Meaning of helm charts ###
 
 The helm charts are used to deploy the application in a kubernetes cluster. The `corvina-app-{name}` chart is used to deploy the application in the Corvina platform. We provide this structure as an example of how we build and deploy our applications in Corvina. You can use this structure as a starting point for your own application or you can use your own structure (there is no need to deploy on kubernetes).

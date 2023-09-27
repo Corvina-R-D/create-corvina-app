@@ -55,8 +55,7 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
 				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(count, c))
 
-				cmd.WebApp(c.Context)
-				return nil
+				return cmd.WebApp(c.Context)
 			},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
