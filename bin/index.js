@@ -32,7 +32,7 @@ const mapNodejsArchToGo = {
 
 const mapPlatformToGo = {
   linux: "linux",
-  darwin: "macos",
+  darwin: "darwin",
   win32: "windows",
 };
 
