@@ -42,7 +42,7 @@ async function buildSecurityContext() {
       }
 
       this.errorMessage = "";
-      this.$router.push({ path: "/list" });
+      this.$router.replace({ path: "/list" });
       console.log(this.$router)
     } catch (error) {
       console.error(error);
