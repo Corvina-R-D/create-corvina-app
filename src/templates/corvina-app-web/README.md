@@ -67,6 +67,7 @@ once the build is done, you can deploy the new version of the app with the follo
 
 ## Required software
 
+* nodejs
 * docker
 * kubectl
 * minikube
