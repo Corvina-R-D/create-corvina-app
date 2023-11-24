@@ -248,7 +248,7 @@ func skipThisFile(path string, k8s bool) bool {
 }
 
 var (
-	extensionsToCopyAsIs = []string{".vue", ".eot", ".ttf", ".woff", ".woff2", ".tgz", ".jpeg"}
+	extensionsToCopyAsIs = []string{".eot", ".ttf", ".woff", ".woff2", ".tgz", ".jpeg"}
 )
 
 func isFileToCopyAsIs(path string) bool {
