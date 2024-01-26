@@ -59,3 +59,11 @@ We use to develop our application usign minikube on our laptop. For that reason,
 - ./start-all-locally.minikube.sh: starts all the stuff you need to run the app locally (postgresql, redis, service, app and istio ingress)
 - ./install-certificate-locally.sh: installs the certificate for the app locally (you need to run this script after running the previous one)
 - ./cleanup.minikube.sh: delete all the resources created by ./start-all-locally.minikube.sh
+
+### Develop on this repo ###
+
+If you want to develop on this repo, you need to install the following softwares:
+
+- [Node.js](https://nodejs.org/en/) (version 18+)
+- [Go](https://golang.org/) (version 1.20+)
+- [upx](https://upx.github.io/) (version 3.96+)

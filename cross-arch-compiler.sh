@@ -8,7 +8,7 @@ fi
 package_split=(${package//\// })
 package_name=${package_split[-1]}
 	
-platforms=("windows/amd64" "windows/arm64" "darwin/amd64" "darwin/arm64" "linux/amd64")
+platforms=("windows/amd64" "darwin/amd64" "darwin/arm64" "linux/amd64")
 
 for platform in "${platforms[@]}"
 do
@@ -25,4 +25,7 @@ do
    		echo 'An error has occurred! Aborting the script execution...'
 		exit 1
 	fi
+
+	# compress using upx software
+	upx build/$output_name
 done
