@@ -1,3 +1,0 @@
-<template>
-    {{ $t('NotFound') }}!
-</template>
