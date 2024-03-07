@@ -3,11 +3,8 @@ import { randomUUID } from 'crypto';
 import { Installation } from '../../entities/installation.entity';
 import { getSequelizeModule } from '../../modules/sequelize.module';
 import { Logger } from '../../utils/logger';
-import { ArtifactService } from '../artifact/artifact.service';
 import { CacheService } from '../cache.service';
 import { InstallationService } from './installation.service';
-import { OpenContainerService } from '../openContainer/openContainer.service';
-import { RepositoryService } from '../repository.service';
 import { RedisService } from '../redis.service';
 
 const INSTALLATION = {
@@ -35,11 +32,6 @@ describe('InstallationService', () => {
       imports: [...getSequelizeModule()],
       providers: [
         InstallationService,
-        {
-          provide: 'IRepositoryService',
-          useClass: RepositoryService,
-        },
-        ArtifactService,
         Logger,
         {
           provide: 'ICacheService',
@@ -48,10 +40,6 @@ describe('InstallationService', () => {
         {
           provide: 'IRedisService',
           useClass: RedisService,
-        },
-        {
-          provide: 'IOpenContainerService',
-          useClass: OpenContainerService,
         },
       ],
     }).compile();

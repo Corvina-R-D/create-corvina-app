@@ -7,9 +7,6 @@ import { LifecycleController } from './lifecycle.controller';
 import { EVENT_TYPE, InstalledInputDTO, UninstalledInputDTO } from '../dtos/lifecycle.dto';
 import { getSequelizeModule } from '../modules/sequelize.module';
 import { CacheService } from '../services/cache.service';
-import { OpenContainerService } from '../services/openContainer/openContainer.service';
-import { RepositoryService } from '../services/repository.service';
-import { ArtifactService } from '../services/artifact/artifact.service';
 import { CustomError } from '../utils/CustomError';
 import { RedisService } from '../services/redis.service';
 
@@ -23,11 +20,6 @@ describe('LifecycleController', () => {
       imports: [...getSequelizeModule()],
       providers: [
         InstallationService,
-        {
-          provide: 'IRepositoryService',
-          useClass: RepositoryService,
-        },
-        ArtifactService,
         Logger,
         {
           provide: 'ICorvinaJwtService',
@@ -37,10 +29,6 @@ describe('LifecycleController', () => {
         {
           provide: 'ICacheService',
           useClass: CacheService,
-        },
-        {
-          provide: 'IOpenContainerService',
-          useClass: OpenContainerService,
         },
       ],
     }).compile();
@@ -126,29 +114,6 @@ describe('LifecycleController', () => {
       expect(error).toBeInstanceOf(CustomError);
       expect(error.code).toBe(501);
       expect(error.message).toBe("I'm the installation endpoint, I can process only the eventType installed");
-    }
-  });
-
-  it('installation fails if the hosts is not in the env var INSTALLATION_HOSTS_WHITELIST', async () => {
-    const input = {
-      key: process.env.MANIFEST_ID,
-      apiVersion: process.env.MANIFEST_API_VERSION.split('-')[1],
-      openIdConfigurationUrl: 'https://auth.corvina.fog:10443/auth/realms/exor/.well-known/openid-configuration',
-      baseUrl: 'https://veryveryveryveryveryverybadsite.io',
-      clientId: 'clientId-testing',
-      clientSecret: 'clientSecret-testing',
-      eventType: EVENT_TYPE.INSTALLED,
-      organizationId: 1,
-      instanceId: randomUUID(),
-      realmValidationRole: 'realmValidationRole-testing',
-    } as InstalledInputDTO;
-
-    try {
-      await controller.installed(input);
-    } catch (error) {
-      expect(error).toBeInstanceOf(CustomError);
-      expect(error.code).toBe(506);
-      expect(error.message).toBe(`The url ${input.baseUrl} is not in the whitelist`);
     }
   });
 
