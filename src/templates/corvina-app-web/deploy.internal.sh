@@ -1,5 +1,5 @@
 # --------------------------- #
-# You need to configure the context "corvina-app-[| .Name |]-internal-qa" before running this script.
+# You need to configure the context "internal" before running this script.
 # --------------------------- #
 helm --kube-context=internal \
     -n corvina-app-[| .Name |] \
