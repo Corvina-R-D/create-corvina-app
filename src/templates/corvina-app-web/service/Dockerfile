@@ -1,4 +1,4 @@
-FROM node:18-alpine3.16 AS development
+FROM node:20.11.1-alpine3.19 AS development
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:18-alpine3.16 as production
+FROM node:20.11.1-alpine3.19 as production
 
 # nestjs application
 ARG NODE_ENV=production

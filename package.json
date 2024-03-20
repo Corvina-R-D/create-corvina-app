@@ -1,6 +1,6 @@
 {
   "name": "@corvina/create-corvina-app",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Setup a corvina web app in one command!",
   "bin": {
     "create-corvina-app": "bin/index.js"
