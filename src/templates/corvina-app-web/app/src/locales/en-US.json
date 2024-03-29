@@ -1,3 +1,6 @@
 {
-  "entity": "Entity"
+  "entity": "Entity",
+  "NoPermissions": "Current user doesn't have permissions (invalid role)",
+  "YouMustProvideThreeQuerystringParams": "You must provide three querystring parameters called \"corvinaHost\", \"organizationId\" and \"accessToken\"",
+  "unableLoadDomainData": "Unable to load application data for domain"
 }
