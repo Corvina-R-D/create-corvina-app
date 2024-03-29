@@ -3,7 +3,20 @@
 ## How to start this project with docker-compose for developing
 
 * start infrastructure dependencies: run in a shell `docker-compose up postgresql redis` and leave it running
-* expose over the internet the service port and the app port: sample, run `ngrok http 3000` and `ngrok http 5173` and copy the urls (you can use other services like localtunnel)
+* expose over the internet the service port and the app port: sample, run `ngrok http 3000` and `ngrok http 5173` and copy the urls (you can use other services like localtunnel). Another approach could be create an ngrok config file with the following content:
+
+```yaml
+tunnels:
+  app:
+    addr: 3000
+    proto: http
+  service:
+    addr: 5173
+    proto: http
+```
+
+and run `ngrok start --config ngrok.yml app service` and copy the urls
+
 * start the frontend app: run in a shell `cd app && cp -n .env.dist .env || true && npm i && npm run dev` and leave it running
 * start the backend service:
 
