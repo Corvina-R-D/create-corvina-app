@@ -1,5 +1,21 @@
-version: '3.1'
+version: '3.7'
 services:
+[|- if .SingleDockerfile |]
+  corvina_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./service/.env.dist
+    environment:
+      - PG_HOST=postgresql
+      - PG_PORT=5432
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgresql
+    restart: always
+[|- end |]
   postgresql:
     image: postgres:15-alpine
     # command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]

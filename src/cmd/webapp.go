@@ -25,6 +25,7 @@ const Redis CtxKey = "redis"
 const RedisBool CtxKey = "redisBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
+const ExperimentalSingleDockerfile CtxKey = "experimentalSingleDockerfile"
 const destinationFolder CtxKey = "destinationFolder"
 
 type RedisValue string
@@ -205,10 +206,16 @@ func createWebApp(ctx context.Context) error {
 	destinationFolder := ctx.Value(destinationFolder).(string)
 	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
+	singleDockerfile := ctx.Value(ExperimentalSingleDockerfile).(bool)
 
 	os.Mkdir(destinationFolder, 0755)
 
-	projectInfo := ProjectInfo{Name: name, RedisEnabled: redis}
+	projectInfo := ProjectInfo{
+		Name:             name,
+		RedisEnabled:     redis,
+		SingleDockerfile: singleDockerfile,
+		K8sEnabled:       k8s,
+	}
 
 	walkThroughWebAppTemplate(func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -235,7 +242,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
-		if skipThisFile(path, redis, k8s) {
+		if skipThisFile(path, projectInfo) {
 			return nil
 		}
 
@@ -258,6 +265,14 @@ func createWebApp(ctx context.Context) error {
 		err = ParseFileAndExecuteTemplate(path, projectInfo, file)
 		if err != nil {
 			return err
+		}
+
+		// if file is a shell script, make it executable
+		if strings.HasSuffix(path, ".sh") {
+			err = os.Chmod(file.Name(), 0755)
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -291,9 +306,9 @@ var filesToExclude = map[string][]string{
 	"redis": filesToExcludeRedis,
 }
 
-func skipThisFile(path string, redis bool, k8s bool) bool {
+func skipThisFile(path string, projectInfo ProjectInfo) bool {
 
-	if !redis {
+	if !projectInfo.RedisEnabled {
 		for _, file := range filesToExclude["redis"] {
 			if strings.Contains(path, file) {
 				return true
@@ -301,11 +316,17 @@ func skipThisFile(path string, redis bool, k8s bool) bool {
 		}
 	}
 
-	if !k8s {
+	if !projectInfo.K8sEnabled {
 		for _, file := range filesToExclude["k8s"] {
 			if strings.Contains(path, file) {
 				return true
 			}
+		}
+	}
+
+	if !projectInfo.SingleDockerfile {
+		if path == "corvina-app-web/Dockerfile" {
+			return true
 		}
 	}
 
@@ -338,8 +359,10 @@ func CopyAsIs(path string, writer *os.File) error {
 }
 
 type ProjectInfo struct {
-	Name         string
-	RedisEnabled bool
+	Name             string
+	RedisEnabled     bool
+	K8sEnabled       bool
+	SingleDockerfile bool
 }
 
 func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {

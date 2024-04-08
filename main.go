@@ -34,7 +34,8 @@ func main() {
 		},
 	}
 
-	var count int
+	var countK8s int
+	var countRedis int
 	app.Commands = []*cli.Command{
 		{
 			Name:  "version",
@@ -53,8 +54,9 @@ func main() {
 				}
 
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
-				c.Context = context.WithValue(c.Context, cmd.Redis, getRedisValueFromCliContext(count, c))
-				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(count, c))
+				c.Context = context.WithValue(c.Context, cmd.Redis, getRedisValueFromCliContext(countRedis, c))
+				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(countK8s, c))
+				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
 
 				return cmd.WebApp(c.Context)
 			},
@@ -68,12 +70,17 @@ func main() {
 					Name:    "kubernetes",
 					Aliases: []string{"k8s"},
 					Usage:   "Do you plan to deploy on kubernetes?",
-					Count:   &count,
+					Count:   &countK8s,
 				},
 				&cli.BoolFlag{
-					Name:  "redis",
-					Usage: "Do you plan to use Redis?",
-					Count: &count,
+					Name:    "redis",
+					Aliases: []string{"r"},
+					Usage:   "Do you plan to use Redis?",
+					Count:   &countRedis,
+				},
+				&cli.BoolFlag{
+					Name:  "experimental-single-dockerfile",
+					Usage: "Use a single Dockerfile for both FE and BE",
 				},
 				verboseFlag,
 			},
