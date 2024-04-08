@@ -12,6 +12,7 @@ import { CacheService } from './services/cache.service';
 import { RedisService } from './services/redis.service';
 import { RateLimiterService } from './services/rateLimiter.service';
 import { AuthorizationController } from './controllers/authorization.controller';
+import { InMemoryCacheService } from './services/inMemoryCache.service';
 
 @Module({
   imports: [
@@ -30,21 +31,27 @@ import { AuthorizationController } from './controllers/authorization.controller'
       useExisting: InstallationService,
     },
     {
-      provide: 'IRedisService',
-      useClass: RedisService,
-    },
-    {
       provide: 'ICacheService',
+[|- if .RedisEnabled |]
       useClass: CacheService,
+[|- else |]
+      useClass: InMemoryCacheService,
+[|- end |]
     },
     {
       provide: 'ICorvinaJwtService',
       useClass: CorvinaJwtService,
     },
+[|- if .RedisEnabled |]
+    {
+      provide: 'IRedisService',
+      useClass: RedisService,
+    },
     {
       provide: 'IRateLimiterService',
       useClass: RateLimiterService,
     },
+[|- end |]
   ],
 })
 export class AppModule {}

@@ -21,9 +21,19 @@ import (
 type CtxKey string
 
 const Name CtxKey = "name"
+const Redis CtxKey = "redis"
+const RedisBool CtxKey = "redisBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
 const destinationFolder CtxKey = "destinationFolder"
+
+type RedisValue string
+
+const (
+	RedisTrue  RedisValue = "true"
+	RedisFalse RedisValue = "false"
+	RedisAsk   RedisValue = "ask"
+)
 
 type KubernetesValue string
 
@@ -35,6 +45,11 @@ const (
 
 func WebApp(ctx context.Context) error {
 	ctx, err := takeNameFromCtxOrAskIt(ctx)
+	if err != nil {
+		return err
+	}
+
+	ctx, err = takeRedisFromCtxOrAskIt(ctx)
 	if err != nil {
 		return err
 	}
@@ -113,6 +128,24 @@ func askName() (string, error) {
 	return result, nil
 }
 
+func takeRedisFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
+	redis := ctx.Value(Redis).(RedisValue)
+
+	switch redis {
+	case RedisTrue:
+		return context.WithValue(ctx, RedisBool, true), nil
+	case RedisFalse:
+		return context.WithValue(ctx, RedisBool, false), nil
+	default:
+		result, err := askRedis()
+		if err != nil {
+			return ctx, err
+		}
+
+		return context.WithValue(ctx, RedisBool, result), nil
+	}
+}
+
 func takeKubernetesFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 	k8s := ctx.Value(Kubernetes).(KubernetesValue)
 
@@ -129,6 +162,20 @@ func takeKubernetesFromCtxOrAskIt(ctx context.Context) (context.Context, error) 
 
 		return context.WithValue(ctx, KubernetesBool, result), nil
 	}
+}
+
+func askRedis() (bool, error) {
+	prompt := promptui.Select{
+		Label: "Do you plan to use redis?",
+		Items: []string{"Yes", "No"},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return false, err
+	}
+
+	return result == "Yes", nil
 }
 
 func askKubernetes() (bool, error) {
@@ -156,11 +203,12 @@ func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
 func createWebApp(ctx context.Context) error {
 	name := ctx.Value(Name).(string)
 	destinationFolder := ctx.Value(destinationFolder).(string)
+	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
 
 	os.Mkdir(destinationFolder, 0755)
 
-	projectInfo := ProjectInfo{Name: name}
+	projectInfo := ProjectInfo{Name: name, RedisEnabled: redis}
 
 	walkThroughWebAppTemplate(func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -187,7 +235,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
-		if skipThisFile(path, k8s) {
+		if skipThisFile(path, redis, k8s) {
 			return nil
 		}
 
@@ -225,26 +273,43 @@ func skipThisFolder(path string, k8s bool) bool {
 	return strings.Contains(path, "helm-charts")
 }
 
-var filesToExclude = []string{
+var filesToExcludeK8s = []string{
 	"corvina-app-web/build.sh",
 	"corvina-app-web/deploy.internal-qa.sh",
 	"corvina-app-web/deploy.internal.sh",
 	"corvina-app-web/draft-new-release.sh",
 	"corvina-app-web/install-certificate-locally.sh",
+	".minikube.sh",
 }
 
-func skipThisFile(path string, k8s bool) bool {
-	if k8s {
-		return false
-	}
+var filesToExcludeRedis = []string{
+	"pf-redis.minikube.sh",
+}
 
-	for _, file := range filesToExclude {
-		if strings.Contains(path, file) {
-			return true
+var filesToExclude = map[string][]string{
+	"k8s":   filesToExcludeK8s,
+	"redis": filesToExcludeRedis,
+}
+
+func skipThisFile(path string, redis bool, k8s bool) bool {
+
+	if !redis {
+		for _, file := range filesToExclude["redis"] {
+			if strings.Contains(path, file) {
+				return true
+			}
 		}
 	}
 
-	return strings.Contains(path, ".minikube.sh")
+	if !k8s {
+		for _, file := range filesToExclude["k8s"] {
+			if strings.Contains(path, file) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 var (
@@ -273,7 +338,8 @@ func CopyAsIs(path string, writer *os.File) error {
 }
 
 type ProjectInfo struct {
-	Name string
+	Name         string
+	RedisEnabled bool
 }
 
 func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {

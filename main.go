@@ -53,6 +53,7 @@ func main() {
 				}
 
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
+				c.Context = context.WithValue(c.Context, cmd.Redis, getRedisValueFromCliContext(count, c))
 				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(count, c))
 
 				return cmd.WebApp(c.Context)
@@ -87,4 +88,14 @@ func getK8sValueFromCliContext(count int, c *cli.Context) cmd.KubernetesValue {
 		k8sContextValue = cmd.KubernetesFalse
 	}
 	return k8sContextValue
+}
+
+func getRedisValueFromCliContext(count int, c *cli.Context) cmd.RedisValue {
+	redisContextValue := cmd.RedisAsk
+	if count == 1 && c.Bool("redis") {
+		redisContextValue = cmd.RedisTrue
+	} else if count == 1 && !c.Bool("redis") {
+		redisContextValue = cmd.RedisFalse
+	}
+	return redisContextValue
 }

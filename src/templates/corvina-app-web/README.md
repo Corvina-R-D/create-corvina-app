@@ -57,7 +57,7 @@ and run `ngrok start --config ngrok.yml app service` and copy the urls
 I'm focusing right now on the test related to the service, so I'm using the following commands to run the tests:
 
 * follow the instructions to start the project with minikube till the point where you have the minikube tunnel running
-* start postgresql and fake-http-server: run `docker-compose up postgresql redis fake-http-server` and leave it running
+* start storage service: run `docker-compose up postgresql redis` and leave it running
 * run `cd service && npm run test`
 
 ## How to release in production?

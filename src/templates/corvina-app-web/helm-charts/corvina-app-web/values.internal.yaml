@@ -57,6 +57,7 @@ migrator:
   envVar: 
     START_FEATURES: migrator.up,quit
 
+[|- if .RedisEnabled |]
 redis:
   global:
     storageClass: "ssd-retain"
@@ -71,3 +72,4 @@ redis:
       requests:
         cpu: "500m"
         memory: "512Mi"
+[|- end |]

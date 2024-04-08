@@ -13,7 +13,11 @@ export class AuthorizationController {
   @Get(':instanceId/:organizationId/check-auth')
   @ApiParam({ name: 'instanceId' })
   @ApiParam({ name: 'organizationId' })
+[|- if .RedisEnabled |]
   @UseGuards(CorvinaAuthGuard, CorvinaInstallationRoleGuard, RateLimiter({ max: 5 }))
+[|- else |]
+  @UseGuards(CorvinaAuthGuard, CorvinaInstallationRoleGuard)
+[|- end |]
   @ApiBearerAuth()
   async checkAuth(): Promise<undefined> {
     return undefined;

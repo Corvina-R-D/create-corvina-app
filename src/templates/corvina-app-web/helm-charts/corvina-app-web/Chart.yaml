@@ -15,9 +15,11 @@ dependencies:
   - name: postgresql
     version: "~12.2.7"
     repository: "https://charts.bitnami.com/bitnami"
+[|- if .RedisEnabled |]
   - name: redis
     version: "~17.8.5"
     repository: "https://charts.bitnami.com/bitnami"
+[|- end |]
   - name: gateway
     version: "1.16.2"
     repository: "https://istio-release.storage.googleapis.com/charts"

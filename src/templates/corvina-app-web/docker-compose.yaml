@@ -12,8 +12,10 @@ services:
     ports:
       - "5434:5432" # expose port for localdevelpment
     restart: always
+[|- if .RedisEnabled |]
   redis:
     image: redis:7-alpine
     ports:
       - "6380:6379"
     restart: always
+[|- end |]

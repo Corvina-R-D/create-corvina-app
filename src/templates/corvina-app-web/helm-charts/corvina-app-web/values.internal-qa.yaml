@@ -57,6 +57,7 @@ migrator:
   envVar: 
     START_FEATURES: migrator.up,quit
 
+[|- if .RedisEnabled |]
 redis:
   architecture: standalone
   replica:
@@ -69,3 +70,4 @@ redis:
       requests:
         cpu: "500m"
         memory: "512Mi"
+[|- end |]
