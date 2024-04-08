@@ -22,7 +22,7 @@ and run `ngrok start --config ngrok.yml app service` and copy the urls
 
   * run in a shell `cd service && cp -n .env.dist .env || true && npm i`
   * edit the `.env` file and set the `MANIFEST_BASE_URL_FE_APP` variable with the url of the app exposed with ngrok
-  * edit the `.env` file and set the `MANIFEST_BASE_URL` variable with the url of the service exposed with ngrok followed by `/v1`
+  * edit the `.env` file and set the `MANIFEST_BASE_URL` variable with the url of the service exposed with ngrok
   * run in a shell `cd service && npm run start:dev` and leave it running
 
 * curl the manifest, run `curl http://localhost:3000/v1/manifest.json` and copy the response

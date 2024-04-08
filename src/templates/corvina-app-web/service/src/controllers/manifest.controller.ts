@@ -13,10 +13,10 @@ export class ManifestController {
     status: 'ACTIVE',
     images: [
       {
-        url: '/static/cover.jpeg',
+        url: '/cover.jpeg',
       },
     ],
-    coverImageUrl: '/static/cover.jpeg',
+    coverImageUrl: '/cover.jpeg',
     baseUrl: process.env.MANIFEST_BASE_URL,
     free: true,
     apiVersion: this._MANIFEST_API_VERSION,
@@ -28,18 +28,18 @@ export class ManifestController {
       website: 'http://www.corvina.io',
     },
     links: {
-      self: '/manifest.json',
+      self: '/v1/manifest.json',
     },
     lifecycle: {
-      installed: '/installed',
-      uninstalled: '/uninstalled',
+      installed: '/v1/installed',
+      uninstalled: '/v1/uninstalled',
     },
     hooks: {
       globalPage: {
         id: `${process.env.MANIFEST_ID}-globalPage`,
         title: '[| .Name |]',
         url: `${process.env.MANIFEST_BASE_URL_FE_APP}/#/`,
-        iconUrl: '/static/icon.svg',
+        iconUrl: '/icon.svg',
       },
     },
     scopes: {

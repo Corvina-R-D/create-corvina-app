@@ -85,7 +85,7 @@ data:
   PG_MAX_QUERY_EXEC_TIME: '{{ .Values.service.envVar.PG_MAX_QUERY_EXEC_TIME }}'
   PG_POOL_MAX: '{{ .Values.service.envVar.PG_POOL_MAX }}'
   PG_QUERY_LOGGING: '{{ .Values.service.envVar.PG_QUERY_LOGGING }}'
-  MANIFEST_BASE_URL: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}/v1
+  MANIFEST_BASE_URL: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}
   MANIFEST_ID: {{ .Release.Namespace }}
   MANIFEST_API_VERSION: '{{ .Chart.AppVersion }}'
   MANIFEST_BASE_URL_FE_APP: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}

@@ -70,6 +70,11 @@ func main() {
 					Usage:   "Do you plan to deploy on kubernetes?",
 					Count:   &count,
 				},
+				&cli.BoolFlag{
+					Name:  "redis",
+					Usage: "Do you plan to use Redis?",
+					Count: &count,
+				},
 				verboseFlag,
 			},
 		},
