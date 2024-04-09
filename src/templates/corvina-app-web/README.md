@@ -1,30 +1,14 @@
 # corvina app [| .Name |]
 
-## How to start this project with docker-compose for developing
+## How to start this project for developing
 
-* start infrastructure dependencies: run in a shell `docker-compose up postgresql redis` and leave it running
-* expose over the internet the service port and the app port: sample, run `ngrok http 3000` and `ngrok http 5173` and copy the urls (you can use other services like localtunnel). Another approach could be create an ngrok config file with the following content:
-
-```yaml
-tunnels:
-  app:
-    addr: 3000
-    proto: http
-  service:
-    addr: 5173
-    proto: http
-```
-
-and run `ngrok start --config ngrok.yml app service` and copy the urls
-
-* start the frontend app: run in a shell `cd app && cp -n .env.dist .env || true && npm i && npm run dev` and leave it running
-* start the backend service:
-
-  * run in a shell `cd service && cp -n .env.dist .env || true && npm i`
-  * edit the `.env` file and set the `MANIFEST_BASE_URL_FE_APP` variable with the url of the app exposed with ngrok
-  * edit the `.env` file and set the `MANIFEST_BASE_URL` variable with the url of the service exposed with ngrok
-  * run in a shell `cd service && npm run start:dev` and leave it running
-
+* install ngrok and login in your account
+* take the ngrok authtoken and put it in the ngrok.yml file
+* run `ngrok start --config ngrok.yml app service`
+* run `cp -n service/.env.dist service/.env`
+* edit the `service/.env` file and set the `MANIFEST_BASE_URL_FE_APP` variable with the url of the app exposed with ngrok
+* edit the `service/.env` file and set the `MANIFEST_BASE_URL` variable with the url of the service exposed with ngrok
+* run `./start-all-development.sh`
 * curl the manifest, run `curl http://localhost:3000/v1/manifest.json` and copy the response
 * browse in the Corvina Store and install the app via "Try custom application" button
 
@@ -56,8 +40,7 @@ and run `ngrok start --config ngrok.yml app service` and copy the urls
 
 I'm focusing right now on the test related to the service, so I'm using the following commands to run the tests:
 
-* follow the instructions to start the project with minikube till the point where you have the minikube tunnel running
-* start storage service: run `docker-compose up postgresql redis` and leave it running
+* run `./start-al-development.sh`
 * run `cd service && npm run test`
 
 ## How to release in production?
