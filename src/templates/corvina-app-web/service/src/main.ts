@@ -63,7 +63,7 @@ async function bootstrap() {
         await (await import('./migrations/migrator')).down(app);
         break;
       case 'app.listen':
-        await app.listen(3000);
+        await app.listen(process.env.PORT || 3000);
         break;
       case 'quit':
         process.exit(0);

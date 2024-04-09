@@ -1,14 +1,11 @@
 import { Umzug, SequelizeStorage } from 'umzug';
 import { Sequelize } from 'sequelize-typescript';
 import { INestApplication } from '@nestjs/common';
+import { getDatabaseConnectionInfo } from '../modules/sequelize.module';
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
-  host: process.env.PG_HOST,
-  port: parseInt(process.env.PG_PORT, 10),
-  username: process.env.PG_USER,
-  password: process.env.PG_PASS,
-  database: process.env.PG_DATABASE,
+  ...getDatabaseConnectionInfo(),
 });
 
 const createUmzug = async (nestApp: INestApplication): Promise<Umzug<any>> => {

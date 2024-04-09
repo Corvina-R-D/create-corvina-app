@@ -8,14 +8,35 @@ import { Installation } from '../entities/installation.entity';
 
 const models = [Installation];
 
+function parseDatabaseUrl(url: string): { host?: string; port?: number; username?: string; password?: string; database?: string } {
+  if (!url) {
+    return {};
+  }
+  const { hostname, port, username, password, pathname } = new URL(url);
+  return {
+    host: hostname,
+    port: parseInt(port, 10),
+    username,
+    password,
+    database: pathname.slice(1),
+  };
+}
+
+export const getDatabaseConnectionInfo = () => {
+  const { host, port, username, password, database } = parseDatabaseUrl(process.env.DATABASE_URL);
+  return {
+    host: host || process.env.PG_HOST,
+    port: port || parseInt(process.env.PG_PORT, 10),
+    username: username || process.env.PG_USER,
+    password: password || process.env.PG_PASS,
+    database: database || process.env.PG_DATABASE,
+  };
+};
+
 const getSequelizeConfig = () =>
   ({
     dialect: 'postgres',
-    host: process.env.PG_HOST,
-    port: parseInt(process.env.PG_PORT, 10),
-    username: process.env.PG_USER,
-    password: process.env.PG_PASS,
-    database: process.env.PG_DATABASE,
+    ...getDatabaseConnectionInfo(),
     // eslint-disable-next-line no-console
     logging: process.env.PG_QUERY_LOGGING === 'true' ? console.log : undefined,
     pool: {
