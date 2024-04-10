@@ -80,7 +80,7 @@ func main() {
 				},
 				&cli.BoolFlag{
 					Name:  "experimental-single-dockerfile",
-					Usage: "Use a single Dockerfile for both FE and BE",
+					Usage: "Use a single Dockerfile for both FE and BE. We also add some instructions to deploy the app on Heroku.",
 				},
 				verboseFlag,
 			},
