@@ -1,6 +1,6 @@
-[| $dockerComposeCommand := "docker-compose up postgresql redis" |]
+[| $dockerComposeCommand := "docker compose up postgresql redis" |]
 [| if not .RedisEnabled |]
-[| $dockerComposeCommand = "docker-compose up postgresql" |]
+[| $dockerComposeCommand = "docker compose up postgresql" |]
 [| end |]
 npx concurrently -k \
     --names "docker,app,service" \
