@@ -94,12 +94,8 @@ Follow these steps to deploy this project on Heroku:
 * docker
 * kubectl
 * minikube
-* local.gd (no installation required)
 * istioctl
 * helm
-* kubectx
-* kubens
 * semver <https://github.com/fsaintjacques/semver-tool>
-* oras <https://oras.land/cli/>
 
 I find <https://github.com/alexellis/arkade> very useful to install software on my local machine!
