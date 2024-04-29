@@ -24,7 +24,7 @@ The basic structure of the project is as follows:
 
 ```bash
 corvina-app-{name}
-├── README.md # all the instruction to run and develop the app
+├── README.md # NB: all the instruction to run and develop the app!!
 ├── docker-compose.yaml
 ├── /app # frontend application written in vuejs and typescript
 │   ├── package.json
