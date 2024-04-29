@@ -70,6 +70,6 @@ redis:
         cpu: "1"
         memory: "2Gi"
       requests:
-        cpu: "500m"
+        cpu: "100m"
         memory: "512Mi"
 [|- end |]

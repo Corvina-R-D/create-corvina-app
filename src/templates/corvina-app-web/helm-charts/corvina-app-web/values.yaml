@@ -8,6 +8,18 @@ istio-gateway:
     - name: https
       port: 11073
       protocol: TCP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 450 # (500 / 100) * 90 => 90% of the limits CPU
 
 imagePullPolicy: IfNotPresent
 tag: local
@@ -68,8 +80,8 @@ redis:
         cpu: "1"
         memory: "2Gi"
       requests:
-        cpu: "500m"
-        memory: "512Mi"
+        cpu: "50m"
+        memory: "128Mi"
 [|- end |]
 
 # https://cert-manager.io/docs/concepts/webhook/#known-problems-and-solutions
