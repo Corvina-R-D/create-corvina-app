@@ -10,6 +10,8 @@ import { GlobalExceptionFilter } from './filters/GlobalExceptionFilter';
 async function bootstrap() {
   const app = (await NestFactory.create(AppModule)) as NestExpressApplication;
 
+  app.enableShutdownHooks();
+
   app.enableCors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     origin: '*',
@@ -28,10 +30,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // register json body parser in order to handle
-  // - OCI requests that have content-type application/vnd.oci.image.manifest.v1+json
-  // - docker requests that have content-type application/vnd.docker.distribution.manifest.v2+json (https://docs.docker.com/registry/spec/manifest-v2-2/#media-types)
-  app.useBodyParser('json', { type: 'application/*+json' });
   app.useBodyParser('json', { type: 'application/json' });
 
   const config = new DocumentBuilder()
