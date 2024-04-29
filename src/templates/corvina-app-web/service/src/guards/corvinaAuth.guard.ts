@@ -4,9 +4,8 @@ import { Observable } from 'rxjs';
 import { ICorvinaJwtService } from '../services/corvinaJwt.service';
 import { extractBearerToken } from '../utils/extractBearerToken';
 import { Logger } from '../utils/logger';
-import { parseProjectName } from '../services/generateProjectName';
 
-const artifactRegistryExtraction = (
+const defaultExtraction = (
   request: any
 ): {
   instanceId: string;
@@ -42,27 +41,9 @@ const artifactRegistryExtraction = (
   };
 };
 
-/**
- * Extract instanceId and organizationId from the request url when the request is for OCI API
- * https://specs.opencontainers.org/distribution-spec/?v=v1.0.0#endpoints
- */
-const ociExtraction = (request: any): { instanceId: string; organizationId: string } => {
-  const { url } = request;
-
-  const project = url.split('/')[2];
-
-  return parseProjectName(project);
-};
-
 const EXTRACTION_FUNCTIONS = {
-  artifactRegistryExtraction,
-  OCIExtraction: ociExtraction,
+  artifactRegistryExtraction: defaultExtraction,
 };
-
-/**
- * Change the behavior of CorvinaAuthGuard to extract instanceId and organizationId from the request url when the request is for OCI API
- */
-export const OCIExtraction = () => SetMetadata('extract-instance-organization', ['OCIExtraction']);
 
 @Injectable()
 export class CorvinaAuthGuard implements CanActivate {
@@ -93,7 +74,7 @@ export class CorvinaAuthGuard implements CanActivate {
 
     this._logger.debug({ msg: 'Extraction', api: request.url, extraction });
 
-    const extractionFn = EXTRACTION_FUNCTIONS[extraction] || artifactRegistryExtraction;
+    const extractionFn = EXTRACTION_FUNCTIONS[extraction] || defaultExtraction;
 
     const { instanceId, organizationId, openIdConfigurationUrl } = extractionFn(request);
 
