@@ -16,10 +16,6 @@ spec:
         prefix: /v1
     - uri:
         prefix: /swagger-ui
-    - uri:
-        regex: ^\/v2\/.*\/manifests\/.* # i need this for intercepting the docker push and apply side effects on psql db
-      method:
-        exact: PUT
     route:
     - destination:
         port:
