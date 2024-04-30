@@ -66,3 +66,14 @@ If you want to develop on this repo, you need to install the following softwares
 
 - [Node.js](https://nodejs.org/en/) (version 18+)
 - [Go](https://golang.org/) (version 1.20+)
+
+### Deploy a new version ###
+
+You need to be a member of @corvina organization on npm to deploy a new version of this package. If you are, you can run the following command:
+
+```bash
+npm run prepublish
+npm run deploy
+```
+
+NB: remember to update the version in the package.json file before deploying a new version!
