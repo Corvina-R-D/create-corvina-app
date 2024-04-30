@@ -84,3 +84,19 @@ spec:
     kind: Issuer
     group: cert-manager.io
 {{ end }}
+
+{{ if and (eq $PROTOCOL "HTTPS") (eq .Values.gateway.appHost "[| .Name |].corvina.mk") }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: corvina-[| .Name |]-app-certificate
+  namespace: {{ .Values.k8sNamespace }}
+spec:
+  secretName: {{ .Values.gateway.certificateSecretName }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: minikube-fake-letsencrypt-ca
+  dnsNames:
+  - {{ .Values.gateway.appHost | quote }}
+  - {{ printf "*.%s" .Values.gateway.appHost | quote }}
+{{- end }}

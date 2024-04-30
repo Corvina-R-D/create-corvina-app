@@ -22,6 +22,25 @@ spec:
         credentialName: {{ .Values.gateway.certificateSecretName }}
       {{ end }}
 ---
+{{ if (eq .Values.gateway.appHost "[| .Name |].corvina.mk") }}
+{{ $istioName := get (get .Values "istio-gateway") "name" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $istioName }}-minikube
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: LoadBalancer
+  clusterIP: 10.96.43.1
+  externalTrafficPolicy: Local
+  ports:
+  - name: https
+    port: 443
+  selector:
+    app: {{ $istioName }}
+    istio: {{ $istioName | trimPrefix "istio-" }}
+{{ end }}
+---
 apiVersion: telemetry.istio.io/v1alpha1
 kind: Telemetry
 metadata:

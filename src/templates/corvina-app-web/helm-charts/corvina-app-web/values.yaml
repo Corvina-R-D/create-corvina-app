@@ -86,3 +86,46 @@ redis:
 
 # https://cert-manager.io/docs/concepts/webhook/#known-problems-and-solutions
 webhook.hostNetwork: true
+
+registration:
+  enabled: false
+  namespace: prod
+  image: docker.io/bitnami/keycloak
+  core:
+    service: corvina-core
+    port: 80
+  keycloak:
+    service: corvina-keycloak
+    port: 80
+    secret: corvina-keycloak-admin-secret
+  manifest:
+    key: corvina-app-[| .Name |]
+    name: [| .Name |]
+    enableDeviceAccess: false
+    description: Your app description
+    status: ACTIVE
+    images:
+    - url: /static/cover.jpeg
+    coverImageUrl: /static/cover.jpeg
+    baseUrl: # https://[| .Name |].corvina.mk/v1
+    free: 'true'
+    apiVersion: 1.0.0
+    authentication:
+      type: JWT
+    vendor:
+      name: Corvina
+      website: http://www.corvina.io
+    links:
+      self: /manifest.json
+    lifecycle:
+      installed: /installed
+      uninstalled: /uninstalled
+    hooks:
+      globalPage:
+        id: corvina-app-[| .Name |]-globalPage
+        title: [| .Name |]
+        url: # https://[| .Name |].corvina.mk/#/
+        iconUrl: /static/icon.svg
+    scopes:
+      applications:
+        - iam.organizations.read

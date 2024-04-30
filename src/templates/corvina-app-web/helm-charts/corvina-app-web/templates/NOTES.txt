@@ -1,0 +1,4 @@
+{{- if eq .Values.gateway.appHost "[| .Name |].corvina.mk" }}
+To access the app in minikube, add this line to your /etc/hosts, then visit https://[| .Name |].corvina.mk :
+10.96.43.1 [| .Name |].corvina.mk
+{{- end }}

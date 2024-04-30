@@ -8,12 +8,24 @@ istio-gateway:
     - name: https
       port: 443
       protocol: TCP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
 
-imagePullPolicy: Always
-tag: 
+imagePullPolicy: IfNotPresent
+tag: latest-master
 
 gateway:
-  appHost: "[| .Name |].corvina.io"
+  appHost: "[| .Name |].corvina.mk"
   protocol: "https"
   port: 443
   certificateSecretName: "corvina-app-[| .Name |]-prod-tls"
@@ -23,35 +35,40 @@ gateway:
 postgresql:
   primary:
     persistence:
-      size: 20Gi
+      size: 8Gi
     resources:
       limits:
-        cpu: "1000m"
-        memory: "2Gi"
+        cpu: "500m"
+        memory: "1Gi"
       requests:
-        cpu: "250m"
-        memory: "256Mi"
+        cpu: "25m"
+        memory: "128Mi"
   global:
-    storageClass: "ssd-retain"
     postgresql:
       auth:
         username: corvina_app_[| .Name |]
         database: corvina_app_[| .Name |]
+        existingSecret: corvina-app-[| .Name |]-postgresql
+        secretKeys:
+          adminPasswordKey: postgres-password
+          userPasswordKey: postgres-password
 
 app:  
   image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
 
 service:
   image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
+  extraCa:
+    secret: corvina-app-[| .Name |]-prod-tls
   envVar:
-    LOG_LEVEL: info
+    LOG_LEVEL: debug
     PG_PORT: 5432
     PG_MAX_QUERY_EXEC_TIME: 5000
-    PG_POOL_MAX: 10
+    PG_POOL_MAX: 3
     PG_QUERY_LOGGING: false
     INSTALLATION_HOSTS_WHITELIST: '*'
     START_FEATURES: app.listen
-    NODE_TLS_REJECT_UNAUTHORIZED: ''
+    NODE_TLS_REJECT_UNAUTHORIZED: '0'
 
 migrator:
   envVar: 
@@ -63,8 +80,6 @@ redis:
     enabled: true
     existingSecret: corvina-app-[| .Name |]-redis
     existingSecretPasswordKey: REDIS_PASSWORD
-  global:
-    storageClass: "ssd-retain"
   architecture: standalone
   replica:
     replicaCount: 0
@@ -74,6 +89,14 @@ redis:
         cpu: "1"
         memory: "2Gi"
       requests:
-        cpu: "100m"
-        memory: "512Mi"
+        cpu: "20m"
+        memory: "32Mi"
 [|- end |]
+
+registration:
+  enabled: true
+  manifest:
+    baseUrl: https://[| .Name |].corvina.mk/v1
+    hooks:
+      globalPage:
+        url: https://[| .Name |].corvina.mk/#/

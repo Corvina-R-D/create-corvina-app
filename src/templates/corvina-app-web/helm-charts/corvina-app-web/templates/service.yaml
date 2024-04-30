@@ -43,12 +43,14 @@ spec:
                   name: {{ .Release.Name }}-postgresql
                   key: password
                   optional: false
+            [|- if .RedisEnabled |]
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-redis
-                  key: redis-password
+                  key: REDIS_PASSWORD
                   optional: false
+            [|- end |]
           readinessProbe:
             httpGet:
               path: /v1/health

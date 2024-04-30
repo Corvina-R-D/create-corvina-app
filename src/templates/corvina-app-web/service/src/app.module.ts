@@ -19,7 +19,7 @@ import { InMemoryCacheService } from './services/inMemoryCache.service';
     ...getSequelizeModule(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'static-assets'),
-      serveRoot: '/',
+      serveRoot: '/v1/static',
     }),
   ],
   controllers: [HealthCheckController, LifecycleController, AuthorizationController, ManifestController],
