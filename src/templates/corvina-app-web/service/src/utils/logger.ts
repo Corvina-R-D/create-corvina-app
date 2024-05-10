@@ -43,7 +43,7 @@ export class Logger implements ILogger {
   }
 
   warn(...params): void {
-    this._logger.error(...params);
+    this._logger.warn(...params);
   }
 
   error(...params): void {
