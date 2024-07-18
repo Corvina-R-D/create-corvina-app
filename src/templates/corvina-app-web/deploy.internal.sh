@@ -1,9 +1,13 @@
+#!/bin/bash
+
+. $(dirname $0)/scripts/common.sh
+
 # --------------------------- #
 # You need to configure the context "internal" before running this script.
 # --------------------------- #
 helm --kube-context=internal \
-    -n corvina-app-[| .Name |] \
+    -n corvina-app-${app_name} \
     upgrade --install \
-    --values helm-charts/corvina-app-[| .Name |]/values.internal.yaml \
-    corvina-app-[| .Name |] \
-    helm-charts/corvina-app-[| .Name |]/
+    --values helm-charts/corvina-app-${app_name}/values.internal.yaml \
+    corvina-app-${app_name} \
+    helm-charts/corvina-app-${app_name}/
