@@ -41,7 +41,6 @@ fi
 new_app_version=$(semver bump $version_type $current_app_version)
 
 echo "New computed version is $new_app_version (was $current_app_version)"
-pause
 
 # update the appVersion in the chart
 yq eval ".appVersion = \"chart-${new_app_version}\"" -i helm-charts/corvina-app-${app_name}/Chart.yaml
