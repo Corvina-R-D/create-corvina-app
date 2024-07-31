@@ -18,18 +18,18 @@
 
 ## How to start this project with minikube
 
-* add to your `/etc/hosts` the following line `127.0.0.1 [| .Name |].local.gd`
-* run `minikube start`
-* install istioctl, run `istioctl install --set profile=minimal`
-* install cert-manager, run `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml`
-* execute `helm --kube-context=minikube dependency update helm-charts/corvina-app-[| .Name |]/`
-* run the script `./start-all-locally.minikube.sh` (istall docker with snap? <https://stackoverflow.com/questions/55316850/docker-build-result-could-not-read-ca-certificate-permission-denied-via>)
-* run `minikube tunnel --bind-address=0.0.0.0` and leave it running
-* install certificates `./install-certificate-locally.sh`
-* install the previous certificates in the browser
-* curl the manifest, run `curl https://[| .Name |].local.gd:11073/v1/manifest.json` and copy the response
-* browse in the Corvina Store and install the app via "Try custom application" button
+* run `./minikube-start.sh` in the main Corvina chart https://bitbucket.org/exorint/corvina-k8s/src/develop/charts/minikube-start.sh
+  * make sure you read all the prerequisites, especially regarding the installation of the self-signed certificate in your browser (see https://exorint.atlassian.net/wiki/spaces/DEV/pages/319389697/Dev
+lopment+with+Minikube#Self-signed-certificates)
+* run the script `./start-all-locally.corvina-minikube.sh`
+* as suggested by the chart, add this entry to your /etc/hosts:
+```
+10.96.43.1 ota.corvina.mk
+```
+* install the app from the Corvina App Store in your organization.
+
 [|- end |]
+
 
 ## How to stop this project  
 

@@ -21,6 +21,6 @@ dependencies:
     repository: "https://charts.bitnami.com/bitnami"
 [|- end |]
   - name: gateway
-    version: "1.16.2"
+    version: "1.20.4"
     repository: "https://istio-release.storage.googleapis.com/charts"
     alias: istio-gateway

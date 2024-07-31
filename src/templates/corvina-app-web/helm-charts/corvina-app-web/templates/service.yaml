@@ -14,6 +14,15 @@ spec:
         app: service
     spec:
       serviceAccountName: service-sa
+      {{- with .Values.service.extraCa }}
+      volumes:
+        - name: extra-ca
+          secret:
+            secretName: {{ .secret }}
+            items:
+            - key: ca.crt
+              path: ca.crt
+      {{- end }}
       initContainers:
         - name: init
           image: "groundnuty/k8s-wait-for:1.3"
@@ -22,6 +31,9 @@ spec:
             - "job"
             - "{{ .Release.Name }}-migrator-job-{{ .Release.Revision }}"
           resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
             limits:
               cpu: 100m
               memory: 64Mi
@@ -29,6 +41,12 @@ spec:
         - name: service
           image: {{ .Values.service.image }}:{{ .Values.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          {{ if (eq .Values.gateway.appHost "[| .Name |].local.gd") }}
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "minikubeip=$(host host.minikube.internal); row=${minikubeip:35}' artifact-registry.local.gd'; echo $row >> /etc/hosts;"]
+          {{ end }}
           ports:
             - containerPort: 3000
           envFrom:
@@ -47,10 +65,19 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-redis
-                  key: REDIS_PASSWORD
+                  name: {{ .Values.redis.auth.existingSecret | default "corvina-app-[| .Name |]-redis" }}
+                  key: redis-password
                   optional: false
             [|- end |]
+            {{- with .Values.service.extraCa }}
+            - name: NODE_EXTRA_CA_CERTS
+              value: /cacerts/ca.crt
+            {{- end }}
+          {{- with .Values.service.extraCa }}
+          volumeMounts:
+            - name: extra-ca
+              mountPath: /cacerts
+          {{- end }}
           readinessProbe:
             httpGet:
               path: /v1/health
