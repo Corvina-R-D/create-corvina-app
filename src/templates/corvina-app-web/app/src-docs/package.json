@@ -1,0 +1,17 @@
+{
+  "name": "corvina-app-ota-docs",
+  "version": "1.0.0",
+  "main": "marked_runner.js",
+  "scripts": {
+    "build": "./build.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@iktakahiro/markdown-it-katex": "^4.0.1",
+    "markdown-it": "^14.1.0",
+    "mustache": "^4.2.0"
+  }
+}
