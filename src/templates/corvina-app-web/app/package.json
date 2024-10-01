@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build",
+    "build": "npm run build-docs && vite build",
     "dev": "vite",
     "preview": "vite preview",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "build-docs": "cd src-docs && npm install && ./build.sh && cd .."
   },
   "dependencies": {
     "@corvina/corvina-app-connect": "^1.1.0",
