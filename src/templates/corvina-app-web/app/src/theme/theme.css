@@ -643,29 +643,20 @@ display: table-row-group;
   padding: 0;
 }
 
-.ecc.v-chip {
-  margin: 0 4px 4px 0;
-  font-size: 12px;
-  border: 1px solid var(--color-g2);
-  background: var(--color-wt) !important;
-  border-radius: 0;
-  line-height: 18px;
-  padding: 3px 10px 3px 5px;
-}
 .ecc.v-chip.disabled {
   opacity: 0.5;
 }
 .ecc.v-chip.v-size--default {
   height: inherit;
 }
-.ecc.v-chip .v-chip__content {
+.ecc.v-chip {
   max-width: 100%;
   color: var(--color-dk);
   height: initial;
   padding: 0;
   position: relative;
 }
-.ecc.v-chip .v-chip__content .close {
+.ecc.v-chip .close {
   position: relative;
   top: -6px;
   right: -6px;
@@ -677,7 +668,7 @@ display: table-row-group;
   height: 10px;
   margin: 0;
 }
-.ecc.v-chip .v-chip__content .close .v-icon {
+.ecc.v-chip .close .v-icon {
   font-size: 10px;
 }
 .ecc.v-btn {
@@ -2079,27 +2070,35 @@ aside {
   width: 0;
 }
 
-.custom-scrollbars * {
-  scrollbar-width: thin;
+/* Modern browsers with `scrollbar-*` support */
+@supports (scrollbar-width: thin) {
+  .custom-scrollbars, .custom-scrollbars * {
+    scrollbar-color: var(--color-highlight) var(--color-g1);
+    scrollbar-width: thin;
+  }
 }
-
-.custom-scrollbars *::-webkit-scrollbar {
-  /* background: transparent; */
-  width: 6px;
-  height: 6px;
-  background-color: var(--color-g3);
-  border-radius: 8px;
-}
-
-.custom-scrollbars *::-webkit-scrollbar-thumb {
-  background: var(--color-highlight);
-  border-radius: 8px;
-}
-
-.custom-scrollbars *::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  background-color: var(--color-g1);
-  border-radius: 8px;
+/* Legacy browsers with `::-webkit-scrollbar-*` support */
+@supports selector(::-webkit-scrollbar) {
+  .custom-scrollbars, .custom-scrollbars * {
+    /* unset standard variables to prioritize webkit version */
+    scrollbar-color: unset;
+    scrollbar-width: unset;
+  }
+  .custom-scrollbars *::-webkit-scrollbar-thumb, .custom-scrollbars::-webkit-scrollbar-thumb {
+    background: var(--color-highlight);
+    border-radius: 8px;
+  }
+  .custom-scrollbars *::-webkit-scrollbar-track, .custom-scrollbars::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: var(--color-g1);
+    border-radius: 8px;
+  }
+  .custom-scrollbars *::-webkit-scrollbar, .custom-scrollbars::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-g3);
+    border-radius: 8px;
+  }
 }
 
 .v-input {
@@ -2125,6 +2124,9 @@ aside {
 }
 .v-messages:not(.error--text) .v-messages__message {
   color: var(--color-g4) !important;
+}
+.v-messages[role=alert] div.v-messages__message {
+  color: var(--color-alert) !important;
 }
 
 .v-btn.icobtn,
@@ -2475,8 +2477,12 @@ aside {
   color: var(--color-wt) !important;
 }
 
-.ecc.v-chip.highlight-chip .v-chip__content .close {
+.ecc.v-chip.highlight-chip .close {
   color: var(--color-wt) !important;
+}
+
+.ecc.v-chip .v-btn {
+  background-color: transparent !important;
 }
 
 .sidepanel-collapsed .sidepanel {
@@ -2903,11 +2909,6 @@ aside {
 
 .v-select__content .v-list-item--density-default.v-list-item--one-line {
   min-height: 40px;
-}
-
-.v-btn--variant-text .v-btn__overlay,
-.v-btn__overlay {
-  background-color: transparent;
 }
 
 /*# sourceMappingURL=theme.css.map */

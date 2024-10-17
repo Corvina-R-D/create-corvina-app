@@ -1,4 +1,4 @@
-FROM node:20.11.1-alpine3.19 AS development
+FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v1 AS development
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:20.11.1-alpine3.19 as production
+FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v1 as production
 
 # nestjs application
 ARG NODE_ENV=production

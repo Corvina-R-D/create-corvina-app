@@ -41,7 +41,7 @@ spec:
           - name: PG_PASS
             valueFrom:
               secretKeyRef:
-                name: name: {{ .Values.postgresql.global.postgresql.auth.existingSecret | default .Release.Name+"-postgresql" }}
+                name: {{ .Values.postgresql.global.postgresql.auth.existingSecret | default ( print .Release.Name "-postgresql" ) }}
                 key: password
                 optional: false
           [|- if .RedisEnabled |]
@@ -49,11 +49,11 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ .Release.Name }}-redis
-                key: REDIS_PASSWORD
+                key: {{ .Values.redis.auth.existingSecretPasswordKey }}
                 optional: false   
           [|- end |]
-      restartPolicy: OnFailure
-  backoffLimit: 3
+      restartPolicy: Never # prevent pod removal on job failure so that we can inspect logs
+  backoffLimit: 100
 ---
 apiVersion: v1
 kind: ServiceAccount

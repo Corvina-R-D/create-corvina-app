@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import { CorvinaConnect, CorvinaConnectEventType } from '@corvina/corvina-app-connect'
+import { CorvinaConnect, CorvinaConnectEventType, ITheme } from '@corvina/corvina-app-connect'
 
 export interface ISecurityDTO {
     connect?: CorvinaConnect,
@@ -28,8 +28,9 @@ const createCorvinaConnect = async ({ corvinaHost }: { corvinaHost: string }) : 
         console.log(`JWT changed to ${jwt}`)
     });
 
-    connect.on(CorvinaConnectEventType.THEME_CHANGED, (theme: string) => {
-        console.log(`Theme changed to ${JSON.stringify(theme)}`)
+    connect.on(CorvinaConnectEventType.THEME_CHANGED, (t: ITheme) => {
+        console.log(`Theme changed to ${JSON.stringify(t)}`)
+        theme = t
     });
 
     (<any>window).connect = connect
@@ -52,6 +53,7 @@ async function createSecurityFromSessionStorage(): Promise<ISecurityDTO | undefi
 }
 
 let security: ISecurityStore;
+let theme: ITheme;
 
 export const useSecurity = async () => {
     if (!security) {
@@ -66,11 +68,16 @@ export const useSecurity = async () => {
                 this.corvinaHost = security.corvinaHost;
                 this.instanceId = security.instanceId;
                 this.key = this.connect?.organizationId;
+                theme = this.connect?.theme;
 
                 localStorage.setItem("security", JSON.stringify(security));
-            },
+            }
         } as ISecurityStore)
     }
 
     return security
+}
+
+export const useTheme = () => {
+    return theme;
 }

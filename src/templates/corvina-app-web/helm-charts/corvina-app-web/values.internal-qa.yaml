@@ -75,7 +75,7 @@ redis:
   auth:
     enabled: true
     existingSecret: corvina-app-[| .Name |]-redis
-    existingSecretPasswordKey: REDIS_PASSWORD
+    existingSecretPasswordKey: redis-password
   architecture: standalone
   replica:
     replicaCount: 0
@@ -88,3 +88,8 @@ redis:
         cpu: "100m"
         memory: "128Mi"
 [|- end |]
+
+registration:
+  enabled: false
+  manifest:
+    url: https://[| .Name |].corvina.cloud/v1/manifest.json

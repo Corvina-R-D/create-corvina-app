@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'ExorFontIcon';
-  src:  url('fonts/ExorFontIcon.eot?n4jcwp');
-  src:  url('fonts/ExorFontIcon.eot?n4jcwp#iefix') format('embedded-opentype'),
-    url('fonts/ExorFontIcon.ttf?n4jcwp') format('truetype'),
-    url('fonts/ExorFontIcon.woff?n4jcwp') format('woff'),
-    url('fonts/ExorFontIcon.svg?n4jcwp#ExorFontIcon') format('svg');
+  src:  url('fonts/ExorFontIcon.eot?prx6li');
+  src:  url('fonts/ExorFontIcon.eot?prx6li#iefix') format('embedded-opentype'),
+    url('fonts/ExorFontIcon.ttf?prx6li') format('truetype'),
+    url('fonts/ExorFontIcon.woff?prx6li') format('woff'),
+    url('fonts/ExorFontIcon.svg?prx6li#ExorFontIcon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,9 +25,136 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ecc-OTA-editRecipe:before {
+  content: "\e9eb";
+}
+.ecc-OTA-log:before {
+  content: "\e9ec";
+}
+.ecc-OTA-newRecipe:before {
+  content: "\e9ed";
+}
+.ecc-OTA-rollBack:before {
+  content: "\e9ee";
+}
+.ecc-OTA-run:before {
+  content: "\e9ef";
+}
+.ecc-org-Graph:before {
+  content: "\e9e6";
+}
+.ecc-user-addSuser:before {
+  content: "\e9e7";
+}
+.ecc-user-Suser:before {
+  content: "\e9e8";
+}
+.ecc-V:before {
+  content: "\e9e9";
+}
+.ecc-X:before {
+  content: "\e9ea";
+}
+.ecc-CONS-aggregate:before {
+  content: "\e9e2";
+}
+.ecc-CONS-graph:before {
+  content: "\e9e3";
+}
+.ecc-CONS-single:before {
+  content: "\e9e4";
+}
+.ecc-CONS-table:before {
+  content: "\e9e5";
+}
+.ecc-D-Back .path1:before {
+  content: "\e9d0";
+  color: rgb(76, 76, 77);
+  opacity: 0.5;
+}
+.ecc-D-Back .path2:before {
+  content: "\e9d1";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Bottom .path1:before {
+  content: "\e9d2";
+  color: rgb(76, 76, 77);
+  opacity: 0.5;
+}
+.ecc-D-Bottom .path2:before {
+  content: "\e9d3";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Bottom .path3:before {
+  content: "\e9d4";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
 .ecc-D-Camera:before {
   content: "\e9d5";
   color: #4c4c4d;
+}
+.ecc-D-Front .path1:before {
+  content: "\e9d6";
+  color: rgb(76, 76, 77);
+  opacity: 0.5;
+}
+.ecc-D-Front .path2:before {
+  content: "\e9d7";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Front .path3:before {
+  content: "\e9d8";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Left .path1:before {
+  content: "\e9d9";
+  color: rgb(76, 76, 77);
+  opacity: 0.5;
+}
+.ecc-D-Left .path2:before {
+  content: "\e9da";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Left .path3:before {
+  content: "\e9db";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Right .path1:before {
+  content: "\e9dc";
+  color: rgb(76, 76, 77);
+  opacity: 0.5;
+}
+.ecc-D-Right .path2:before {
+  content: "\e9dd";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Right .path3:before {
+  content: "\e9de";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Top .path1:before {
+  content: "\e9df";
+  color: rgb(76, 76, 77);
+  opacity: 0.5;
+}
+.ecc-D-Top .path2:before {
+  content: "\e9e0";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
+}
+.ecc-D-Top .path3:before {
+  content: "\e9e1";
+  margin-left: -1em;
+  color: rgb(76, 76, 77);
 }
 .ecc-empty:before {
   content: "\e9c6";

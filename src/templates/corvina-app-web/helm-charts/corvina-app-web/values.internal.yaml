@@ -63,7 +63,7 @@ redis:
   auth:
     enabled: true
     existingSecret: corvina-app-[| .Name |]-redis
-    existingSecretPasswordKey: REDIS_PASSWORD
+    existingSecretPasswordKey: redis-password
   global:
     storageClass: "ssd-retain"
   architecture: standalone
@@ -78,3 +78,9 @@ redis:
         cpu: "100m"
         memory: "512Mi"
 [|- end |]
+
+
+registration:
+  enabled: false
+  manifest:
+    url: https://[| .Name |].corvina.io/v1/manifest.json

@@ -1,6 +1,6 @@
 // Icons
 import { Blueprint } from 'vuetify/lib/framework.mjs';
-import {mdi} from 'vuetify/iconsets/mdi';
+// import {mdi} from 'vuetify/iconsets/mdi';
 // import { mdi } from 'vuetify/iconsets/mdi.mjs'; // Types
 export const bp_cc2 : Blueprint = {
   defaults: {
@@ -65,4 +65,3 @@ export const bp_cc2 : Blueprint = {
     }
   }
 };
-//# sourceMappingURL=md1.mjs.map
