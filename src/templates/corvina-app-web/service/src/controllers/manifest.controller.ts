@@ -9,7 +9,7 @@ export class ManifestController {
   private readonly MANIFEST: object = {
     key: process.env.MANIFEST_ID,
     name: '[| .Name |]',
-    description: 'This app enables you to handle a list of repositories. You can upload and download an artifact identified by name and tag version.',
+    description: 'Description of the app',
     status: 'ACTIVE',
     images: [
       {

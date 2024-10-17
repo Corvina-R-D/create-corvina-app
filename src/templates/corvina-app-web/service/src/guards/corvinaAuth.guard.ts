@@ -41,10 +41,6 @@ const defaultExtraction = (
   };
 };
 
-const EXTRACTION_FUNCTIONS = {
-  artifactRegistryExtraction: defaultExtraction,
-};
-
 @Injectable()
 export class CorvinaAuthGuard implements CanActivate {
   private readonly _corvinaJwtService: ICorvinaJwtService;
@@ -74,7 +70,7 @@ export class CorvinaAuthGuard implements CanActivate {
 
     this._logger.debug({ msg: 'Extraction', api: request.url, extraction });
 
-    const extractionFn = EXTRACTION_FUNCTIONS[extraction] || defaultExtraction;
+    const extractionFn = defaultExtraction;
 
     const { instanceId, organizationId, openIdConfigurationUrl } = extractionFn(request);
 

@@ -13,10 +13,6 @@ export class InstallationServiceMock implements IInstallationService {
   getDockerLoginScript({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  
-  getArtifactRegistryHost({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
 
   getInstallation({
     instanceId,
