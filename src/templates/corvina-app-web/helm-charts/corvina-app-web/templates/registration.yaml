@@ -31,7 +31,7 @@ spec:
             exit
           fi
           echo Installing app {{ .manifest.name | quote }}
-          curl -sf --oauth2-bearer "$token" -X POST http://corvina-core:80/api/v1/apps --json '{"manifestUrl":"{{ .manifest.url }}"}'
+          curl --fail-with-body --oauth2-bearer "$token" -X POST http://corvina-core:80/api/v1/apps --json '{"manifestUrl":"{{ .manifest.url }}"}'
         securityContext:
           runAsUser: 0
         env:
