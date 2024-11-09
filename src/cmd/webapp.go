@@ -207,14 +207,22 @@ func createWebApp(ctx context.Context) error {
 	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
 	singleDockerfile := ctx.Value(ExperimentalSingleDockerfile).(bool)
+	options := ""
+	if redis {
+		options += "-r "
+	}
+	if k8s {
+		options += "-k8s "
+	}
 
 	os.Mkdir(destinationFolder, 0755)
 
 	projectInfo := ProjectInfo{
-		Name:             name,
-		RedisEnabled:     redis,
-		SingleDockerfile: singleDockerfile,
-		K8sEnabled:       k8s,
+		Name:                            name,
+		RedisEnabled:                    redis,
+		SingleDockerfile:                singleDockerfile,
+		K8sEnabled:                      k8s,
+		CreateCorvinaAppCreationOptions: options,
 	}
 
 	walkThroughWebAppTemplate(func(path string, d fs.DirEntry, err error) error {
@@ -359,10 +367,11 @@ func CopyAsIs(path string, writer *os.File) error {
 }
 
 type ProjectInfo struct {
-	Name             string
-	RedisEnabled     bool
-	K8sEnabled       bool
-	SingleDockerfile bool
+	Name                            string
+	RedisEnabled                    bool
+	K8sEnabled                      bool
+	SingleDockerfile                bool
+	CreateCorvinaAppCreationOptions string
 }
 
 func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {
