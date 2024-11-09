@@ -2,6 +2,9 @@ package cmd
 
 import "fmt"
 
+// value set by ldflags
+var CliVersion string
+
 func Version() {
-	fmt.Println("v1.0.0")
+	fmt.Println(CliVersion)
 }
