@@ -26,7 +26,7 @@ const RedisBool CtxKey = "redisBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
 const ExperimentalSingleDockerfile CtxKey = "experimentalSingleDockerfile"
-const destinationFolder CtxKey = "destinationFolder"
+const DestinationFolder CtxKey = "destinationFolder"
 
 type RedisValue string
 
@@ -60,7 +60,10 @@ func WebApp(ctx context.Context) error {
 		return err
 	}
 
-	ctx = context.WithValue(ctx, destinationFolder, fmt.Sprintf("corvina-app-%s", ctx.Value(Name)))
+	ctx, err = takeDestinationFolderFromCtxOrDefault(ctx)
+	if err != nil {
+		return err
+	}
 
 	stopIfDestinationFolderIsNotEmpty(ctx)
 
@@ -70,7 +73,7 @@ func WebApp(ctx context.Context) error {
 	}
 
 	utils.PrintlnGreen("Corvina web app created successfully!")
-	utils.PrintlnCyan(fmt.Sprintf("- cd %s", ctx.Value(destinationFolder)))
+	utils.PrintlnCyan(fmt.Sprintf("- cd %s", ctx.Value(DestinationFolder)))
 	utils.PrintlnCyan("- follow the instructions in the README.md file to run the app")
 
 	return nil
@@ -165,6 +168,16 @@ func takeKubernetesFromCtxOrAskIt(ctx context.Context) (context.Context, error) 
 	}
 }
 
+func takeDestinationFolderFromCtxOrDefault(ctx context.Context) (context.Context, error) {
+	destinationFolder := ctx.Value(DestinationFolder)
+
+	if destinationFolder == nil || destinationFolder == "" {
+		return context.WithValue(ctx, DestinationFolder, fmt.Sprintf("corvina-app-%s", ctx.Value(Name))), nil
+	}
+
+	return ctx, nil
+}
+
 func askRedis() (bool, error) {
 	prompt := promptui.Select{
 		Label: "Do you plan to use redis?",
@@ -203,7 +216,7 @@ func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
 
 func createWebApp(ctx context.Context) error {
 	name := ctx.Value(Name).(string)
-	destinationFolder := ctx.Value(destinationFolder).(string)
+	destinationFolder := ctx.Value(DestinationFolder).(string)
 	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
 	singleDockerfile := ctx.Value(ExperimentalSingleDockerfile).(bool)
@@ -223,6 +236,7 @@ func createWebApp(ctx context.Context) error {
 		SingleDockerfile:                singleDockerfile,
 		K8sEnabled:                      k8s,
 		CreateCorvinaAppCreationOptions: options,
+		CreateCorvinaAppVersion:         CliVersion,
 	}
 
 	walkThroughWebAppTemplate(func(path string, d fs.DirEntry, err error) error {
@@ -372,6 +386,7 @@ type ProjectInfo struct {
 	K8sEnabled                      bool
 	SingleDockerfile                bool
 	CreateCorvinaAppCreationOptions string
+	CreateCorvinaAppVersion         string
 }
 
 func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io.Writer) error {
@@ -395,13 +410,13 @@ func ParseFileAndExecuteTemplate(name string, projectInfo ProjectInfo, writer io
 
 func stopIfDestinationFolderIsNotEmpty(ctx context.Context) {
 	if !destinationFolderIsEmptyOrNotPresent(ctx) {
-		utils.PrintlnYellow(fmt.Sprintf("The folder %s is not empty, please delete it or choose another name", ctx.Value(destinationFolder).(string)))
+		utils.PrintlnYellow(fmt.Sprintf("The folder %s is not empty, please delete it or choose another name", ctx.Value(DestinationFolder).(string)))
 		os.Exit(0)
 	}
 }
 
 func destinationFolderIsEmptyOrNotPresent(ctx context.Context) bool {
-	destinationFolder := ctx.Value(destinationFolder).(string)
+	destinationFolder := ctx.Value(DestinationFolder).(string)
 
 	if _, err := os.Stat(destinationFolder); os.IsNotExist(err) {
 		return true

@@ -77,3 +77,20 @@ npm run deploy
 ```
 
 NB: remember to update the version in the package.json file before deploying a new version!
+
+
+### Resyncing an existing app with scaffold ###
+
+If you want to resync an existing app with the latest scaffold, you can run the following command:
+
+```bash
+./scripts/resync-create-corvina-app-sh
+```
+
+The script requires to run in a valid git repo.
+
+The first time the script will initialize a branch named `create-corvina-app` running the create-corvina-app command at the version used for scaffolding the app.
+
+Afterwards, the script will rebase the branch on the latest version of the create-corvina-app command.\
+
+You can use this branch to cherry-pick the changes you want to apply to your app.

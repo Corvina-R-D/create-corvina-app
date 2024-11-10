@@ -57,6 +57,7 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Redis, getRedisValueFromCliContext(countRedis, c))
 				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(countK8s, c))
 				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
+				c.Context = context.WithValue(c.Context, cmd.DestinationFolder, c.String("destinationFolder"))
 
 				return cmd.WebApp(c.Context)
 			},
@@ -65,6 +66,11 @@ func main() {
 					Name:    "name",
 					Aliases: []string{"n"},
 					Usage:   "Name of the application",
+				},
+				&cli.StringFlag{
+					Name:    "destinationFolder",
+					Aliases: []string{"o"},
+					Usage:   "Destination folder",
 				},
 				&cli.BoolFlag{
 					Name:    "kubernetes",
