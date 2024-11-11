@@ -1,0 +1,26 @@
+istio-gateway:
+  service:
+    type: ClusterIP
+
+tag: latest-master
+
+postgresql:
+  global:
+    storageClass: local-path
+
+rabbitmq:
+  storageClass: local-path
+
+service:
+  extraCa:
+    secret: corvina-app-[| .Name |]-prod-tls
+
+stasher:
+  extraCa:
+    secret: corvina-app-[| .Name |]-prod-tls
+
+registration:
+  enabled: true
+
+schedule:
+  enabled: false

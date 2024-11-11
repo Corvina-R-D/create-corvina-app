@@ -2,7 +2,7 @@
 
 . $(dirname $0)/scripts/common.sh
 
-kubectl --context=minikube -n corvina-app-${app_name} get secrets ${app_name}-crt-secret -o jsonpath='{.data}' | jq '."ca.crt"' -r | base64 --decode > /tmp/${app_name}-ca.crt
+kubectl --context=corvina-minikube -n corvina-app-${app_name} get secrets ${app_name}-crt-secret -o jsonpath='{.data}' | jq '."ca.crt"' -r | base64 --decode > /tmp/${app_name}-ca.crt
 
 if  [ -e "`which update-ca-certificates`" ]; then
 

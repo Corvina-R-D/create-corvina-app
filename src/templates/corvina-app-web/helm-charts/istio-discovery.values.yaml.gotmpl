@@ -1,9 +1,11 @@
-revision: corvina-app-[| .Name |]
+revision: {{ .StateValues.releaseName }}
 global:
-  istioNamespace: corvina-app-[| .Name |]
+  istioNamespace: {{ .StateValues.releaseName }}
   configValidation: true
   defaultPodDisruptionBudget:
     enabled: false
+  proxy:
+    clusterDomain: {{ .StateValues.clusterDomain }}
 pilot:
   autoscaleEnabled: false
   env:
@@ -19,4 +21,4 @@ pilot:
 meshConfig:
   discoverySelectors:
   - matchLabels:
-      kubernetes.io/metadata.name: corvina-app-[| .Name |]
+      kubernetes.io/metadata.name: {{ .StateValues.releaseName }}

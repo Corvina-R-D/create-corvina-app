@@ -1,0 +1,6 @@
+service:
+  envVar:
+    LOG_LEVEL: info
+
+rabbitmq:
+  storageClass: ssd-retain

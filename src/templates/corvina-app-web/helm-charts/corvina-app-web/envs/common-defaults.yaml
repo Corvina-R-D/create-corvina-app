@@ -1,0 +1,2 @@
+releaseName: corvina-app-[| .Name |]
+appName: [| .Name |]

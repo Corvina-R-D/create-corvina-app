@@ -1,0 +1,43 @@
+repositories:
+  - name: istio
+    url: https://istio-release.storage.googleapis.com/charts
+  # - name: harbor
+  #   url: https://helm.goharbor.io
+
+helmDefaults:
+  timeout: 1800
+  kubeContext: {{ .StateValues.kubeContext }}
+
+releases:
+  - name: istio-discovery
+    chart: istio/istiod
+    version: 1.20.4
+    kubeContext: {{ .StateValues.kubeContext }}
+    namespace: {{ .StateValues.releaseName }}
+    values:
+      - istio-discovery.values.yaml.gotmpl
+  - name: {{ .StateValues.releaseName }}
+    chart: {{ .StateValues.releaseName }}
+    kubeContext: {{ .StateValues.kubeContext }}
+    namespace: {{ .StateValues.releaseName }}
+    values:
+      - base.yaml.gotmpl
+      - values.{{ .Environment.Name }}.yaml
+
+environments: 
+  internal-qa:
+    values:
+      - envs/common-defaults.yaml
+      - envs/internal-qa.yaml
+  us:
+    values:
+      - envs/common-defaults.yaml
+      - envs/us.yaml
+  minikube:
+    values:
+      - envs/common-defaults.yaml
+      - envs/minikube.yaml
+  internal:
+    values:
+      - envs/common-defaults.yaml
+      - envs/internal.yaml

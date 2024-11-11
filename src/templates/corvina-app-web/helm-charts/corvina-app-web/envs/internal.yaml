@@ -1,0 +1,4 @@
+appHost: [| .Name |]a.corvina.io
+corvinaAppHost: app.corvina.io
+kubeContext: internal
+clusterDomain: cluster.local
