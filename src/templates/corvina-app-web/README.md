@@ -22,10 +22,6 @@
   * make sure you read all the prerequisites, especially regarding the installation of the self-signed certificate in your browser (see https://exorint.atlassian.net/wiki/spaces/DEV/pages/319389697/Dev
 lopment+with+Minikube#Self-signed-certificates)
 * run the script `./start-all-locally.corvina-minikube.sh`
-* as suggested by the chart, add this entry to your /etc/hosts:
-```
-10.96.43.1 ota.corvina.mk
-```
 * install the app from the Corvina App Store in your organization.
 
 [|- end |]
@@ -33,17 +29,17 @@ lopment+with+Minikube#Self-signed-certificates)
 
 ## How to stop this project  
 
-* run the script cleanup.sh
+* run the script `cleanup.minikube.sh`
 
 ## How to update this project based on docker images  
 
-* run the script update-service.sh
+* run the script `./scripts/mk-replace-images.sh`
 
 ## How to run tests on this project?
 
 I'm focusing right now on the test related to the service, so I'm using the following commands to run the tests:
 
-* run `./start-al-development.sh`
+* run `./start-all-development.sh`
 * run `cd service && npm run test`
 
 [|- if .K8sEnabled |]
@@ -57,14 +53,14 @@ You can run the script `./draft-new-release.sh` to create a new release, or you 
 * tag master with chart-appVersion (appVersion from Chart.yaml) `git tag chart-X.X.X`
 * push the tag `git push origin chart-X.X.X`
 
-Behind the scene the google build will do the following:
+Behind the scene the build pipelines will do the following:
 
 * build all the docker images
 * push the docker image to gcr.io with a tag based on the chart-appVersion
 
 once the build is done, you can deploy the new version of the app with the following command:
 
-* `./deploy.internal-qa.sh`
+* `./deploy.sh <kube-context>`
 
 [|- end |]
 
@@ -96,6 +92,8 @@ Follow these steps to deploy this project on Heroku:
 * minikube
 * istioctl
 * helm
+* helmfile
+* jq
 * semver <https://github.com/fsaintjacques/semver-tool>
 
 I find <https://github.com/alexellis/arkade> very useful to install software on my local machine!

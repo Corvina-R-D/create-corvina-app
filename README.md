@@ -54,11 +54,14 @@ npx @corvina/create-corvina-app@latest webapp --name myapp --kubernetes
 
 The helm charts are used to deploy the application in a kubernetes cluster. The `corvina-app-{name}` chart is used to deploy the application in the Corvina platform. We provide this structure as an example of how we build and deploy our applications in Corvina. You can use this structure as a starting point for your own application or you can use your own structure (there is no need to deploy on kubernetes).
 
-We use to develop our application usign minikube on our laptop. For that reason, at the root of the project, you will find some scripts to help you:
+We use to develop our application using minikube on our laptop. For that reason, at the root of the project, you will find some scripts to help you:
 
-- ./start-all-locally.minikube.sh: starts all the stuff you need to run the app locally (postgresql, redis, service, app and istio ingress)
-- ./install-certificate-locally.sh: installs the certificate for the app locally (you need to run this script after running the previous one)
-- ./cleanup.minikube.sh: delete all the resources created by ./start-all-locally.minikube.sh
+- `./start-all-locally.minikube.sh`: starts all the stuff you need to run the app locally (postgresql, redis, service, app and istio ingress)
+- `./install-certificate-locally.sh`: installs the certificate for the app locally (you need to run this script after running the previous one)
+- `./cleanup.minikube.sh`: delete all the resources created by ./start-all-locally.minikube.sh
+
+Moreover to easily handle deployment on different environments, we leverage the power of helmfile. A utility script `deploy.sh <kubeContext>` wraps call to Helmfile to deploy the application on a specific kubernetes cluster. The script will use the kubeconfig file in the root of the project to connect to the cluster.
+
 
 ### Develop on this repo ###
 
@@ -91,6 +94,6 @@ The script requires to run in a valid git repo.
 
 The first time the script will initialize a branch named `create-corvina-app` running the create-corvina-app command at the version used for scaffolding the app.
 
-Afterwards, the script will rebase the branch on the latest version of the create-corvina-app command.\
+Afterwards, the script will rebase the branch on the latest version of the create-corvina-app command.
 
-You can use this branch to cherry-pick the changes you want to apply to your app.
+You can use this branch to cherry-pick the changes you want to apply to your app, or to contribute back changes to create-corvina-app.
