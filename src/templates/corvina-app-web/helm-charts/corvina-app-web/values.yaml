@@ -78,10 +78,10 @@ redis:
         memory: "128Mi"
 [|- end |]
 
-[|- if .StasherEnabled |]
+[| if .StasherEnabled |]
 stasher:
   image: europe-west1-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.0.0
-[|- end |]
+[| end |]
 
 
 # https://cert-manager.io/docs/concepts/webhook/#known-problems-and-solutions

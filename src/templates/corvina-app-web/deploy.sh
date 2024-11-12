@@ -41,4 +41,4 @@ if [ "$NO_DIFF" = false ]; then
   fi
 fi
 
-helmfile -e $ENVIRONMENT apply
+helmfile -e $ENVIRONMENT sync

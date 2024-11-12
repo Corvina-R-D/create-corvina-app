@@ -91,7 +91,7 @@
 //import { i18n } from '../main'; TODO to integrate later
 
 import { PropType } from 'vue'
-export default({
+export default{
 	name: 'AutocompleteFilter',
 	data () {
     return {
@@ -284,7 +284,7 @@ export default({
 	mounted() {
 		this.select = this.initialValue;
 	}
-})
+}
 </script>
 
 <style>

@@ -5,7 +5,7 @@ import * as components from 'vuetify/components'
 
 // Vuetify
 import { createVuetify } from 'vuetify'
-import { md } from 'vuetify/iconsets/md'
+import { aliases, md } from 'vuetify/iconsets/md'
 import { bp_cc2 } from '../theme/blueprint.ts'
 
 const vuetify = createVuetify({
@@ -18,9 +18,7 @@ const vuetify = createVuetify({
   },
   icons: {
     defaultSet: 'md',
-    aliases: {
-      md: 'md',
-    },
+    aliases,
     sets: {
       md,
     },

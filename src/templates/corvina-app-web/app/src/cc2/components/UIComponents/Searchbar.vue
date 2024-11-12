@@ -63,7 +63,7 @@
 
   import AutocompleteFilter from "../AutocompleteFilter.vue";
   import Vue from 'vue'
-  export default({
+  export default{
     name: 'Searchbar',
     components: {
       AutocompleteFilter
@@ -149,5 +149,5 @@
         default: ()=>[]
       },
     }
-  })
+  }
 </script>
