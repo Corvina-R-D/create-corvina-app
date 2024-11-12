@@ -30,6 +30,7 @@ const StasherBool CtxKey = "stasherBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
 const ExperimentalSingleDockerfile CtxKey = "experimentalSingleDockerfile"
+const DisableNameValidation CtxKey = "disableNameValidation"
 const DestinationFolder CtxKey = "destinationFolder"
 
 type RedisValue string
@@ -111,6 +112,7 @@ func WebApp(ctx context.Context) error {
 
 func takeNameFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 	name := ctx.Value(Name)
+	disableValidation := ctx.Value(DisableNameValidation)
 
 	if name == nil || name == "" {
 		result, err := askName()
@@ -121,9 +123,11 @@ func takeNameFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 		return context.WithValue(ctx, Name, result), nil
 	}
 
-	err := validateName(name.(string))
-	if err != nil {
-		return ctx, err
+	if disableValidation == nil || !disableValidation.(bool) {
+		err := validateName(name.(string))
+		if err != nil {
+			return ctx, err
+		}
 	}
 
 	return ctx, nil

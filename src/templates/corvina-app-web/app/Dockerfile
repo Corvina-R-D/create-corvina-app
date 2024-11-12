@@ -1,7 +1,7 @@
 ##### build environment #####
 FROM node:lts-alpine AS build
 
-RUN apk add bash
+RUN apk add bash git
 
 # make the 'app' folder the current working directory
 WORKDIR /app

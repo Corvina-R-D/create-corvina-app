@@ -61,6 +61,7 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Rabbit, getRabbitValueFromCliContext(countRabbit, c))
 				c.Context = context.WithValue(c.Context, cmd.Stasher, getStasherValueFromCliContext(countStasher, c))
 				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
+				c.Context = context.WithValue(c.Context, cmd.DisableNameValidation, c.Bool("disable-name-validation"))
 				c.Context = context.WithValue(c.Context, cmd.DestinationFolder, c.String("destinationFolder"))
 
 				return cmd.WebApp(c.Context)
@@ -101,6 +102,10 @@ func main() {
 				&cli.BoolFlag{
 					Name:  "experimental-single-dockerfile",
 					Usage: "Use a single Dockerfile for both FE and BE. We also add some instructions to deploy the app on Heroku.",
+				},
+				&cli.BoolFlag{
+					Name:  "disable-name-validation",
+					Usage: "Skip name validation for existin apps. DO NOT USE THIS FLAG UNLESS YOU KNOW WHAT YOU ARE DOING",
 				},
 				verboseFlag,
 			},

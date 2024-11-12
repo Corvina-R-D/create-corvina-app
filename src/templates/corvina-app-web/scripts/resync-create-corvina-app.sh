@@ -33,7 +33,7 @@ if ! git show-ref --quiet refs/heads/create-corvina-app ; then
     git clean -d -f -i
 
     # checkout initial content
-    $create_corvina_app_original_command webapp --name $app_name
+    $create_corvina_app_original_command webapp --name $app_name --disable-name-validation 
 
 
     git add .
@@ -52,7 +52,7 @@ git clean -d -f -i
 
 git rm -rfq .
 
-$create_corvina_app_command webapp --name $app_name $create_corvina_app_creation_options
+$create_corvina_app_command webapp --name $app_name --disable-name-validation $create_corvina_app_creation_options
 
 git add corvina-app-$app_name
 
