@@ -1,0 +1,49 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: {{ .Values.rabbitmq.clusterName }}
+spec:
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ .Values.rabbitmq.clusterName }}
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+  {{- with .Values.rabbitmq.resources }}
+  resources:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+  replicas: {{ .Values.rabbitmq.replicas }}
+  image: {{ .Values.rabbitmq.image }}
+  persistence:
+    storageClassName: {{ .Values.rabbitmq.storageClass }}
+    storage: {{ .Values.rabbitmq.storageSize }}
+  rabbitmq:
+    additionalConfig: |
+      queue_leader_locator: balanced
+      cluster_partition_handling: pause_minority
+    additionalPlugins:
+        - rabbitmq_management
+        - rabbitmq_peer_discovery_k8s
+        - rabbitmq_federation_management
+        - rabbitmq_shovel
+        - rabbitmq_shovel_management
+        - rabbitmq_prometheus
+        - rabbitmq_consistent_hash_exchange
+        - rabbitmq_top
+        - rabbitmq_delayed_message_exchange
+        - rabbitmq_stream
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.rabbitmq.clusterName }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.rabbitmq.clusterName }}

@@ -1,29 +1,41 @@
 istio-gateway:
-  revision: corvina-app-[| .Name |]
-  name: istio-[| .Name |]gateway
+  revision: corvina-app-{{ .StateValues.appName }}
+  name: istio-{{ .StateValues.appName }}gateway
   service:
     type: LoadBalancer
-    externalTrafficPolicy: Local
     ports:
     - name: https
       port: 443
       protocol: TCP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
 
 imagePullPolicy: Always
 tag: 
 
 gateway:
-  appHost: "[| .Name |].corvina.io"
+  appHost: "{{ .StateValues.appHost }}"
   protocol: "https"
   port: 443
-  certificateSecretName: "corvina-app-[| .Name |]-prod-tls"
+  certificateSecretName: "corvina-app-{{ .StateValues.appName }}-prod-tls"
   issuer: 
     name: "letsencrypt-issuer"
 
 postgresql:
   primary:
+    clusterDomain: {{ .StateValues.clusterDomain }}
     persistence:
-      size: 20Gi
+      size: 10Gi
     resources:
       limits:
         cpu: "1000m"
@@ -35,11 +47,21 @@ postgresql:
     storageClass: "ssd-retain"
     postgresql:
       auth:
-        username: corvina_app_[| .Name |]
-        database: corvina_app_[| .Name |]
+        database: {{ .StateValues.appName }}
+        username: {{ .StateValues.appName }}
+        existingSecret: postgresql-{{ .StateValues.appName }}-secrets
+        password: dummy
+        postgresPassword: dummy
 
 app:  
   image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
+  resources:
+    limits:
+      cpu: 0.5
+      memory: 256Mi
+    requests:
+      cpu: 0.1
+      memory: 128Mi
 
 service:
   image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
@@ -52,6 +74,13 @@ service:
     INSTALLATION_HOSTS_WHITELIST: '*'
     START_FEATURES: app.listen
     NODE_TLS_REJECT_UNAUTHORIZED: ''
+  resources:
+    limits:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 0.25
+      memory: 256Mi
 
 migrator:
   envVar: 
@@ -59,12 +88,14 @@ migrator:
 
 [|- if .RedisEnabled |]
 redis:
+  clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
     enabled: true
-    existingSecret: corvina-app-[| .Name |]-redis
+    existingSecret: redis-{{ .StateValues.appName }}-secrets
     existingSecretPasswordKey: redis-password
   global:
     storageClass: "ssd-retain"
+    defaultStorageClass: "ssd-retain"
   architecture: standalone
   replica:
     replicaCount: 0
@@ -76,6 +107,34 @@ redis:
       requests:
         cpu: "100m"
         memory: "512Mi"
+[|- end |]
+
+
+[| if .RabbitEnabled |]
+rabbitmq:
+  clusterName: {{ .StateValues.releaseName }}-rabbitmq
+  replicas: 1
+  image: eu.gcr.io/corvina-exorint/rabbitmq:v2
+  storageSize: 7Gi
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+[| end |]
+
+[|- if .StasherEnabled |]
+stasher:
+  queue: stasher
+  resources:
+    requests:
+        memory: "16Mi"
+        cpu: "10m"
+    limits:
+        memory: "128Mi"
+        cpu: "200m"
 [|- end |]
 
 

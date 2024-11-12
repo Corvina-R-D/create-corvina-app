@@ -36,6 +36,8 @@ func main() {
 
 	var countK8s int
 	var countRedis int
+	var countRabbit int
+	var countStasher int
 	app.Commands = []*cli.Command{
 		{
 			Name:  "version",
@@ -56,6 +58,8 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
 				c.Context = context.WithValue(c.Context, cmd.Redis, getRedisValueFromCliContext(countRedis, c))
 				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(countK8s, c))
+				c.Context = context.WithValue(c.Context, cmd.Rabbit, getRabbitValueFromCliContext(countRabbit, c))
+				c.Context = context.WithValue(c.Context, cmd.Stasher, getStasherValueFromCliContext(countStasher, c))
 				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
 				c.Context = context.WithValue(c.Context, cmd.DestinationFolder, c.String("destinationFolder"))
 
@@ -83,6 +87,16 @@ func main() {
 					Aliases: []string{"r"},
 					Usage:   "Do you plan to use Redis?",
 					Count:   &countRedis,
+				},
+				&cli.BoolFlag{
+					Name:  "rabbit",
+					Usage: "Do you plan to use Rabbit?",
+					Count: &countRabbit,
+				},
+				&cli.BoolFlag{
+					Name:  "stasher",
+					Usage: "Do you plan to use Corvina App Stasher?",
+					Count: &countStasher,
 				},
 				&cli.BoolFlag{
 					Name:  "experimental-single-dockerfile",
@@ -116,4 +130,24 @@ func getRedisValueFromCliContext(count int, c *cli.Context) cmd.RedisValue {
 		redisContextValue = cmd.RedisFalse
 	}
 	return redisContextValue
+}
+
+func getRabbitValueFromCliContext(count int, c *cli.Context) cmd.RabbitValue {
+	rabbitContextValue := cmd.RabbitAsk
+	if count == 1 && c.Bool("rabbit") {
+		rabbitContextValue = cmd.RabbitTrue
+	} else if count == 1 && !c.Bool("rabbit") {
+		rabbitContextValue = cmd.RabbitFalse
+	}
+	return rabbitContextValue
+}
+
+func getStasherValueFromCliContext(count int, c *cli.Context) cmd.StasherValue {
+	stasherContextValue := cmd.StasherAsk
+	if count == 1 && c.Bool("stasher") {
+		stasherContextValue = cmd.StasherTrue
+	} else if count == 1 && !c.Bool("stasher") {
+		stasherContextValue = cmd.StasherFalse
+	}
+	return stasherContextValue
 }

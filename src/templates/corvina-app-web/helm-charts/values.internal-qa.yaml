@@ -1,2 +1,8 @@
+istio-gateway:
+  service:
+    externalTrafficPolicy: Local
+
+[|- if .RabbitEnabled |]
 rabbitmq:
   storageClass: standard
+[|- end |]

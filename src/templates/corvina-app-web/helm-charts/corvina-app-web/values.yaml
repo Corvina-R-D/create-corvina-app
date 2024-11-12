@@ -4,7 +4,6 @@ istio-gateway:
   name: istio-[| .Name |]gateway
   service:
     type: LoadBalancer
-    externalTrafficPolicy: Local
     ports:
     - name: https
       port: 11073
@@ -44,12 +43,6 @@ postgresql:
       requests:
         cpu: "250m"
         memory: "256Mi"
-  global:
-    #storageClass: "ssd-retain"
-    postgresql:
-      auth:
-        username: corvina_app_[| .Name |]
-        database: corvina_app_[| .Name |]
 
 app:  
   image: [| .Name |]_app
@@ -84,6 +77,12 @@ redis:
         cpu: "50m"
         memory: "128Mi"
 [|- end |]
+
+[|- if .StasherEnabled |]
+stasher:
+  image: europe-west1-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.0.0
+[|- if .StasherEnabled |]
+
 
 # https://cert-manager.io/docs/concepts/webhook/#known-problems-and-solutions
 webhook.hostNetwork: true

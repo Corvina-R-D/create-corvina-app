@@ -48,7 +48,7 @@ spec:
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-redis
+                name: {{ .Values.redis.auth.existingSecret | default "corvina-app-[| .Name |]-redis" }}
                 key: {{ .Values.redis.auth.existingSecretPasswordKey }}
                 optional: false   
           [|- end |]

@@ -31,7 +31,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   type: LoadBalancer
-  clusterIP: 10.96.43.1
   externalTrafficPolicy: Local
   ports:
   - name: https

@@ -58,7 +58,7 @@ spec:
             - name: PG_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
+                  name: {{ .Values.postgresql.global.postgresql.auth.existingSecret | default "corvina-app-[| .Name |]-postgresql" }}
                   key: password
                   optional: false
             [|- if .RedisEnabled |]
@@ -87,12 +87,7 @@ spec:
               path: /v1/health
               port: 3000
           resources:
-            limits:
-              cpu: 1
-              memory: 512Mi
-            requests:
-              cpu: 0.25
-              memory: 256Mi
+            {{- toYaml .Values.service.resources | nindent 12 }}
 ---
 apiVersion: v1
 kind: ConfigMap

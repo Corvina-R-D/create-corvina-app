@@ -17,7 +17,12 @@ fi
 
 eval $(minikube -p corvina-minikube docker-env -u);
 
-./deploy.sh corvina-minikube
+(
+  cd helm-charts
+  helmfile -e minikube deps
+)
+
+./deploy.sh minikube --no-diff
 
 # --------------------------- #
 # trigger a new deployment for all services if first argument is "restart"

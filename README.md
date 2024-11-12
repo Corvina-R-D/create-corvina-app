@@ -60,7 +60,7 @@ We use to develop our application using minikube on our laptop. For that reason,
 - `./install-certificate-locally.sh`: installs the certificate for the app locally (you need to run this script after running the previous one)
 - `./cleanup.minikube.sh`: delete all the resources created by ./start-all-locally.minikube.sh
 
-Moreover to easily handle deployment on different environments, we leverage the power of helmfile. A utility script `deploy.sh <kubeContext>` wraps call to Helmfile to deploy the application on a specific kubernetes cluster. The script will use the kubeconfig file in the root of the project to connect to the cluster.
+Moreover to easily handle deployment on different environments, we leverage the power of helmfile. A utility script `deploy.sh <environment>` wraps call to Helmfile to deploy the application on a specific kubernetes cluster. The script will use the environment name to select the values specific for it.
 
 
 ### Develop on this repo ###

@@ -23,6 +23,10 @@ type CtxKey string
 const Name CtxKey = "name"
 const Redis CtxKey = "redis"
 const RedisBool CtxKey = "redisBool"
+const Rabbit CtxKey = "rabbit"
+const RabbitBool CtxKey = "rabbitBool"
+const Stasher CtxKey = "stasher"
+const StasherBool CtxKey = "stasherBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
 const ExperimentalSingleDockerfile CtxKey = "experimentalSingleDockerfile"
@@ -34,6 +38,22 @@ const (
 	RedisTrue  RedisValue = "true"
 	RedisFalse RedisValue = "false"
 	RedisAsk   RedisValue = "ask"
+)
+
+type RabbitValue string
+
+const (
+	RabbitTrue  RabbitValue = "true"
+	RabbitFalse RabbitValue = "false"
+	RabbitAsk   RabbitValue = "ask"
+)
+
+type StasherValue string
+
+const (
+	StasherTrue  StasherValue = "true"
+	StasherFalse StasherValue = "false"
+	StasherAsk   StasherValue = "ask"
 )
 
 type KubernetesValue string
@@ -51,6 +71,16 @@ func WebApp(ctx context.Context) error {
 	}
 
 	ctx, err = takeRedisFromCtxOrAskIt(ctx)
+	if err != nil {
+		return err
+	}
+
+	ctx, err = takeRabbitFromCtxOrAskIt(ctx)
+	if err != nil {
+		return err
+	}
+
+	ctx, err = takeStasherFromCtxOrAskIt(ctx)
 	if err != nil {
 		return err
 	}
@@ -150,6 +180,40 @@ func takeRedisFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 	}
 }
 
+func takeRabbitFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
+	rabbit := ctx.Value(Rabbit).(RabbitValue)
+
+	switch rabbit {
+	case RabbitTrue:
+		return context.WithValue(ctx, RabbitBool, true), nil
+	case RabbitFalse:
+		return context.WithValue(ctx, RabbitBool, false), nil
+	default:
+		result, err := askRabbit()
+		if err != nil {
+			return ctx, err
+		}
+		return context.WithValue(ctx, RabbitBool, result), nil
+	}
+}
+
+func takeStasherFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
+	stasher := ctx.Value(Stasher).(StasherValue)
+
+	switch stasher {
+	case StasherTrue:
+		return context.WithValue(ctx, StasherBool, true), nil
+	case StasherFalse:
+		return context.WithValue(ctx, StasherBool, false), nil
+	default:
+		result, err := askStasher()
+		if err != nil {
+			return ctx, err
+		}
+		return context.WithValue(ctx, StasherBool, result), nil
+	}
+}
+
 func takeKubernetesFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 	k8s := ctx.Value(Kubernetes).(KubernetesValue)
 
@@ -192,6 +256,33 @@ func askRedis() (bool, error) {
 	return result == "Yes", nil
 }
 
+func askRabbit() (bool, error) {
+	prompt := promptui.Select{
+		Label: "Do you plan to use rabbit?",
+		Items: []string{"Yes", "No"},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return false, err
+	}
+
+	return result == "Yes", nil
+}
+
+func askStasher() (bool, error) {
+	prompt := promptui.Select{
+		Label: "Do you plan to use stasher to reliable sync with corvina platform through REST APIs?",
+		Items: []string{"Yes", "No"},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return false, err
+	}
+	return result == "Yes", nil
+}
+
 func askKubernetes() (bool, error) {
 	prompt := promptui.Select{
 		Label: "Do you plan to deploy on kubernetes? We will add a helm chart for you",
@@ -217,15 +308,23 @@ func walkThroughWebAppTemplate(fn fs.WalkDirFunc) {
 func createWebApp(ctx context.Context) error {
 	name := ctx.Value(Name).(string)
 	destinationFolder := ctx.Value(DestinationFolder).(string)
-	redis := ctx.Value(RedisBool).(bool)
+	rabbit := ctx.Value(RabbitBool).(bool)
+	stasher := ctx.Value(StasherBool).(bool)
+	redis := ctx.Value(RedisBool).(bool) || stasher
 	k8s := ctx.Value(KubernetesBool).(bool)
 	singleDockerfile := ctx.Value(ExperimentalSingleDockerfile).(bool)
 	options := ""
 	if redis {
-		options += "-r "
+		options += "--redis "
 	}
 	if k8s {
-		options += "-k8s "
+		options += "--kubernetes "
+	}
+	if stasher {
+		options += "--stasher "
+	}
+	if rabbit {
+		options += "--rabbit "
 	}
 
 	os.Mkdir(destinationFolder, 0755)
@@ -233,6 +332,8 @@ func createWebApp(ctx context.Context) error {
 	projectInfo := ProjectInfo{
 		Name:                            name,
 		RedisEnabled:                    redis,
+		StasherEnabled:                  stasher,
+		RabbitEnabled:                   rabbit,
 		SingleDockerfile:                singleDockerfile,
 		K8sEnabled:                      k8s,
 		CreateCorvinaAppCreationOptions: options,
@@ -323,9 +424,19 @@ var filesToExcludeRedis = []string{
 	"pf-redis.minikube.sh",
 }
 
+var filesToExcludeRabbit = []string{
+	"corvina-app-web/templates/rabbit-cluster.yaml",
+}
+
+var filesToExcludeStasher = []string{
+	"corvina-app-web/templates/stasher.yaml",
+}
+
 var filesToExclude = map[string][]string{
-	"k8s":   filesToExcludeK8s,
-	"redis": filesToExcludeRedis,
+	"k8s":     filesToExcludeK8s,
+	"redis":   filesToExcludeRedis,
+	"rabbit":  filesToExcludeRabbit,
+	"stasher": filesToExcludeStasher,
 }
 
 func skipThisFile(path string, projectInfo ProjectInfo) bool {
@@ -340,6 +451,22 @@ func skipThisFile(path string, projectInfo ProjectInfo) bool {
 
 	if !projectInfo.K8sEnabled {
 		for _, file := range filesToExclude["k8s"] {
+			if strings.Contains(path, file) {
+				return true
+			}
+		}
+	}
+
+	if !projectInfo.RabbitEnabled {
+		for _, file := range filesToExclude["rabbit"] {
+			if strings.Contains(path, file) {
+				return true
+			}
+		}
+	}
+
+	if !projectInfo.StasherEnabled {
+		for _, file := range filesToExclude["stasher"] {
 			if strings.Contains(path, file) {
 				return true
 			}
@@ -383,6 +510,8 @@ func CopyAsIs(path string, writer *os.File) error {
 type ProjectInfo struct {
 	Name                            string
 	RedisEnabled                    bool
+	StasherEnabled                  bool
+	RabbitEnabled                   bool
 	K8sEnabled                      bool
 	SingleDockerfile                bool
 	CreateCorvinaAppCreationOptions string

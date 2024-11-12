@@ -60,7 +60,7 @@ Behind the scene the build pipelines will do the following:
 
 once the build is done, you can deploy the new version of the app with the following command:
 
-* `./deploy.sh <kube-context>`
+* `./deploy.sh <environment>`
 
 [|- end |]
 

@@ -2,13 +2,20 @@
 
 set -eo pipefail    
 
-# Check if context is passed as an argument
+# Check if environment name is passed as an argument
 if [ -z "$1" ]; then
-  echo "Usage: $0 <context>"
+  echo "Usage: $0 <environment-name> [--no-diff]"
   exit 1
 fi
 
-CONTEXT=$1
+ENVIRONMENT=$1
+NO_DIFF=false
+
+# Check for --no-diff option
+if [ $# -eq 2 ] && [ "$2" == "--no-diff" ]; then
+  NO_DIFF=true
+fi
+
 # Check if the terminal supports colors
 if [ -n "$(tput colors)" ] && [ "$(tput colors)" -ge 8 ]; then
   BOLD=$(tput bold)
@@ -21,12 +28,17 @@ fi
 
 cd $(dirname $0)/helm-charts
 
-HELM_DIFF_USE_UPGRADE_DRY_RUN=true helmfile -e $CONTEXT diff --color --context 6 | less
+if [ "$NO_DIFF" = false ]; then
+  HELM_DIFF_USE_UPGRADE_DRY_RUN=true helmfile -e $ENVIRONMENT diff --color --context 6 | less
 
-# ask for confirmation before applying changes
-read -p "${BOLD}Do you want to apply the changes on ${RED}$CONTEXT${NORMAL}? (y/n) " -n 1 -r
+  # ask for confirmation before applying changes
+  read -p "${BOLD}Do you want to apply the changes on ${RED}$ENVIRONMENT${NORMAL}? (y/n) " -n 1 -r
 
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-  helmfile -e $CONTEXT apply
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo
+    echo "Aborting."
+    exit 1
+  fi
 fi
+
+helmfile -e $ENVIRONMENT apply
