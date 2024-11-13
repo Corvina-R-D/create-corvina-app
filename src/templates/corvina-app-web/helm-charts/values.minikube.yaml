@@ -34,5 +34,5 @@ stasher:
 registration:
   enabled: true
 
-schedule:
+backup:
   enabled: false
