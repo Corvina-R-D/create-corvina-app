@@ -62,6 +62,7 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Stasher, getStasherValueFromCliContext(countStasher, c))
 				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
 				c.Context = context.WithValue(c.Context, cmd.DisableNameValidation, c.Bool("disable-name-validation"))
+				c.Context = context.WithValue(c.Context, cmd.SkipPackageLockGeneration, c.Bool("skip-package-lock-generation"))
 				c.Context = context.WithValue(c.Context, cmd.DestinationFolder, c.String("destinationFolder"))
 
 				return cmd.WebApp(c.Context)
@@ -106,6 +107,10 @@ func main() {
 				&cli.BoolFlag{
 					Name:  "disable-name-validation",
 					Usage: "Skip name validation for existin apps. DO NOT USE THIS FLAG UNLESS YOU KNOW WHAT YOU ARE DOING",
+				},
+				&cli.BoolFlag{
+					Name:  "skip-package-lock-generation",
+					Usage: "Skip package-lock.json generation",
 				},
 				verboseFlag,
 			},

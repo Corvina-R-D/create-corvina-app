@@ -9,7 +9,9 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
@@ -31,6 +33,7 @@ const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
 const ExperimentalSingleDockerfile CtxKey = "experimentalSingleDockerfile"
 const DisableNameValidation CtxKey = "disableNameValidation"
+const SkipPackageLockGeneration CtxKey = "skipPackageLockGeneration"
 const DestinationFolder CtxKey = "destinationFolder"
 
 type RedisValue string
@@ -101,6 +104,15 @@ func WebApp(ctx context.Context) error {
 	err = createWebApp(ctx)
 	if err != nil {
 		return err
+	}
+
+	skipPackageLockGeneration := ctx.Value(SkipPackageLockGeneration).(bool)
+
+	if !skipPackageLockGeneration {
+		err = runNpmInstallForEachPackageJson(ctx)
+		if err != nil {
+			return err
+		}
 	}
 
 	utils.PrintlnGreen("Corvina web app created successfully!")
@@ -413,6 +425,46 @@ func createWebApp(ctx context.Context) error {
 		return nil
 	})
 	return nil
+}
+
+func runCommand(command string, dir string) error {
+	cmd := exec.Command("sh", "-c", command)
+	cmd.Dir = dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func runNpmInstallForEachPackageJson(ctx context.Context) (err error) {
+	log.Debug().Msg("Running npm install for each package.json")
+	destinationFolder := ctx.Value(DestinationFolder).(string)
+	log.Debug().Msg("Destination folder " + destinationFolder)
+	err = fs.WalkDir(os.DirFS(destinationFolder), ".", func(path string, d fs.DirEntry, err error) error {
+		log.Debug().Msg("Check " + path)
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if filepath.Base(path) == "package.json" {
+			log.Info().Str("path", filepath.Dir(path)).Msg("Running npm install")
+			err = runCommand("npm install --package-lock-only", filepath.Join(destinationFolder, filepath.Dir(path)))
+			if err != nil {
+				log.Error().Err(err).Msg("Error running npm install")
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Error().Err(err).Msg("Error running npm install")
+	}
+
+	return
 }
 
 func skipThisFolder(path string, k8s bool) bool {

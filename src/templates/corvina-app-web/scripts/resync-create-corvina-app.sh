@@ -51,7 +51,7 @@ if ! git show-ref --quiet refs/heads/create-corvina-app ; then
         git clean -d -f -i
 
         # checkout initial content
-        $create_corvina_app_original_command webapp --name $app_name --disable-name-validation 
+        $create_corvina_app_original_command webapp --name $app_name --disable-name-validation --skip-package-lock-generation
 
 
         git add .
@@ -75,7 +75,7 @@ git rm -rfq .
 # list untracked files and ask to remove them 
 git clean -d -f -i
 
-$create_corvina_app_command webapp --name $app_name --disable-name-validation $create_corvina_app_creation_options
+$create_corvina_app_command webapp --name $app_name $create_corvina_app_creation_options --disable-name-validation --skip-package-lock-generation
 
 git add corvina-app-$app_name
 
