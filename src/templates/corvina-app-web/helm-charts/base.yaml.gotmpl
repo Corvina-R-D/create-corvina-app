@@ -138,5 +138,14 @@ stasher:
 [|- end |]
 
 
+backup:
+  enabled: true
+  cron: "20 6 * * *" 
+  ttl: 72h30m0s
+
+velero:
+  storageLocation: default
+  snapshotLocation: eu
+
 registration:
   enabled: false
