@@ -1,7 +1,7 @@
 repositories:
   - name: istio
     url: https://istio-release.storage.googleapis.com/charts
-
+    
 helmDefaults:
   timeout: 1800
   kubeContext: {{ .StateValues.kubeContext }}
@@ -12,12 +12,16 @@ releases:
     version: 1.20.4
     kubeContext: {{ .StateValues.kubeContext }}
     namespace: {{ .StateValues.releaseName }}
+    labels:
+      pkg: istio
     values:
       - istio-discovery.values.yaml.gotmpl
   - name: {{ .StateValues.releaseName }}
     chart: {{ .StateValues.releaseName }}
     kubeContext: {{ .StateValues.kubeContext }}
     namespace: {{ .StateValues.releaseName }}
+    labels:
+      pkg: app
     values:
       - base.yaml.gotmpl
       - values.{{ .Environment.Name }}.yaml
