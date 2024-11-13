@@ -1,5 +1,6 @@
 {{ $PROTOCOL := (.Values.gateway.protocol | upper) }}
-{{ if and (eq $PROTOCOL "HTTPS") (or (eq .Values.gateway.appHost "[| .Name |].corvina.cloud") (eq .Values.gateway.appHost "[| .Name |].corvina.io")) }}
+{{ $appHost := .Values.gateway.appHost }}
+{{ if and (eq $PROTOCOL "HTTPS") (or (hasSuffix ".io" $appHost) (hasSuffix ".cloud" $appHost) (hasSuffix ".com" $appHost)) }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -31,58 +32,6 @@ spec:
   dnsNames:
   - {{ .Values.gateway.appHost | quote }}
   - {{ printf "*.%s" .Values.gateway.appHost | quote }}
-{{ end }}
-{{ if and (eq $PROTOCOL "HTTPS") (eq .Values.gateway.appHost "[| .Name |].local.gd") }}
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: {{ .Release.Name }}-selfsigned-issuer
-spec:
-  selfSigned: {}
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: my-selfsigned-ca
-  namespace: {{ .Release.Namespace }}
-spec:
-  isCA: true
-  commonName: my-selfsigned-ca
-  secretName: root-secret
-  privateKey:
-    algorithm: ECDSA
-    size: 256
-  issuerRef:
-    name: {{ .Release.Name }}-selfsigned-issuer
-    kind: ClusterIssuer
-    group: cert-manager.io
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: {{ .Values.gateway.issuer.name }}
-  namespace: {{ .Release.Namespace }}
-spec:
-  ca:
-    secretName: root-secret
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: [| .Name |]-crt
-  namespace: {{ .Release.Namespace }}
-spec:
-  secretName: {{ .Values.gateway.certificateSecretName }}
-  dnsNames:
-  - local.gd
-  - '*.local.gd'
-  - '*.[| .Name |].local.gd'
-  issuerRef:
-    name: {{ .Values.gateway.issuer.name }}
-    # We can reference ClusterIssuers by changing the kind here.
-    # The default value is Issuer (i.e. a locally namespaced Issuer)
-    kind: Issuer
-    group: cert-manager.io
 {{ end }}
 
 {{ if and (eq $PROTOCOL "HTTPS") (eq .Values.gateway.appHost "[| .Name |].corvina.mk") }}

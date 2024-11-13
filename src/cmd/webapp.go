@@ -320,15 +320,23 @@ func createWebApp(ctx context.Context) error {
 	options := ""
 	if redis {
 		options += "--redis "
+	} else {
+		options += "--redis=false "
 	}
 	if k8s {
 		options += "--kubernetes "
+	} else {
+		options += "--kubernetes=false "
 	}
 	if stasher {
 		options += "--stasher "
+	} else {
+		options += "--stasher=false "
 	}
 	if rabbit {
 		options += "--rabbit "
+	} else {
+		options += "--rabbit=false "
 	}
 
 	os.Mkdir(destinationFolder, 0755)
