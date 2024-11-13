@@ -153,7 +153,7 @@ export class InstallationService implements IInstallationService {
     this._logger.debug(`Getting open id conf client for ${openIdConfigurationUrl}`);
 
     const response = await fetch(openIdConfigurationUrl).catch((error) => {
-      this._logger.error(`Error getting open id conf client for ${openIdConfigurationUrl}: ${error.message}`);
+      this._logger.error(`Error getting open id conf client for ${openIdConfigurationUrl}: ${error.message} : ${error.cause}`);
 
       return { ok: false, status: 500, statusText: error.message, json: () => undefined };
     });

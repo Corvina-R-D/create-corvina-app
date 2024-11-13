@@ -1,0 +1,14 @@
+global:
+  proxy:
+    clusterDomain: cluster-us.local
+
+istio-gateway:
+  service:
+    externalTrafficPolicy: Local
+
+service:
+  envVar:
+    LOG_LEVEL: info
+
+velero:
+  snapshotLocation: us
