@@ -86,7 +86,7 @@ migrator:
   envVar: 
     START_FEATURES: migrator.up,quit
 
-[|- if .RedisEnabled |]
+[| if .RedisEnabled |]
 redis:
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
@@ -115,6 +115,7 @@ rabbitmq:
   clusterName: {{ .StateValues.releaseName }}-rabbitmq
   replicas: 1
   image: eu.gcr.io/corvina-exorint/rabbitmq:v2
+  storageClass: "ssd-retain"
   storageSize: 7Gi
   resources:
     limits:
@@ -125,7 +126,7 @@ rabbitmq:
       memory: "256Mi"
 [| end |]
 
-[|- if .StasherEnabled |]
+[| if .StasherEnabled |]
 stasher:
   queue: stasher
   resources:
@@ -142,8 +143,6 @@ backup:
   enabled: true
   cron: "20 6 * * *" 
   ttl: 72h30m0s
-
-velero:
   storageLocation: default
   snapshotLocation: eu
 

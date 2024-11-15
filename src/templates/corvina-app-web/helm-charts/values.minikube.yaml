@@ -9,14 +9,14 @@ postgresql:
   global:
     storageClass: local-path
 
-[|- if .RedisEnabled |]
+[| if .RedisEnabled |]
 redis:
   global:
     storageClass: local-path
     defaultStorageClass: local-path
 [|- end |]
 
-[|- if .RabbitEnabled |]
+[| if .RabbitEnabled |]
 rabbitmq:
   storageClass: local-path
 [|- end |]
@@ -25,7 +25,7 @@ service:
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
 
-[|- if .StasherEnabled |]
+[| if .StasherEnabled |]
 stasher:
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
