@@ -1,10 +1,9 @@
 <template>
   <div>
-    <Breadcrumb :path="breadcrumb.path" icon="mdi-file-arrow-up-down-outline" :disableSort="true"
-      :searchTitle="breadcrumb.searchTitle" :currentTab="fromIndexToTabKeysValue(activeTab)"
+    <Breadcrumb :path="breadcrumb.path" :icon="breadcrumb.icon" :disableSort="breadcrumb.disableSort" :currentTab="fromIndexToTabKeysValue(activeTab)"
       :searchKey="fromIndexToTabKeysValue(activeTab)" :searchModel="''" :sortQueryKeys="breadcrumb.sortQueryKeys"
-      :sortingKeys="breadcrumb.sortingKeys" :disableSearch="false" />
-    <v-container fluid class="container maincontaier">
+      :sortingKeys="breadcrumb.sortingKeys" :searchTitle="breadcrumb.searchTitle" :disableSearch="breadcrumb.disableSearch" />
+    <v-container fluid class="container maincontainer">
       <v-row>
         <v-spacer />
         <v-col>
@@ -122,6 +121,7 @@ export default defineComponent({
           },
         },
         disableSearch: false,
+        disableSort: true,
       },
     };
   },
