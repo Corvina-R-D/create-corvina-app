@@ -1,6 +1,9 @@
 istio-gateway:
   service:
     type: ClusterIP
+  resources:
+    requests:
+      cpu: 10m
 
 tag: latest-master
 imagePullPolicy: IfNotPresent
@@ -8,27 +11,51 @@ imagePullPolicy: IfNotPresent
 postgresql:
   global:
     storageClass: local-path
+  primary:
+    resources:
+      requests:
+        cpu: 10m
+
 
 [| if .RedisEnabled |]
 redis:
   global:
     storageClass: local-path
     defaultStorageClass: local-path
+  master:
+    resources:
+      requests:
+        cpu: 10m
 [|- end |]
 
 [| if .RabbitEnabled |]
 rabbitmq:
   storageClass: local-path
+  resources:
+    requests:
+      cpu: 10m
 [|- end |]
+
+app:
+  resources:
+    requests:
+      cpu: 10m
+
 
 service:
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
+  resources:
+    requests:
+      cpu: 10m
 
 [| if .StasherEnabled |]
 stasher:
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
+  resources:
+    requests:
+        cpu: 10m
 [|- end |]
 
 registration:
