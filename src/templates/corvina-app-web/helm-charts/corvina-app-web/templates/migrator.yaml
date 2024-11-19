@@ -18,20 +18,13 @@ spec:
             - "service"
             - "{{ .Release.Name }}-postgresql"
           resources:
-            limits:
-              cpu: 100m
-              memory: 64Mi
+            {{- toYaml .Values.service.resources | nindent 12 }}
       containers:
       - name: service
         image: {{ .Values.service.image }}:{{ .Values.tag | default .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
-            limits:
-              cpu: 1
-              memory: 512Mi
-            requests:
-              cpu: 0.25
-              memory: 256Mi
+          {{- toYaml .Values.service.resources | nindent 10 }}
         envFrom:
         - configMapRef:
             name: service-config

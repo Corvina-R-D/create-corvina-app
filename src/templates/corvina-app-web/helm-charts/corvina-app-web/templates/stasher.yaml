@@ -22,9 +22,7 @@ spec:
             - "service"
             - "{{ .Release.Name }}-redis-headless"
           resources:
-            limits:
-              cpu: 100m
-              memory: 64Mi
+            {{ toYaml .Values.stasher.resources | nindent 12 }}
         - name: init-password
           image: "blockstack/envsubst"
           env:
@@ -47,9 +45,7 @@ spec:
           - name: stasher-config
             mountPath: /etc/stasher
           resources:
-              limits:
-                cpu: 100m
-                memory: 64Mi
+            {{ toYaml .Values.stasher.resources | nindent 12 }}
       containers:
         - name: stasher
           image: {{ .Values.stasher.image }}

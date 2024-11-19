@@ -109,7 +109,6 @@ redis:
         memory: "512Mi"
 [|- end |]
 
-
 [| if .RabbitEnabled |]
 rabbitmq:
   clusterName: {{ .StateValues.releaseName }}-rabbitmq
@@ -137,7 +136,6 @@ stasher:
         memory: "128Mi"
         cpu: "200m"
 [|- end |]
-
 
 backup:
   enabled: true
