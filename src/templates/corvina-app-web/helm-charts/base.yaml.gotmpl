@@ -86,7 +86,7 @@ migrator:
   envVar: 
     START_FEATURES: migrator.up,quit
 
-[| if .RedisEnabled |]
+[| if .RedisEnabled -|]
 redis:
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
@@ -109,7 +109,7 @@ redis:
         memory: "512Mi"
 [|- end |]
 
-[| if .RabbitEnabled |]
+[| if .RabbitEnabled -|]
 rabbitmq:
   clusterName: {{ .StateValues.releaseName }}-rabbitmq
   replicas: 1
@@ -123,9 +123,9 @@ rabbitmq:
     requests:
       cpu: "250m"
       memory: "256Mi"
-[| end |]
+[|- end |]
 
-[| if .StasherEnabled |]
+[| if .StasherEnabled -|]
 stasher:
   queue: stasher
   resources:

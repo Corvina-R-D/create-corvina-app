@@ -6,7 +6,7 @@ service:
   envVar:
     LOG_LEVEL: info
 
-[| if .RabbitEnabled |]
+[| if .RabbitEnabled -|]
 rabbitmq:
   storageClass: ssd-retain
 [|- end |]

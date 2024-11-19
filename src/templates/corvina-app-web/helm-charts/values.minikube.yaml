@@ -16,8 +16,7 @@ postgresql:
       requests:
         cpu: 10m
 
-
-[| if .RedisEnabled |]
+[| if .RedisEnabled -|]
 redis:
   global:
     storageClass: local-path
@@ -28,7 +27,7 @@ redis:
         cpu: 10m
 [|- end |]
 
-[| if .RabbitEnabled |]
+[| if .RabbitEnabled -|]
 rabbitmq:
   storageClass: local-path
   resources:
@@ -41,7 +40,6 @@ app:
     requests:
       cpu: 10m
 
-
 service:
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
@@ -49,7 +47,7 @@ service:
     requests:
       cpu: 10m
 
-[| if .StasherEnabled |]
+[| if .StasherEnabled -|]
 stasher:
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
