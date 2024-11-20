@@ -54,7 +54,7 @@ postgresql:
         postgresPassword: dummy
 
 app:  
-  image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
+  image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
   resources:
     limits:
       cpu: 0.5
@@ -64,7 +64,7 @@ app:
       memory: 128Mi
 
 service:
-  image: europe-west1-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
+  image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
   envVar:
     LOG_LEVEL: info
     PG_PORT: 5432

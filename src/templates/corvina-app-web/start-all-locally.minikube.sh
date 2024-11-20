@@ -8,7 +8,7 @@ cd $(dirname $0)
 eval $(minikube -p corvina-minikube docker-env);
 
 # check if images are already built, otherwise build from source
-if [ ! "$(docker images -q europe-west1-docker.pkg.dev/corvina-app-${app_name}/images/corvina-app-${app_name}-frontend:latest-master 2> /dev/null)" ]; then
+if [ ! "$(docker images -q europe-docker.pkg.dev/corvina-app-${app_name}/images/corvina-app-${app_name}-frontend:latest-master 2> /dev/null)" ]; then
   echo "Images are not build yet. Run ./mk_replace_images.sh first.";
   ./scripts/mk-replace-images.sh
 else
