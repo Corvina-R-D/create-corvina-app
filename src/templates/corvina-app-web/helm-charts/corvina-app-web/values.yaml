@@ -80,7 +80,7 @@ redis:
 
 [| if .StasherEnabled |]
 stasher:
-  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.0.0
+  image: europe-west1-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.1.0
 [| end |]
 
 
