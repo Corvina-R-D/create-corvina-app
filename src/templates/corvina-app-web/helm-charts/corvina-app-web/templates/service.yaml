@@ -45,7 +45,7 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: ["/bin/sh", "-c", "minikubeip=$(host host.minikube.internal); row=${minikubeip:35}' artifact-registry.local.gd'; echo $row >> /etc/hosts;"]
+                command: ["/bin/sh", "-c", "minikubeip=$(host host.minikube.internal); row=${minikubeip:35}' [| .Name |].local.gd'; echo $row >> /etc/hosts;"]
           {{ end }}
           ports:
             - containerPort: 3000

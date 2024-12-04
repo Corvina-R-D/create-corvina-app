@@ -19,8 +19,7 @@
 ## How to start this project with minikube
 
 * run `./minikube-start.sh` in the main Corvina chart https://bitbucket.org/exorint/corvina-k8s/src/develop/charts/minikube-start.sh
-  * make sure you read all the prerequisites, especially regarding the installation of the self-signed certificate in your browser (see https://exorint.atlassian.net/wiki/spaces/DEV/pages/319389697/Dev
-lopment+with+Minikube#Self-signed-certificates)
+  * make sure you read all the prerequisites, especially regarding the installation of the self-signed certificate in your browser (see https://exorint.atlassian.net/wiki/spaces/DEV/pages/319389697/Development+with+Minikube#Self-signed-certificates)
 * run the script `./start-all-locally.corvina-minikube.sh`
 * install the app from the Corvina App Store in your organization.
 

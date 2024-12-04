@@ -41,7 +41,7 @@
       <v-window v-model="activeTab">
         <v-window-item>
           <div class="overflow-y-auto fill-height tabs-top-separator" infinite-wrapper>
-            <v-table density="comfortable" class="main-table mt-5" data-qa="artifact-table">
+            <v-table density="comfortable" class="main-table mt-5" data-qa="main-table">
               <thead>
                 <tr>
                   <th class="text-left" id="repo-table-name">

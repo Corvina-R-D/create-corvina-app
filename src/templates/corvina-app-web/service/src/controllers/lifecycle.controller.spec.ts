@@ -117,7 +117,7 @@ describe('LifecycleController', () => {
     }
   });
 
-  it('uninstallation should return ArtifactRegistryError if I never execute the installation', async () => {
+  it('uninstallation should return error if I never execute the installation', async () => {
     try {
       await controller.uninstalled({
         key: process.env.MANIFEST_ID,

@@ -22,7 +22,7 @@ ENV VITE_SERVICE_URL=${VITE_SERVICE_URL}
 RUN npm run build
 
 ##### production environment #####
-FROM nginx:stable-alpine as prod
+FROM nginx:stable-alpine AS prod
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8080
