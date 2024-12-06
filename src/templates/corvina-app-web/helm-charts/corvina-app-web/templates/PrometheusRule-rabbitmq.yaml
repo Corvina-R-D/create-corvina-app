@@ -1,0 +1,18 @@
+kind: PrometheusRule
+apiVersion: monitoring.coreos.com/v1
+metadata:
+  labels:
+    app: kube-prometheus-stack
+  name: [| .Name |]-prometheus-rabbitmq.rules
+  namespace: corvina-app-[| .Name |]
+spec:
+  groups:
+    - name: PrometheusRabbitMQRules-[| .Name |]
+      rules:
+        - alert: RabbitMQNoConsumer
+          expr: rabbitmq_queue_consumers == 0
+          for: 5m
+          labels:
+            severity: fail
+          annotations:
+            summary: No consumer attached to queue

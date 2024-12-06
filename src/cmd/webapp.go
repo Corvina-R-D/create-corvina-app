@@ -486,10 +486,12 @@ var filesToExcludeK8s = []string{
 
 var filesToExcludeRedis = []string{
 	"pf-redis.minikube.sh",
+	"corvina-app-web/templates/PrometheusRule-redis.yaml",
 }
 
 var filesToExcludeRabbit = []string{
 	"corvina-app-web/templates/rabbit-cluster.yaml",
+	"corvina-app-web/templates/PrometheusRule-rabbitmq.yaml",
 }
 
 var filesToExcludeStasher = []string{
