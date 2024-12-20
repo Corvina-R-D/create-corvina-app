@@ -1,0 +1,51 @@
+kind: PrometheusRule
+apiVersion: monitoring.coreos.com/v1
+metadata:
+  labels:
+    app: kube-prometheus-stack
+  name: [| .Name |]-prometheus-resourcequota.rules
+  namespace: corvina-app-[| .Name |]
+spec:
+  groups:
+    - name: PrometheusResourceQuotas-[| .Name |]
+      rules:
+      - alert: corvina-app-[| .Name |]-CpuLimitResourceQuota
+        annotations:
+          description: "High CPU limit Usage for corvina-app-[| .Name |] in Resource Quotas"
+          summary: "CPU limit usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.cpu", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.cpu", type="hard"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+      - alert: corvina-app-[| .Name |]-CpuRequestResourceQuota
+        annotations:
+          description: "High CPU request Usage for corvina-app-[| .Name |] in Resource Quotas"
+          summary: "CPU request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.cpu", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.cpu", type="hard"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+      - alert: corvina-app-[| .Name |]-MemoryLimitResourceQuota
+        annotations:
+          description: "High Memory limit Usage for corvina-app-[| .Name |] in Resource Quotas"
+          summary: "Memory limit usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.memory", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.memory", type="hard"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+      - alert: corvina-app-[| .Name |]-MemoryRequestResourceQuota
+        annotations:
+          description: "High Memory request Usage for corvina-app-[| .Name |] in Resource Quotas"
+          summary: "Memory request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.memory", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.memory", type="hard"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+      - alert: corvina-app-[| .Name |]-StorageRequestResourceQuota
+        annotations:
+          description: "High Storage request Usage for corvina-app-[| .Name |] in Resource Quotas"
+          summary: "Storage request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.storage", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.storage", type="hard"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
