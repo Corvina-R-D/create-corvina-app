@@ -1,9 +1,9 @@
 dependencies:
 - name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 15.2.5
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 15.2.12
 - name: redis
-  repository: https://charts.bitnami.com/bitnami
+  repository: oci://registry-1.docker.io/bitnamicharts
   version: 17.8.7
 - name: gateway
   repository: https://istio-release.storage.googleapis.com/charts

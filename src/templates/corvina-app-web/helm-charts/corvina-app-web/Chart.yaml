@@ -14,11 +14,11 @@ appVersion: "chart-1.0.0"
 dependencies:
   - name: postgresql
     version: "~15.2.5"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
 [|- if .RedisEnabled |]
   - name: redis
     version: "~17.8.5"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
 [|- end |]
   - name: gateway
     version: "1.20.4"
