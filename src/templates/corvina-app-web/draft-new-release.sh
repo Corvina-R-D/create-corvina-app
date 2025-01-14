@@ -17,13 +17,14 @@ fi
 # check if yq is installed
 if ! command -v yq &> /dev/null
 then
-    echo "yq could not be found"
+    echo "yq could not be found (arkade get yq)"
+    echo "arkade ( https://github.com/alexellis/arkade ): very useful to install CLI tools and Kubernetes apps"
     exit 1
 fi
 # check if semver is installed
 if ! command -v semver &> /dev/null
 then
-    echo "semver could not be found (curl -L https://raw.githubusercontent.com/usvc/semver/master/init/install.sh | sh)"
+    echo "semver could not be found ( https://github.com/usvc/semver )"
     exit 1
 fi
 # retrieve the current appVersion of the chart
