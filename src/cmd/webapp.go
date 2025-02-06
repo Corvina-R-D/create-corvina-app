@@ -152,13 +152,13 @@ func validateName(name string) error {
 	}
 
 	// only letters and numbers (but not in the first position)
-	mateched, err := regexp.MatchString("^[a-z][a-z0-9]{0,14}$", name)
+	mateched, err := regexp.MatchString("^[a-z][a-z0-9\\-]{0,15}$", name)
 	if err != nil {
 		return err
 	}
 
 	if !mateched {
-		return errors.New("assign a name only letters and numbers are allowed, but not in the first position, and with a maximum of 15 characters")
+		return errors.New("assign a name only letters and numbers or - are allowed, but not in the first position, and with a maximum of 15 characters")
 	}
 
 	return nil
