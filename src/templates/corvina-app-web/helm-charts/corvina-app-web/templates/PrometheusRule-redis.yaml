@@ -4,7 +4,7 @@ metadata:
   labels:
     app: kube-prometheus-stack
   name: [| .Name |]-prometheus-redis.rules
-  namespace: corvina-app-[| .Name |]
+  namespace: {{ .Release.Namespace }}
 spec:
   groups:
     - name: PrometheusRedisRules-[| .Name |]

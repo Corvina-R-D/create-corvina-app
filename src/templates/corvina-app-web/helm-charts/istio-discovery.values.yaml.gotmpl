@@ -1,6 +1,6 @@
 revision: {{ .StateValues.releaseName }}
 global:
-  istioNamespace: {{ .StateValues.releaseName }}
+  istioNamespace: {{ .Release.Namespace }}
   configValidation: true
   defaultPodDisruptionBudget:
     enabled: false
@@ -21,4 +21,4 @@ pilot:
 meshConfig:
   discoverySelectors:
   - matchLabels:
-      kubernetes.io/metadata.name: {{ .StateValues.releaseName }}
+      kubernetes.io/metadata.name: {{ .Release.Namespace }}

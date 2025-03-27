@@ -41,12 +41,6 @@ spec:
         - name: service
           image: {{ .Values.service.image }}:{{ .Values.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          {{ if (eq .Values.gateway.appHost "[| .Name |].local.gd") }}
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "minikubeip=$(host host.minikube.internal); row=${minikubeip:35}' [| .Name |].local.gd'; echo $row >> /etc/hosts;"]
-          {{ end }}
           ports:
             - containerPort: 3000
           envFrom:
@@ -110,7 +104,7 @@ data:
   PG_POOL_MAX: '{{ .Values.service.envVar.PG_POOL_MAX }}'
   PG_QUERY_LOGGING: '{{ .Values.service.envVar.PG_QUERY_LOGGING }}'
   MANIFEST_BASE_URL: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}
-  MANIFEST_ID: {{ .Release.Namespace }}
+  MANIFEST_ID: {{ .Values.service.appId }}
   MANIFEST_API_VERSION: '{{ .Chart.AppVersion }}'
   MANIFEST_BASE_URL_FE_APP: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}
   INSTALLATION_HOSTS_WHITELIST: '{{ .Values.service.envVar.INSTALLATION_HOSTS_WHITELIST }}'

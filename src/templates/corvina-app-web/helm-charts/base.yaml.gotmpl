@@ -65,6 +65,7 @@ app:
 
 service:
   image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
+  appId: corvina-app-{{ .StateValues.appName }}
   envVar:
     LOG_LEVEL: info
     PG_PORT: 5432

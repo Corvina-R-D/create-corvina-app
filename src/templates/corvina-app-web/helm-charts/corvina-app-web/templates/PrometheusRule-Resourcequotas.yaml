@@ -4,7 +4,7 @@ metadata:
   labels:
     app: kube-prometheus-stack
   name: [| .Name |]-prometheus-resourcequota.rules
-  namespace: corvina-app-[| .Name |]
+  namespace: {{ .Release.Namespace }}
 spec:
   groups:
     - name: PrometheusResourceQuotas-[| .Name |]
@@ -13,7 +13,7 @@ spec:
         annotations:
           description: "High CPU limit Usage for corvina-app-[| .Name |] in Resource Quotas"
           summary: "CPU limit usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
-        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.cpu", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.cpu", type="hard"}) * 100 > 90
+        expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.cpu", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.cpu", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
@@ -21,7 +21,7 @@ spec:
         annotations:
           description: "High CPU request Usage for corvina-app-[| .Name |] in Resource Quotas"
           summary: "CPU request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
-        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.cpu", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.cpu", type="hard"}) * 100 > 90
+        expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.cpu", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.cpu", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
@@ -29,7 +29,7 @@ spec:
         annotations:
           description: "High Memory limit Usage for corvina-app-[| .Name |] in Resource Quotas"
           summary: "Memory limit usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
-        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.memory", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="limits.memory", type="hard"}) * 100 > 90
+        expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.memory", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.memory", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
@@ -37,7 +37,7 @@ spec:
         annotations:
           description: "High Memory request Usage for corvina-app-[| .Name |] in Resource Quotas"
           summary: "Memory request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
-        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.memory", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.memory", type="hard"}) * 100 > 90
+        expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.memory", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.memory", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
@@ -45,7 +45,7 @@ spec:
         annotations:
           description: "High Storage request Usage for corvina-app-[| .Name |] in Resource Quotas"
           summary: "Storage request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
-        expr: sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.storage", type="used"})/sum(kube_resourcequota{namespace="corvina-app-[| .Name |]", resource="requests.storage", type="hard"}) * 100 > 90
+        expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.storage", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.storage", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical

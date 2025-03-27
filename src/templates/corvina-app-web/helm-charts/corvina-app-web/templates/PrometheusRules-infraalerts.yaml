@@ -4,13 +4,13 @@ metadata:
   labels:
     app: kube-prometheus-stack
   name: [| .Name |]-prometheus-infraalerts.rules
-  namespace: corvina-app-[| .Name |]
+  namespace: {{ .Release.Namespace }}
 spec:
   groups:
     - name: PrometheusInfraAlerts-[| .Name |]
       rules:
         - alert: CorvinaRestarts
-          expr: increase(kube_pod_container_status_restarts_total{namespace="corvina-app-[| .Name |]"}[5m])>0
+          expr: increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[5m])>0
           labels:
             severity: critical
           annotations:

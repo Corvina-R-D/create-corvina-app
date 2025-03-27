@@ -11,7 +11,7 @@ releases:
     chart: istio/istiod
     version: 1.20.4
     kubeContext: {{ .StateValues.kubeContext }}
-    namespace: {{ .StateValues.releaseName }}
+    namespace: {{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
     labels:
       pkg: istio
     values:
@@ -19,7 +19,7 @@ releases:
   - name: {{ .StateValues.releaseName }}
     chart: {{ .StateValues.releaseName }}
     kubeContext: {{ .StateValues.kubeContext }}
-    namespace: {{ .StateValues.releaseName }}
+    namespace: {{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
     labels:
       pkg: app
     values:
