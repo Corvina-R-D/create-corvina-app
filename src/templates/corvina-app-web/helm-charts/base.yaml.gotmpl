@@ -1,5 +1,5 @@
 istio-gateway:
-  revision: corvina-app-{{ .StateValues.appName }}
+  revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
   name: istio-{{ .StateValues.appName }}gateway
   service:
     type: LoadBalancer

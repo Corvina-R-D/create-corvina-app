@@ -17,7 +17,7 @@ releases:
     values:
       - istio-discovery.values.yaml.gotmpl
   - name: {{ .StateValues.releaseName }}
-    chart: {{ .StateValues.releaseName }}
+    chart: corvina-app-[| .Name |]
     kubeContext: {{ .StateValues.kubeContext }}
     namespace: {{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
     labels:
