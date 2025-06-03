@@ -17,7 +17,8 @@ spec:
     solvers:
       - dns01:
           cloudDNS:
-            project: corvina-networking
+            project: {{ .Values.gateway.issuer.gcpProject | required "Missing gcpNetworkingProject value in envs" }}
+            hostedZoneName: {{ .Values.gateway.issuer.gcpZoneName }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

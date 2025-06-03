@@ -2,3 +2,4 @@ appHost: [| .Name |].corvina-us.io
 corvinaAppHost: app.corvina-us.io
 kubeContext: us
 clusterDomain: cluster-us.local
+gcpNetworkingProject: corvina-us

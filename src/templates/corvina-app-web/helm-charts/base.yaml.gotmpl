@@ -30,6 +30,8 @@ gateway:
   certificateSecretName: "corvina-app-{{ .StateValues.appName }}-prod-tls"
   issuer: 
     name: "letsencrypt-issuer"
+    gcpProject: {{ index .StateValues "gcpNetworkingProject" | default "" }}
+    gcpZoneName: {{ regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-" }}
 
 postgresql:
   primary:
