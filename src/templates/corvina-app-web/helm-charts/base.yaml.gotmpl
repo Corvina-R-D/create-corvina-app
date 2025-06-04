@@ -34,6 +34,8 @@ gateway:
     gcpZoneName: {{ regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-" }}
 
 postgresql:
+  image:
+    registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
     persistence:
@@ -91,6 +93,8 @@ migrator:
 
 [| if .RedisEnabled -|]
 redis:
+  image:
+    registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
     enabled: true
