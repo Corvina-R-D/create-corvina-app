@@ -80,24 +80,9 @@ redis:
 
 [| if .StasherEnabled |]
 stasher:
-  image: europe-west1-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.1.0
+  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.1.1
 [| end |]
 
 
 # https://cert-manager.io/docs/concepts/webhook/#known-problems-and-solutions
 webhook.hostNetwork: true
-
-registration:
-  enabled: false
-  namespace: prod
-  image: docker.io/bitnami/keycloak
-  appName: [| .Name |]
-  core:
-    service: corvina-core
-    port: 80
-  keycloak:
-    service: corvina-keycloak
-    port: 80
-    secret: corvina-keycloak-admin-secret
-  manifest:
-    url: https://[| .Name |].corvina.mk/v1/manifest.json
