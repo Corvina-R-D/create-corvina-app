@@ -134,6 +134,7 @@ rabbitmq:
 
 [| if .StasherEnabled -|]
 stasher:
+  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.1.1
   queue: stasher
   resources:
     requests:
