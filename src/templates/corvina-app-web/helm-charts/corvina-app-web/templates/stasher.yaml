@@ -114,6 +114,10 @@ kind: ServiceAccount
 metadata:
   name: stasher-sa
   namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- with (dig "stasher-sa" "" .Values.workloadIdentity.gcpSaLinks) }}
+    iam.gke.io/gcp-service-account: "{{ . }}"
+    {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

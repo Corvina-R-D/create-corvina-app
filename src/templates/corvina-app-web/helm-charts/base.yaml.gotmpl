@@ -151,3 +151,8 @@ backup:
   ttl: 72h30m0s
   storageLocation: default
   snapshotLocation: eu
+
+{{- with .StateValues.workloadIdentity }}
+workloadIdentity:
+  {{ toYaml . | nindent 2 }}
+{{- end }}

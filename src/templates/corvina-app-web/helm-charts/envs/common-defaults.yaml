@@ -1,2 +1,4 @@
 releaseName: corvina-app-[| .Name |]
 appName: [| .Name |]
+workloadIdentity:
+  gcpSaLinks: {}

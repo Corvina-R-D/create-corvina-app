@@ -130,6 +130,10 @@ kind: ServiceAccount
 metadata:
   name: service-sa
   namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- with (dig "service-sa" "" .Values.workloadIdentity.gcpSaLinks) }}
+    iam.gke.io/gcp-service-account: "{{ . }}"
+    {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
