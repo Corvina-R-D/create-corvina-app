@@ -31,7 +31,7 @@ gateway:
   issuer: 
     name: "letsencrypt-issuer"
     gcpProject: {{ index .StateValues "gcpNetworkingProject" | default "" }}
-    gcpZoneName: {{ regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-" }}
+    gcpZoneName: {{ index .StateValues "gcpZoneName" | default (regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-") }}
 
 postgresql:
   image:
