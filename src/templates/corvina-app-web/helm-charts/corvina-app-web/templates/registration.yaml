@@ -1,0 +1,49 @@
+{{- with .Values.registration }}
+{{- if .enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "corvina-app-[| .Name |].fullname" $ }}-registration
+  namespace: {{ .namespace }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+spec:
+  backoffLimit: 100
+  template:
+    spec:
+      containers:
+      - image: {{ .image }}
+        name: app-registration
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - |
+          set -euo pipefail
+
+          admin_conf="$(mktemp)"
+          timeout 5s kcadm.sh config credentials --config "${admin_conf}" --server http://{{ .keycloak.service }}:{{ .keycloak.port }}/auth --realm master --user "${KEYCLOAK_ADMIN_USERNAME}" --password "${KEYCLOAK_ADMIN_PASSWORD}"
+          token=$(jq -r -e '.endpoints[].master.token' < "${admin_conf}")
+          appId="$(curl -s --fail-with-body --oauth2-bearer "$token" http://{{ .core.service }}:{{ .core.port }}/api/v1/apps?name={{ .appName | urlquery }} | jq -r -e '.content[0].id // ""')"
+          if [[ -n "$appId" ]]; then
+            echo App {{ .appName | quote }} is already registered in Corvina, if you want to register it again delete it and upgrade the chart again
+            exit
+          fi
+          echo Installing app {{ .appName | quote }}
+          curl -s --fail-with-body --oauth2-bearer "$token" -X POST http://{{ .core.service }}:{{ .core.port }}/api/v1/apps --json '{"manifestUrl":"{{ .manifest.url }}"}'
+        securityContext:
+          runAsUser: 0
+        env:
+        - name: KEYCLOAK_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: {{ .keycloak.secret }}
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{ .keycloak.secret }}
+      restartPolicy: Never
+{{- end }}
+{{- end }}

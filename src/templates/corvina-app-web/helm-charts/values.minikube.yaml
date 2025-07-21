@@ -56,5 +56,9 @@ stasher:
         cpu: 10m
 [|- end |]
 
+registration:
+  enabled: true
+  namespace: prod
+
 backup:
   enabled: false
