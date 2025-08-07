@@ -65,6 +65,7 @@ else
     echo "Scaffold branch detected. Skipping initialization and checking out branch create-corvina-app."
     cd ..
     git checkout create-corvina-app
+    git pull origin create-corvina-app
 fi
 
 # list untracked files and ask to remove them
