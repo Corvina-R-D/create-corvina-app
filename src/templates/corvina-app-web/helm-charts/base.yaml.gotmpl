@@ -179,7 +179,7 @@ workloadIdentity:
 
 prometheus:
   appName: {{ .StateValues.appName }}
-[| if .RabbitEnabled -|]
+[|- if .RabbitEnabled |]
   rabbitmqReadyMessagesThreshold: 1
   rabbitmqUnacknowledgedMessagesThreshold: 1
 [|- end |]
