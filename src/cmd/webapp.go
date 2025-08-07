@@ -492,6 +492,7 @@ var filesToExcludeRedis = []string{
 var filesToExcludeRabbit = []string{
 	"corvina-app-web/templates/rabbit-cluster.yaml",
 	"corvina-app-web/templates/PrometheusRule-rabbitmq.yaml",
+	"corvina-app-web/templates/ServiceMonitor-rabbitmq.yaml",
 }
 
 var filesToExcludeStasher = []string{

@@ -3,30 +3,30 @@ apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: [| .Name |]-prometheus-redis.rules
+  name: {{ .Values.prometheus.appName }}-prometheus-redis.rules
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
-    - name: PrometheusRedisRules-[| .Name |]
+    - name: {{ .Values.prometheus.appName }}-PrometheusRedisRules-ota
       rules:
-        - alert: RedisConnectedClientsHigh
-          expr: redis_connected_clients / redis_config_maxclients > 0.8
+        - alert: {{ .Values.prometheus.appName }}-RedisConnectedClientsHigh
+          expr: redis_connected_clients{ namespace="{{ .Release.Namespace }}" } / redis_config_maxclients{ namespace="{{ .Release.Namespace }}" } > 0.8
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "High number of connected clients on Redis instance"
             description: "Redis instance is using more than 80% of its allowed client connections."
-        - alert: RedisInstanceDown
-          expr: up{job="corvina-redis-metrics"} == 0
+        - alert: {{ .Values.prometheus.appName }}-RedisInstanceDown
+          expr: up{job="{{ .Values.prometheus.appName }}-redis-metrics", namespace="{{ .Release.Namespace }}" } == 0
           for: 1m
           labels:
             severity: critical
           annotations:
             summary: "Redis instance is down"
             description: "The Redis instance is unreachable."
-        - alert: RedisHighCPUUsage
-          expr: rate(process_cpu_seconds_total{job="corvina-redis-metrics"}[1m]) > 0.8
+        - alert: {{ .Values.prometheus.appName }}-RedisHighCPUUsage
+          expr: rate(process_cpu_seconds_total{job="{{ .Values.prometheus.appName }}-redis-metrics", namespace="{{ .Release.Namespace }}" }[1m]) > 0.8
           for: 5m
           labels:
             severity: warning

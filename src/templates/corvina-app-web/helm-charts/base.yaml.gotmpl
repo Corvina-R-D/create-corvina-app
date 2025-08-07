@@ -104,6 +104,10 @@ redis:
     storageClass: "ssd-retain"
     defaultStorageClass: "ssd-retain"
   architecture: standalone
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   replica:
     replicaCount: 0
   master:
@@ -171,3 +175,11 @@ registration:
 workloadIdentity:
   {{ toYaml . | nindent 2 }}
 {{- end }}
+
+
+prometheus:
+  appName: {{ .StateValues.appName }}
+[| if .RabbitEnabled -|]
+  rabbitmqReadyMessagesThreshold: 1
+  rabbitmqUnacknowledgedMessagesThreshold: 1
+[|- end |]

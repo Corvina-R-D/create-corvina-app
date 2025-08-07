@@ -3,13 +3,13 @@ kind: PrometheusRule
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: [| .Name |]-prometheus-infraalerts.rules
+  name: {{ .Values.prometheus.appName }}-prometheus-infraalerts.rules
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
-    - name: PrometheusInfraAlerts-[| .Name |]
+    - name: {{ .Values.prometheus.appName }}-PrometheusInfraAlerts
       rules:
-        - alert: CorvinaRestarts
+        - alert: {{ .Values.prometheus.appName }}-Restarts
           expr: increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[5m])>0
           labels:
             severity: critical

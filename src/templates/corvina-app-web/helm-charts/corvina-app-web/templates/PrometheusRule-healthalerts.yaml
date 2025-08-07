@@ -3,20 +3,20 @@ kind: PrometheusRule
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: [| .Name |]-prometheus-healthalerts.rules
+  name: {{ .Values.prometheus.appName }}-prometheus-healthalerts.rules
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
-    - name: PrometheusHealthAlerts-[| .Name |]
+    - name: {{ .Values.prometheus.appName }}-PrometheusHealthAlerts
       rules:
-        - alert: PodNotReady
+        - alert: {{ .Values.prometheus.appName }}-PodNotReady
           expr: kube_pod_status_phase{phase="Failed", namespace="{{ .Release.Namespace }}"} > 0
           for: 15m
           labels:
             severity: critical
           annotations:
             description: "Pod {{`{{ $labels.pod }}`}} is not ready."
-        - alert: PodCrashLooping
+        - alert: {{ .Values.prometheus.appName }}-PodCrashLooping
           expr: rate(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[5m]) > 0.1
           for: 5m
           labels:
@@ -24,18 +24,18 @@ spec:
           annotations:
             summary: "Pod {{`{{ $labels.pod }}`}} is crashing frequently"
             description: "Pod {{`{{ $labels.pod }}`}} in namespace {{ .Release.Namespace }} is restarting more than once every 5 minutes."
-        - alert: corvina-app-[| .Name |]CpuUsage
+        - alert: {{ .Values.prometheus.appName }}-CpuUsage
           annotations:
-            description: "System CPU Usage for corvina-app-[| .Name |]"
-            summary: "System CPU usage for corvina-app-[| .Name |] is high and its more than 80%"
+            description: "System CPU Usage for {{ .Values.prometheus.appName }}"
+            summary: "System CPU usage for {{ .Values.prometheus.appName }} is high and its more than 80%"
           expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{ namespace="{{ .Release.Namespace }}"}) / sum(kube_pod_container_resource_requests{job="kube-state-metrics",  namespace="{{ .Release.Namespace }}", resource="cpu"}) > 0.8
           for: 5m
           labels:
             severity: critical
-        - alert: corvina-app-[| .Name |]MemoryUsage
+        - alert: {{ .Values.prometheus.appName }}-MemoryUsage
           annotations:
-            description: "Memory Utilisation for corvina-app-[| .Name |]"
-            summary: "Memory Utilisation for corvina-app-[| .Name |] is high and its more than 80%"
+            description: "Memory Utilisation for {{ .Values.prometheus.appName }}"
+            summary: "Memory Utilisation for {{ .Values.prometheus.appName }} is high and its more than 80%"
           expr: sum(container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", namespace="{{ .Release.Namespace }}",container!="", image!=""}) / sum(kube_pod_container_resource_requests{job="kube-state-metrics", namespace="{{ .Release.Namespace }}", resource="memory"}) > 0.8
           for: 5m
           labels:

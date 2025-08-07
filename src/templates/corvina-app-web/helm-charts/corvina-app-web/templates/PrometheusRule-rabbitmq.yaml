@@ -3,14 +3,118 @@ apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: [| .Name |]-prometheus-rabbitmq.rules
+  name: prometheus-rabbitmq.rules-{{ .Values.prometheus.appName }}
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
-    - name: PrometheusRabbitMQRules-[| .Name |]
+    - name: {{ .Values.prometheus.appName }}-RabbitMQNodeStatus
       rules:
-        - alert: RabbitMQNoConsumer
-          expr: rabbitmq_queue_consumers == 0
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQDown
+          expr: max_over_time(up{job="{{ .Values.rabbitmq.clusterName }}"} [5m] ) == 0
+          for: 5m
+          labels:
+            severity: fail
+          annotations:
+            summary: RabbitMQ node is down
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQLowDiskFree
+          expr: rabbitmq_core_node_disk_free{ namespace="{{ .Release.Namespace }}" } < rabbitmq_core_node_disk_free_limit{ namespace="{{ .Release.Namespace }}" } * 4
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: RabbitMQ node free disk space is low.
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQcloseToHighWatermark
+          expr: rabbitmq_disk_space_available_bytes{ namespace="{{ .Release.Namespace }}" } < rabbitmq_disk_space_available_limit_bytes{ namespace="{{ .Release.Namespace }}" } * 1.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: RabbitMQ disk space is close to high watermark.
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQHighWatermark
+          expr: rabbitmq_disk_space_available_bytes{ namespace="{{ .Release.Namespace }}" } < rabbitmq_disk_space_available_limit_bytes{ namespace="{{ .Release.Namespace }}" }
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: RabbitMQ disk space is exceeded high watermark.
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQMemoryHighWatermark
+          expr: (rabbitmq_process_resident_memory_bytes{ namespace="{{ .Release.Namespace }}" } / on(namespace, pod) kube_pod_container_resource_limits{resource="memory",pod=~"{{ .Values.rabbitmq.clusterName }}-server-.*"}) > 0.8
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RabbitMQ Memory Usage High {{`{{ $labels.pod }}`}}"
+            description: "RabbitMQ pod {{`{{ $labels.pod }}`}} in namespace {{`{{ $labels.namespace }}`}}  is using more than 80% of its memory limit."
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQMemoryFillingFast
+          expr: rate(rabbitmq_process_resident_memory_bytes{ namespace="{{ .Release.Namespace }}" }[5m]) > 30000000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RabbitMQ Memory Filling Fast Alert"
+            description: "The rate of RabbitMQ memory usage increase has exceeded the threshold in the last 5 minutes."
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQNoDiskFree
+          expr: rabbitmq_disk_space_available_bytes{ namespace="{{ .Release.Namespace }}" } < rabbitmq_disk_space_available_limit_bytes{ namespace="{{ .Release.Namespace }}" }
+          for: 1m
+          labels:
+            severity: fail
+          annotations:
+            summary: RabbitMQ node has no free disk.
+
+    - name: {{ .Values.prometheus.appName }}-RabbitMQQueues
+      rules:
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQGrowingQueues
+          expr: deriv(rabbitmq_queue_messages_ready{ namespace="{{ .Release.Namespace }}" }[5m]) > 0
+          for: 5m
+          labels:
+            severity: fail
+          annotations:
+            summary: It looks like services are accumulating messages
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQReadyMessages
+          expr: min_over_time(rabbitmq_queue_messages_ready{ namespace="{{ .Release.Namespace }}" }[5m]) > {{ .Values.prometheus.rabbitmqReadyMessagesThreshold | default 1000 }}
+          for: 5m
+          labels:
+            severity: pre-fail
+          annotations:
+            summary: There are too many Ready messages on queues
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQUnacknowledgedMessages
+          expr: ( ( (min_over_time(rabbitmq_queue_messages_unacked{ namespace="{{ .Release.Namespace }}" }[5m]) > bool 0 ) * on(namespace, service, queue) ( min_over_time(rabbitmq_queue_messages_unacked{ namespace="{{ .Release.Namespace }}" }[5m]) / on(namespace, service, queue) sum by (namespace, service, queue) (irate(rabbitmq_queue_messages_published_total{ namespace="{{ .Release.Namespace }}" }[5m]) ) ) ) ) > {{ .Values.prometheus.rabbitmqUnacknowledgedMessagesThreshold | default 1000 }}
+          for: 5m
+          labels:
+            severity: fail
+          annotations:
+            summary: There are too many Unacknowledged messages on queues
+
+    - name: {{ .Values.prometheus.appName }}-RabbitMQErlangVM
+      rules:
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQLowAvailProcs
+          expr: (erlang_vm_process_count{job="{{ .Values.rabbitmq.clusterName }}" } / erlang_vm_process_limit{job="{{ .Values.rabbitmq.clusterName }}"}) * 100 > 90
+          for: 10m
+          labels:
+            severity: pre-fail
+          annotations:
+            summary: RabbitMQ is close to processes limit.
+
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQLowFreeFD
+          expr: (rabbitmq_core_node_fd_used{ namespace="{{ .Release.Namespace }}" } / rabbitmq_core_node_fd_total{ namespace="{{ .Release.Namespace }}" }) * 100 > 90
+          for: 10m
+          labels:
+            severity: pre-fail
+          annotations:
+            summary: RabbitMQ fd count is close to files descriptor limit.
+
+    - name: {{ .Values.prometheus.appName }}-RabbitMQConsumers
+      rules:
+        - alert: {{ .Values.prometheus.appName }}-RabbitMQNoConsumer
+          expr: rabbitmq_queue_consumers{ namespace="{{ .Release.Namespace }}" } == 0
           for: 5m
           labels:
             severity: fail

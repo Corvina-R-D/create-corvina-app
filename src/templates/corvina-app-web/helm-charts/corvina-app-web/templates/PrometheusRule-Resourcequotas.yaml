@@ -3,48 +3,48 @@ apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: [| .Name |]-prometheus-resourcequota.rules
+  name: ota-prometheus-resourcequota.rules
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
-    - name: PrometheusResourceQuotas-[| .Name |]
+    - name: {{ .Values.prometheus.appName }}-PrometheusResourceQuotas
       rules:
-      - alert: corvina-app-[| .Name |]-CpuLimitResourceQuota
+      - alert: {{ .Values.prometheus.appName }}-CpuLimitResourceQuota
         annotations:
-          description: "High CPU limit Usage for corvina-app-[| .Name |] in Resource Quotas"
-          summary: "CPU limit usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+          description: "High CPU limit Usage for {{ .Release.Name }} in Resource Quotas"
+          summary: "CPU limit usage for {{ .Release.Name }} is high and its more than 90% in Resource Quotas"
         expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.cpu", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.cpu", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
-      - alert: corvina-app-[| .Name |]-CpuRequestResourceQuota
+      - alert: {{ .Values.prometheus.appName }}-CpuRequestResourceQuota
         annotations:
-          description: "High CPU request Usage for corvina-app-[| .Name |] in Resource Quotas"
-          summary: "CPU request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+          description: "High CPU request Usage for {{ .Release.Name }} in Resource Quotas"
+          summary: "CPU request usage for {{ .Release.Name }} is high and its more than 90% in Resource Quotas"
         expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.cpu", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.cpu", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
-      - alert: corvina-app-[| .Name |]-MemoryLimitResourceQuota
+      - alert: {{ .Values.prometheus.appName }}-MemoryLimitResourceQuota
         annotations:
-          description: "High Memory limit Usage for corvina-app-[| .Name |] in Resource Quotas"
-          summary: "Memory limit usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+          description: "High Memory limit Usage for {{ .Release.Name }} in Resource Quotas"
+          summary: "Memory limit usage for {{ .Release.Name }} is high and its more than 90% in Resource Quotas"
         expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.memory", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="limits.memory", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
-      - alert: corvina-app-[| .Name |]-MemoryRequestResourceQuota
+      - alert: {{ .Values.prometheus.appName }}-MemoryRequestResourceQuota
         annotations:
-          description: "High Memory request Usage for corvina-app-[| .Name |] in Resource Quotas"
-          summary: "Memory request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+          description: "High Memory request Usage for {{ .Release.Name }} in Resource Quotas"
+          summary: "Memory request usage for {{ .Release.Name }} is high and its more than 90% in Resource Quotas"
         expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.memory", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.memory", type="hard"}) * 100 > 90
         for: 5m
         labels:
           severity: critical
-      - alert: corvina-app-[| .Name |]-StorageRequestResourceQuota
+      - alert: {{ .Values.prometheus.appName }}-StorageRequestResourceQuota
         annotations:
-          description: "High Storage request Usage for corvina-app-[| .Name |] in Resource Quotas"
-          summary: "Storage request usage for corvina-app-[| .Name |] is high and its more than 90% in Resource Quotas"
+          description: "High Storage request Usage for {{ .Release.Name }} in Resource Quotas"
+          summary: "Storage request usage for {{ .Release.Name }} is high and its more than 90% in Resource Quotas"
         expr: sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.storage", type="used"})/sum(kube_resourcequota{namespace="{{ .Release.Namespace }}", resource="requests.storage", type="hard"}) * 100 > 90
         for: 5m
         labels:
