@@ -54,7 +54,7 @@ echo    # move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     # commit all the changes
-    git add .
+    git add . -u
     git commit -m "Release chart-${new_app_version}"
     git push
     # create a new tag
