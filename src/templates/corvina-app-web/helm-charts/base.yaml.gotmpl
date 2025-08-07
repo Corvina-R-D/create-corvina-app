@@ -108,6 +108,13 @@ redis:
     enabled: true
     serviceMonitor:
       enabled: true
+    resources:
+      limits:
+        cpu: "250m"
+        memory: "128Mi"
+      requests:
+        cpu: "10m"
+        memory: "64Mi"
   replica:
     replicaCount: 0
   master:
