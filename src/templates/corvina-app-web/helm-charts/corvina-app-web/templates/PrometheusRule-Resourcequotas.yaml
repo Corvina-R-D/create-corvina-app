@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: ota-prometheus-resourcequota.rules
+  name: {{ .Values.prometheus.appName }}-prometheus-resourcequota.rules
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
