@@ -18,18 +18,6 @@
 * yq `arkade get yq`  
 * semver <https://github.com/usvc/semver>  
 
-## How to start this project for developing
-
-* install ngrok and login in your account
-* take the ngrok authtoken and put it in the ngrok.yml file
-* run `ngrok start --config ngrok.yml app service`
-* run `cp -n service/.env.dist service/.env`
-* edit the `service/.env` file and set the `MANIFEST_BASE_URL_FE_APP` variable with the url of the app exposed with ngrok
-* edit the `service/.env` file and set the `MANIFEST_BASE_URL` variable with the url of the service exposed with ngrok
-* run `./start-all-development.sh`
-* curl the manifest, run `curl http://localhost:3000/v1/manifest.json` and copy the response
-* browse in the Corvina Store and install the app via "Try custom application" button
-
 ![Try custom application](https://storage.googleapis.com/corvina-public-assets/create-corvina-app-readme-custom-app.png)
 
 [|- if .K8sEnabled |]
