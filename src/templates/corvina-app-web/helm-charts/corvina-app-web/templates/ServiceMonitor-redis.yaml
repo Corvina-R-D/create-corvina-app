@@ -1,0 +1,17 @@
+kind: ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+metadata:
+  labels:
+    app: {{ .Values.redis.clusterName }}
+  name: {{ .Values.redis.clusterName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - path: /metrics/per-object
+      port: prometheus
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.redis.clusterName }}

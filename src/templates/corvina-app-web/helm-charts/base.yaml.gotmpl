@@ -1,4 +1,5 @@
 istio-gateway:
+  clusterName: {{ .StateValues.releaseName }}-istio
   revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
   name: istio-{{ .StateValues.appName }}gateway
   service:
@@ -19,6 +20,10 @@ istio-gateway:
     minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 imagePullPolicy: Always
 tag: 
@@ -34,6 +39,7 @@ gateway:
     gcpZoneName: {{ index .StateValues "gcpZoneName" | default (regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-") }}
 
 postgresql:
+  clusterName: {{ .StateValues.releaseName }}-postgresql
   image:
     registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
   primary:
@@ -56,6 +62,10 @@ postgresql:
         existingSecret: postgresql-{{ .StateValues.appName }}-secrets
         password: dummy
         postgresPassword: dummy
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
 
 app:  
   image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
@@ -93,6 +103,7 @@ migrator:
 
 [| if .RedisEnabled -|]
 redis:
+  clusterName: {{ .StateValues.releaseName }}-redis
   image:
     registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
   clusterDomain: {{ .StateValues.clusterDomain }}

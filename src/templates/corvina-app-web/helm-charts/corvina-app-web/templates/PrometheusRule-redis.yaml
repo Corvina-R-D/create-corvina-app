@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
     app: kube-prometheus-stack
-  name: {{ .Values.prometheus.appName }}-prometheus-redis.rules
+  name: prometheus-redis.rules-{{ .Values.prometheus.appName }}
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
