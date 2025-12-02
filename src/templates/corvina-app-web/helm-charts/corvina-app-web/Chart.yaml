@@ -14,11 +14,11 @@ appVersion: "chart-1.0.0"
 dependencies:
   - name: postgresql
     version: "15.2.5"
-    repository: "oci://europe-docker.pkg.dev/corvina-exorint/corvina-oci-virtual/bitnamicharts"
+    repository: oci://europe-docker.pkg.dev/corvina-exorint/dockeroci-remote/bitnamicharts
 [|- if .RedisEnabled |]
   - name: redis
     version: "17.8.5"
-    repository: "oci://europe-docker.pkg.dev/corvina-exorint/corvina-oci-virtual/bitnamicharts"
+    repository: oci://europe-docker.pkg.dev/corvina-exorint/dockeroci-remote/bitnamicharts
 [|- end |]
   - name: gateway
     version: "1.20.4"

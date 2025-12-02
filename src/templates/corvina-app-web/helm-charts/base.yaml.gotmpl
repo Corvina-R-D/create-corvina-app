@@ -41,7 +41,7 @@ gateway:
 postgresql:
   clusterName: {{ .StateValues.releaseName }}-postgresql
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
+    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
     persistence:
@@ -68,7 +68,7 @@ postgresql:
       enabled: true
 
 app:  
-  image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
+  image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-frontend
   resources:
     limits:
       cpu: 0.5
@@ -78,7 +78,7 @@ app:
       memory: 128Mi
 
 service:
-  image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
+  image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-backend
   appId: corvina-app-{{ .StateValues.appName }}
   envVar:
     LOG_LEVEL: info
@@ -105,7 +105,9 @@ migrator:
 redis:
   clusterName: {{ .StateValues.releaseName }}-redis
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
+    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+    repository: bitnamilegacy/redis
+    tag: 7.0.9-debian-11-r1
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
     enabled: true
@@ -116,6 +118,10 @@ redis:
     defaultStorageClass: "ssd-retain"
   architecture: standalone
   metrics:
+    image:
+      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+      repository: bitnamilegacy/redis-exporter
+      tag: 1.47.0-debian-11-r1
     enabled: true
     serviceMonitor:
       enabled: true
@@ -177,7 +183,7 @@ backup:
 registration:
   enabled: false
 # namespace: prod
-  image: eu.gcr.io/corvina-exorint/corvina-devops-utils:latest-develop
+  image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop   # automatic registration is expected only in dev environment, so :develop is acceptable
   appName: {{ .StateValues.appName }}
   core:
     service: corvina-core

@@ -16,7 +16,7 @@ spec:
       serviceAccountName: stasher-sa
       initContainers:
         - name: redis-wait
-          image: "groundnuty/k8s-wait-for:1.3"
+          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "service"
