@@ -28,7 +28,7 @@ spec:
               memory: 64Mi
       containers:
         - name: app
-          image: {{ .Values.app.image }}:{{ .Values.tag | default .Chart.AppVersion }}
+          image: {{ .Values.app.image }}:{{ .Values.app.tag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 8080

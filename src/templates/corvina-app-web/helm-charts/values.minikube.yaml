@@ -5,8 +5,7 @@ istio-gateway:
     requests:
       cpu: 10m
 
-tag: latest-master
-imagePullPolicy: IfNotPresent
+imagePullPolicy: IfNotPresent   # necessary for scripts/replace-images.minikube.sh
 
 postgresql:
   global:

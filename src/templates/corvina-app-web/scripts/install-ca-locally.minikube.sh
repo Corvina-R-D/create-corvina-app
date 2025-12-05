@@ -6,12 +6,12 @@ kubectl --context=corvina-minikube -n corvina-app-${app_name} get secrets ${app_
 
 if  [ -e "`which update-ca-certificates`" ]; then
 
-	sudo mkdir -p /usr/local/share/ca-certificates/${app_name}
+  sudo mkdir -p /usr/local/share/ca-certificates/${app_name}
   sudo cp /tmp/${app_name}-ca.crt /usr/local/share/ca-certificates/${app_name}/${app_name}-ca.crt
   sudo update-ca-certificates
 
 elif [ -e "`which security`" ]; then
 
-	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/${app_name}-ca.crt
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/${app_name}-ca.crt
 
 fi

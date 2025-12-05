@@ -21,7 +21,7 @@ spec:
             {{- toYaml .Values.service.resources | nindent 12 }}
       containers:
       - name: service
-        image: {{ .Values.service.image }}:{{ .Values.tag | default .Chart.AppVersion }}
+        image: {{ .Values.service.image }}:{{ .Values.service.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           {{- toYaml .Values.service.resources | nindent 10 }}

@@ -30,16 +30,21 @@ environments:
   internal-qa:
     values:
       - envs/common-defaults.yaml
+      - envs/hotfix-branch-tags.yaml
       - envs/internal-qa.yaml
   us:
     values:
       - envs/common-defaults.yaml
+      - envs/hotfix-branch-tags.yaml
       - envs/us.yaml
   minikube:
     values:
       - envs/common-defaults.yaml
+      - envs/hotfix-branch-tags.yaml
+      - envs/this-branch-tags.yaml
       - envs/minikube.yaml
   internal:
     values:
       - envs/common-defaults.yaml
+      - envs/hotfix-branch-tags.yaml
       - envs/internal.yaml

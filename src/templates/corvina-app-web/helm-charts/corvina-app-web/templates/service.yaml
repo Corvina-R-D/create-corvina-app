@@ -39,7 +39,7 @@ spec:
               memory: 64Mi
       containers:
         - name: service
-          image: {{ .Values.service.image }}:{{ .Values.tag | default .Chart.AppVersion }}
+          image: {{ .Values.service.image }}:{{ .Values.service.tag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000

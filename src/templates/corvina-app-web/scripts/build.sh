@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -euo pipefail
 
 cd $(dirname $0)
 
@@ -12,13 +13,13 @@ cd ../app/
 
 # set default value for VITE_SERVICE_URL
 VITE_SERVICE_URL=${VITE_SERVICE_URL:-}
+TAG=${TAG:-latest}
+REGISTRY=${REGISTRY:-europe-docker.pkg.dev/corvina-app-${app_name}/images}
 
 echo 'Start building app with VITE_SERVICE_URL=' $VITE_SERVICE_URL
-docker build --build-arg VITE_SERVICE_URL -t ${app_name}_app . --progress plain
-docker tag ${app_name}_app:latest europe-docker.pkg.dev/corvina-app-${app_name}/images/corvina-app-${app_name}-frontend:latest-master
+docker build --build-arg VITE_SERVICE_URL -t ${app_name}_app . --progress plain -t ${REGISTRY}/corvina-app-${app_name}-frontend:${TAG}
 # --------------------------- #
 # build docker image for service
 # --------------------------- #
 cd ../service/
-docker build -t ${app_name}_service . --progress plain
-docker tag ${app_name}_service:latest europe-docker.pkg.dev/corvina-app-${app_name}/images/corvina-app-${app_name}-backend:latest-master
+docker build -t ${app_name}_service . --progress plain -t ${REGISTRY}/corvina-app-${app_name}-backend:${TAG}
