@@ -9,7 +9,7 @@ imagePullPolicy: IfNotPresent   # necessary for scripts/replace-images.minikube.
 
 postgresql:
   global:
-    storageClass: local-path
+    storageClass: csi-hostpath-sc
   primary:
     resources:
       requests:
@@ -18,8 +18,8 @@ postgresql:
 [| if .RedisEnabled -|]
 redis:
   global:
-    storageClass: local-path
-    defaultStorageClass: local-path
+    storageClass: csi-hostpath-sc
+    defaultStorageClass: csi-hostpath-sc
   master:
     resources:
       requests:
@@ -28,7 +28,7 @@ redis:
 
 [| if .RabbitEnabled -|]
 rabbitmq:
-  storageClass: local-path
+  storageClass: csi-hostpath-sc
   resources:
     requests:
       cpu: 10m
