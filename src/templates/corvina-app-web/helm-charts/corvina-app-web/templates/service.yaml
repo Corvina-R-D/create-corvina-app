@@ -63,6 +63,14 @@ spec:
                   key: redis-password
                   optional: false
             [|- end |]
+            [|- if .RabbitEnabled |]
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: corvina-app-[| .Name |]-rabbitmq-default-user
+                  key: password
+                  optional: false
+            [|- end |]
             {{- with .Values.service.extraCa }}
             - name: NODE_EXTRA_CA_CERTS
               value: /cacerts/ca.crt
@@ -111,6 +119,11 @@ data:
   REDIS_HOST: '{{ .Release.Name }}-redis-headless'
   REDIS_PORT: '6379'
   CACHE_DEFAULT_TTL: '30' # in seconds
+  [|- if .RabbitEnabled |]
+  RABBITMQ_HOST: '{{ .Release.Name }}-rabbitmq'
+  RABBITMQ_PORT: '5672'
+  RABBITMQ_ADMIN_PORT: '15672'
+  [|- end |]
 ---
 apiVersion: v1
 kind: Service
