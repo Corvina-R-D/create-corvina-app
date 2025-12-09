@@ -29,6 +29,7 @@ redis:
 [| if .RabbitEnabled -|]
 rabbitmq:
   storageClass: csi-hostpath-sc
+  fakeAuth: true
   resources:
     requests:
       cpu: 10m

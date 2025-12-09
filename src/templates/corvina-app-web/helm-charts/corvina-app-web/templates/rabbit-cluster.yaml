@@ -36,7 +36,6 @@ spec:
         - rabbitmq_top
         - rabbitmq_delayed_message_exchange
         - rabbitmq_stream
-
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -47,3 +46,22 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Values.rabbitmq.clusterName }}
+---
+{{- if .Values.rabbitmq.fakeAuth }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.rabbitmq.clusterName }}-default-user
+type: Opaque
+stringData:
+  type: rabbitmq
+  provider: rabbitmq
+  host: {{ .Values.rabbitmq.clusterName }}
+  default_user.conf: |
+    default_user = admin
+    default_pass = password
+  username: admin
+  password: password
+  port: "5672"
+  stream-port: "5552"
+{{- end }}
