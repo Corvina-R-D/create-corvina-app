@@ -24,7 +24,7 @@ spec:
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
         - name: init-password
-          image: "blockstack/envsubst"
+          image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop
           env:
           - name: REDIS_PASSWORD
             valueFrom:
