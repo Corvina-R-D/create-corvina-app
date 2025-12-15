@@ -1,25 +1,17 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: prometheus-istio.rules-{{ .Values.prometheus.appName }}
+  name: {{ .Values.prometheus.appName }}-prometheus-istio.rules
   namespace: {{ .Release.Namespace }}
 spec:
   groups:
   - name: {{ .Values.prometheus.appName }}-istioAlerts
     rules:
       - alert: {{ .Values.prometheus.appName }}-HighErrorRate
-        expr: increase(istio_requests_total{response_code=~"5.."}[5m]) / increase(istio_requests_total[5m]) > 0.05
+        expr: increase(istio_requests_total{namespace="{{ .Release.Namespace }}", response_code=~"5.."}[5m]) / increase(istio_requests_total{namespace="{{ .Release.Namespace }}"}[5m]) > 0.05
         for: 2m
         labels:
           severity: warning
         annotations:
           summary: "High rate of 5xx errors in Istio traffic"
           description: "Requests returning 5xx in the last 5m"
-      - alert: {{ .Values.prometheus.appName }}-IstioTrafficDrop
-        expr: sum(rate(istio_requests_total[5m])) by (destination_workload) < 1
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Istio traffic dropped"
-          description: "Requests to {{'{{ $labels.destination_workload }}'}} dropped below 1 RPS in the last 5m."

@@ -1,17 +1,18 @@
+{{- $istioValues := index .Values "istio-gateway" }}
 kind: ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
-    app: {{ .Values.istio-gateway.clusterName }}
-  name: {{ .Values.istio-gateway.clusterName }}
+    app: {{ $istioValues.name }}
+  name: {{ $istioValues.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
-    - path: /metrics/per-object
-      port: prometheus
+    - path: /stats/prometheus
+      targetPort: http-envoy-prom
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Values.istio-gateway.clusterName }}
+      app: {{ $istioValues.name }}

@@ -21,7 +21,6 @@ istio-gateway:
     targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
 
 imagePullPolicy: Always
-tag: 
 
 gateway:
   appHost: "{{ .StateValues.appHost }}"
@@ -34,7 +33,6 @@ gateway:
     gcpZoneName: {{ index .StateValues "gcpZoneName" | default (regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-") }}
 
 postgresql:
-  clusterName: {{ .StateValues.releaseName }}-postgresql
   image:
     registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
   primary:
@@ -59,6 +57,9 @@ postgresql:
         postgresPassword: dummy
   metrics:
     enabled: true
+    image:
+      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+      repository: bitnamilegacy/postgres-exporter
     serviceMonitor:
       enabled: true
 
@@ -98,7 +99,6 @@ migrator:
 
 [| if .RedisEnabled -|]
 redis:
-  clusterName: {{ .StateValues.releaseName }}-redis
   image:
     registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
     repository: bitnamilegacy/redis

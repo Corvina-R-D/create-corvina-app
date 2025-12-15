@@ -1,3 +1,6 @@
+fakeExternalSecrets:
+  password: password
+
 istio-gateway:
   service:
     type: ClusterIP
