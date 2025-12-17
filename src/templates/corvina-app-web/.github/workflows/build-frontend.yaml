@@ -1,0 +1,40 @@
+on:
+  workflow_dispatch:
+  create:
+  push:
+    paths:
+      - 'app/*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+
+name: Build frontend
+
+jobs:
+  build-and-push:
+    if: github.event_name != 'create' || (startsWith(github.ref_name, 'chart-') && endsWith(github.ref_name, '-hotfix'))
+    name: Build and push image
+    uses: Corvina-R-D/corvina-github-actions/.github/workflows/build.yaml@v5
+    with:
+      gcp-project-id: corvina-app-[| .Name |]
+      gcp-registry: europe-docker.pkg.dev
+      context: app
+      file: app/Dockerfile
+      registry-image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
+      app-tag-service: app
+      is-app-build: true
+  notify_failure:
+    runs-on: ubuntu-24.04
+    needs: build-and-push
+    if: failure()
+    steps:
+      - name: Notify on failure
+        uses: Corvina-R-D/corvina-github-actions/notify-ms-teams@v5
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          title-style-color: Attention
+          title-text: corvina-app-[| .Name |] build frontend failed
+          body-text: >
+            The build and push action for corvina-app-[| .Name |] frontend has failed. Please refer to the GitHub Actions log for more details.
+            Workflow: ${{ github.workflow }}
+            View logs at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
