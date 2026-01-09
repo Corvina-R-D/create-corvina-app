@@ -64,6 +64,12 @@ I'm focusing right now on the test related to the service, so I'm using the foll
 
 [|- if .K8sEnabled |]
 
+## How to run migrations
+
+Every time the chart is installed (or the app is synced with ArgoCD), a job is started to run backend migrations. To rerun the migrations, simply upgrade the helm chart again, or sync again on ArgoCD.
+
+The backend deployment stalls the creation of upgraded pods until the job executes at least once succesfully, for the current backend image tag. After that, the migration can be rerun but the backend is not automatically restarted.
+
 ## How to release in production?
 
 Releases are identified to the semver version of the chart, like `chart-1.2.3`. We use tagged hotfix branches like `chart-1.2-hotfix`. For more information, the release workflow is documented in our [Confluence](https://exorint.atlassian.net/wiki/spaces/DEV/pages/731480068/Corvina+app+Development+and+release+workflows).

@@ -33,7 +33,7 @@ jobs:
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           title-style-color: Attention
-          title-text: corvina-app-[| .Name |] build backend failed
+          title-text: Corvina-app-[| .Name |] build backend failed
           body-text: >
             The build and push action for corvina-app-[| .Name |] backend has failed. Please refer to the GitHub Actions log for more details.
             Workflow: ${{ github.workflow }}

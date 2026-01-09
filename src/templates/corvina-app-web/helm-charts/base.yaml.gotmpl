@@ -1,3 +1,7 @@
+global:
+  argocdManagement: {{ sprigGet .Values "argocdManagement" | default false }}
+
+
 istio-gateway:
   revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
   name: istio-{{ .StateValues.appName }}gateway

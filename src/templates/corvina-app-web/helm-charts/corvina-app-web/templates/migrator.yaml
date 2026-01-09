@@ -1,8 +1,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-migrator-job-{{ .Release.Revision }}
+  name: {{ .Release.Name }}-migr-{{ .Values.service.tag }}
   namespace: {{ .Release.Namespace }}
+  {{- if not .Values.global.argocdManagement }}
+  annotations:
+    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+  {{- end }}
 spec:
   template:
     metadata:
@@ -21,7 +26,7 @@ spec:
             {{- toYaml .Values.service.resources | nindent 12 }}
       containers:
       - name: service
-        image: {{ .Values.service.image }}:{{ .Values.service.tag }}
+        image: "{{ .Values.service.image }}:{{ .Values.service.tag | required ".service.tag is required" }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           {{- toYaml .Values.service.resources | nindent 10 }}

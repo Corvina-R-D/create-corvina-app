@@ -7,9 +7,12 @@ metadata:
 spec:
   schedule: {{ .Values.backup.cron }}
   template:
+    metadata:
+      labels:
+        argocd.argoproj.io/instance: none
     includedNamespaces:
       - corvina-app-[| .Name |]
-    ttl: {{ .Values.backup.ttl | default "72h30m0s" }} 
+    ttl: {{ .Values.backup.ttl | default "72h30m0s" }}
     storageLocation: {{ .Values.backup.storageLocation }}
     volumeSnapshotLocations:
       - {{ .Values.backup.snapshotLocation }}

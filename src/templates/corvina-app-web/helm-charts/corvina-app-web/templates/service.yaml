@@ -29,7 +29,7 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "job"
-            - "{{ .Release.Name }}-migrator-job-{{ .Release.Revision }}"
+            - "{{ .Release.Name }}-migr-{{ .Values.service.tag }}"
           resources:
             requests:
               cpu: 100m
@@ -39,7 +39,7 @@ spec:
               memory: 64Mi
       containers:
         - name: service
-          image: {{ .Values.service.image }}:{{ .Values.service.tag }}
+          image: "{{ .Values.service.image }}:{{ .Values.service.tag | required ".service.tag is required" }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000

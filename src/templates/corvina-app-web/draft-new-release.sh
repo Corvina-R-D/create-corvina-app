@@ -74,4 +74,4 @@ fi
 # commit all the changes
 git commit helm-charts/corvina-app-${app_name}/Chart.yaml -m "Release chart-${new_app_version}"
 git push -u origin "$current_branch" $new_branch
-echo "Branches $current_branch $new_branch pushed, now wait for the image builds and tag updates in helm-charts/envs/hotfix-branch-tags.yaml (hotfix branches) and "
+echo "Branches $current_branch $new_branch pushed, now wait for the image builds and tag updates in helm-charts/envs/hotfix-branch-tags.yaml (hotfix branches)"

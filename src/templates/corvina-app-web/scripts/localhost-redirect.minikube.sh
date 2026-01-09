@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [[ "$#" < 3 ]]; then
+if [[ "$#" -lt 3 ]]; then
   echo "Usage: $0 <namespace> <service> <k8s service port>:<local port> [<k8s service port>:<local port>...]"
   exit
 fi
