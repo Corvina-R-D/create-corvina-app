@@ -1,0 +1,99 @@
+name: Render and publish Kubernetes templates
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Helmfile environment
+        required: true
+        default: internal-qa
+        type: choice
+        options:
+        - internal-qa
+# push:
+#   branches:
+#   - master
+#   paths:
+#   - "helm-charts/**"
+
+env:
+  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'internal-qa' }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'internal-qa' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  render:
+    name: Publish app templates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      HELM_VERSION: v3.17.3
+      HELMFILE_VERSION: v0.163.1
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Login to Google Artifact Registry
+        uses: Corvina-R-D/corvina-github-actions/gcp-registry-login@v5
+        with:
+          base-images-login: "true"
+
+      - name: Render template - helmfile
+        uses: helmfile/helmfile-action@v2
+        with:
+          helmfile-version: ${{ env.HELMFILE_VERSION }}
+          helm-version: ${{ env.HELM_VERSION }}
+          helm-plugins: https://github.com/databus23/helm-diff@v3.9.11
+          helmfile-args: >
+            -f helm-charts/helmfile.yaml
+            -e ${{ env.ENVIRONMENT }}
+            --output-dir-template "/tmp/templates/{{ .Release.KubeContext }}.{{ .Release.Namespace }}"
+            template --state-values-set argocdManagement=true
+
+      - name: Check out templates branch
+        uses: actions/checkout@v5
+        with:
+          ref: publish
+
+      - name: Update templates repo
+        run: rm -rf $(ls /tmp/templates/) && mv /tmp/templates/* .
+
+      - name: Push to templates repo
+        if: ${{ env.ENVIRONMENT == 'internal-qa' || endsWith(env.ENVIRONMENT, 'dev') }}
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: |
+            ${{ env.ENVIRONMENT }}: render `${{ github.repository }}@${{ github.sha }}`
+
+      - name: Create PR on templates repo
+        if: ${{ env.ENVIRONMENT != 'internal-qa' && !endsWith(env.ENVIRONMENT, 'dev') }}
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: publish-pr/${{ env.ENVIRONMENT }}/${{ github.sha }}
+          delete-branch: true
+          title: Publish `${{ github.ref_name }}` in `${{ env.ENVIRONMENT }}`
+          body: Refer to ${{ github.repository }}@${{ github.sha }}
+          commit-message: |
+            ${{ env.ENVIRONMENT }}: render `${{ github.repository }}@${{ github.sha }}`
+
+            Refer to ${{ github.repository }}@${{ github.sha }}
+
+      - name: Notify on failure
+        uses: Corvina-R-D/corvina-github-actions/notify-ms-teams@v5
+        if: failure() && !cancelled()
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          title-style-color: Attention
+          title-text: corvina-app-[| .Name |] templates render failed
+          body-text: >
+            Failed to render helmfile templates and push them to the publish branch. Please refer to the GitHub Actions log for more details.
+            Workflow: ${{ github.workflow }}
+            View logs at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

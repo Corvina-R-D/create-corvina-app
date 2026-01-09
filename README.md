@@ -56,9 +56,9 @@ The helm charts are used to deploy the application in a kubernetes cluster. The 
 
 We use to develop our application using minikube on our laptop. For that reason, at the root of the project, you will find some scripts to help you:
 
-- `./start-all-locally.minikube.sh`: starts all the stuff you need to run the app locally (postgresql, redis, service, app and istio ingress)
-- `./install-certificate-locally.sh`: installs the certificate for the app locally (you need to run this script after running the previous one)
-- `./cleanup.minikube.sh`: delete all the resources created by ./start-all-locally.minikube.sh
+- `./scripts/install.minikube.sh`: starts all the stuff you need to run the app in a minikube cluster
+- `./scripts/install-ca-locally.minikube.sh`: installs the certificate for the app locally (you need to run this script after running the previous one)
+- `./scripts/cleanup.minikube.sh`: delete all the resources created by the install script.
 
 Moreover to easily handle deployment on different environments, we leverage the power of helmfile. A utility script `deploy.sh <environment>` wraps call to Helmfile to deploy the application on a specific kubernetes cluster. The script will use the environment name to select the values specific for it.
 
@@ -87,7 +87,7 @@ NB: remember to update the version in the package.json file before deploying a n
 If you want to resync an existing app with the latest scaffold, you can run the following command:
 
 ```bash
-./scripts/resync-create-corvina-app-sh
+./scripts/resync-create-corvina-app.sh
 ```
 
 The script requires to run in a valid git repo.

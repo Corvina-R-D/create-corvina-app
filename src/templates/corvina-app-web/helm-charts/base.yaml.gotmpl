@@ -1,5 +1,8 @@
+global:
+  argocdManagement: {{ sprigGet .Values "argocdManagement" | default false }}
+
+
 istio-gateway:
-  clusterName: {{ .StateValues.releaseName }}-istio
   revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
   name: istio-{{ .StateValues.appName }}gateway
   service:
@@ -20,13 +23,8 @@ istio-gateway:
     minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
-  metrics:
-    enabled: true
-    serviceMonitor:
-      enabled: true
 
 imagePullPolicy: Always
-tag: 
 
 gateway:
   appHost: "{{ .StateValues.appHost }}"
@@ -39,9 +37,8 @@ gateway:
     gcpZoneName: {{ index .StateValues "gcpZoneName" | default (regexReplaceAll "^[^.]+\\." .StateValues.appHost "" | replace "." "-") }}
 
 postgresql:
-  clusterName: {{ .StateValues.releaseName }}-postgresql
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
+    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
     persistence:
@@ -64,11 +61,14 @@ postgresql:
         postgresPassword: dummy
   metrics:
     enabled: true
+    image:
+      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+      repository: bitnamilegacy/postgres-exporter
     serviceMonitor:
       enabled: true
 
 app:  
-  image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-frontend
+  image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-frontend
   resources:
     limits:
       cpu: 0.5
@@ -78,7 +78,7 @@ app:
       memory: 128Mi
 
 service:
-  image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
+  image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-backend
   appId: corvina-app-{{ .StateValues.appName }}
   envVar:
     LOG_LEVEL: info
@@ -103,9 +103,10 @@ migrator:
 
 [| if .RedisEnabled -|]
 redis:
-  clusterName: {{ .StateValues.releaseName }}-redis
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-virtual
+    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+    repository: bitnamilegacy/redis
+    tag: 7.0.9-debian-11-r1
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
     enabled: true
@@ -116,6 +117,10 @@ redis:
     defaultStorageClass: "ssd-retain"
   architecture: standalone
   metrics:
+    image:
+      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+      repository: bitnamilegacy/redis-exporter
+      tag: 1.47.0-debian-11-r1
     enabled: true
     serviceMonitor:
       enabled: true
@@ -177,7 +182,7 @@ backup:
 registration:
   enabled: false
 # namespace: prod
-  image: eu.gcr.io/corvina-exorint/corvina-devops-utils:latest-develop
+  image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop   # automatic registration is expected only in dev environment, so :develop is acceptable
   appName: {{ .StateValues.appName }}
   core:
     service: corvina-core

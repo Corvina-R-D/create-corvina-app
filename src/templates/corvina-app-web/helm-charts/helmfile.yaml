@@ -1,7 +1,7 @@
 repositories:
   - name: istio
     url: https://istio-release.storage.googleapis.com/charts
-    
+
 helmDefaults:
   timeout: 1800
   kubeContext: {{ .StateValues.kubeContext }}
@@ -16,6 +16,16 @@ releases:
       pkg: istio
     values:
       - istio-discovery.values.yaml.gotmpl
+    transformers:
+    - apiVersion: builtin
+      kind: AnnotationsTransformer
+      metadata:
+        name: istio-sync-wave
+      annotations:
+        argocd.argoproj.io/sync-wave: "-10000"
+      fieldSpecs:
+      - path: metadata/annotations
+        create: true
   - name: {{ .StateValues.releaseName }}
     chart: corvina-app-[| .Name |]
     kubeContext: {{ .StateValues.kubeContext }}
@@ -25,8 +35,24 @@ releases:
     values:
       - base.yaml.gotmpl
       - values.{{ .Environment.Name }}.yaml
+      - envs/hotfix-branch-tags.yaml
+      {{- if eq .Environment.Name "minikube" }}
+      - envs/this-branch-tags.yaml
+      {{- end }}
+    transformers:
+    - apiVersion: builtin
+      kind: AnnotationsTransformer
+      metadata:
+        name: argocd-annotate-job-for-recreation
+      annotations:
+        argocd.argoproj.io/sync-options: "Force=true,Replace=true"
+      fieldSpecs:
+      - kind: Job
+        group: ""
+        path: metadata/annotations
+        create: true
 
-environments: 
+environments:
   internal-qa:
     values:
       - envs/common-defaults.yaml

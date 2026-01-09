@@ -1,3 +1,6 @@
+fakeExternalSecrets:
+  password: password
+
 istio-gateway:
   service:
     type: ClusterIP
@@ -5,12 +8,11 @@ istio-gateway:
     requests:
       cpu: 10m
 
-tag: latest-master
-imagePullPolicy: IfNotPresent
+imagePullPolicy: IfNotPresent   # necessary for scripts/replace-images.minikube.sh
 
 postgresql:
   global:
-    storageClass: local-path
+    storageClass: csi-hostpath-sc
   primary:
     resources:
       requests:
@@ -19,8 +21,8 @@ postgresql:
 [| if .RedisEnabled -|]
 redis:
   global:
-    storageClass: local-path
-    defaultStorageClass: local-path
+    storageClass: csi-hostpath-sc
+    defaultStorageClass: csi-hostpath-sc
   master:
     resources:
       requests:
@@ -29,7 +31,8 @@ redis:
 
 [| if .RabbitEnabled -|]
 rabbitmq:
-  storageClass: local-path
+  storageClass: csi-hostpath-sc
+  fakeAuth: true
   resources:
     requests:
       cpu: 10m

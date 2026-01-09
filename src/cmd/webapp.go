@@ -476,17 +476,15 @@ func skipThisFolder(path string, k8s bool) bool {
 }
 
 var filesToExcludeK8s = []string{
-	"corvina-app-web/build.sh",
-	"corvina-app-web/deploy.internal-qa.sh",
-	"corvina-app-web/deploy.internal.sh",
+	"corvina-app-web/deploy.sh",
 	"corvina-app-web/draft-new-release.sh",
-	"corvina-app-web/install-certificate-locally.sh",
 	".minikube.sh",
 }
 
 var filesToExcludeRedis = []string{
 	"pf-redis.minikube.sh",
 	"corvina-app-web/templates/PrometheusRule-redis.yaml",
+	"corvina-app-web/templates/ServiceMonitor-redis.yaml",
 }
 
 var filesToExcludeRabbit = []string{
