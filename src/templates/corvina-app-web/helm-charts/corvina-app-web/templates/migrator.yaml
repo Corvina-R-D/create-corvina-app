@@ -48,7 +48,7 @@ spec:
               secretKeyRef:
                 name: {{ .Values.redis.auth.existingSecret | default "corvina-app-[| .Name |]-redis" }}
                 key: {{ .Values.redis.auth.existingSecretPasswordKey }}
-                optional: false   
+                optional: false
           [|- end |]
       restartPolicy: Never # prevent pod removal on job failure so that we can inspect logs
   backoffLimit: 100
