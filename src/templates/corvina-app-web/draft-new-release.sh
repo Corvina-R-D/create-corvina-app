@@ -23,12 +23,6 @@ then
     echo "arkade ( https://github.com/alexellis/arkade ): very useful to install CLI tools and Kubernetes apps"
     exit 1
 fi
-# check if semver is installed
-if ! command -v semver &> /dev/null
-then
-    echo "semver could not be found ( https://github.com/usvc/semver )"
-    exit 1
-fi
 # retrieve the current appVersion of the chart
 current_app_version=$(yq eval '.appVersion' helm-charts/corvina-app-${app_name}/Chart.yaml)
 # remove prefix chart-
@@ -41,7 +35,7 @@ if [ "$version_type" != "minor" ] && [ "$version_type" != "major" ] && [ "$versi
     exit 1
 fi
 # increment the version
-new_app_version=$(semver bump $version_type $current_app_version)
+new_app_version=$(npx semver -i $version_type $current_app_version)
 
 echo "New computed version is $new_app_version (was $current_app_version)"
 

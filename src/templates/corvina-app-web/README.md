@@ -16,7 +16,7 @@
 * helmfile `arkade get helmfile`
 * jq `arkade get jq`
 * yq `arkade get yq`
-* semver <https://github.com/usvc/semver>
+* npx
 
 ![Try custom application](https://storage.googleapis.com/corvina-public-assets/create-corvina-app-readme-custom-app.png)
 
