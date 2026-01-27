@@ -3,7 +3,7 @@ on:
   create:
   push:
     paths:
-      - 'app/*'
+      - 'app/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
