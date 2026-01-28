@@ -85,10 +85,17 @@ git diff --cached
 git commit -a -m "Update scaffold to version $($create_corvina_app_command version)"
 
 # get the SHA of the last commit
+# get the SHA of the last commit
 last_commit_sha=$(git rev-parse HEAD)
 echo
-echo "You can cherry-pick the latest scaffold changes to your branch with the following command:"
-echo "git cherry-pick $last_commit_sha"
+printf '\033[34m%s\033[0m\n' "You can cherry-pick the latest scaffold changes to your branch with the following command:"
+printf '\033[1;34m%s\033[0m\n' "git cherry-pick $last_commit_sha"
+echo
+echo
+echo "Remember to push create-corvina-app branch if you want to keep it updated:"
+printf '\033[1;34m%s\033[0m\n' "git push origin create-corvina-app"
+echo
+echo "Returning to previous branch..."
 
 git checkout -
 
