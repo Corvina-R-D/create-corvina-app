@@ -36,6 +36,11 @@ spec:
         - rabbitmq_top
         - rabbitmq_delayed_message_exchange
         - rabbitmq_stream
+  {{- if .Values.rabbitmq.fakeAuth }}
+  secretBackend:
+    externalSecret:
+      name: "{{ .Values.rabbitmq.clusterName }}-default-user"
+  {{- end }}
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
