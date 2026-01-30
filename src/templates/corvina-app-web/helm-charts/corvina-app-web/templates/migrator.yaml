@@ -3,9 +3,9 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}-migr-{{ .Values.service.tag }}
   namespace: {{ .Release.Namespace }}
-  {{- if not .Values.global.argocdManagement }}
+  {{- if and (not .Values.global.argocdManagement) .Release.IsUpgrade }}
   annotations:
-    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation
   {{- end }}
 spec:

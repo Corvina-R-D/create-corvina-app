@@ -17,6 +17,14 @@ postgresql:
     resources:
       requests:
         cpu: 10m
+  metrics:
+    resources:
+      limits:
+        cpu: 150m
+        memory: 192Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
 
 [| if .RedisEnabled -|]
 redis:
