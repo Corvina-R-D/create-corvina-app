@@ -181,7 +181,7 @@ backup:
 
 registration:
   enabled: false
-# namespace: prod
+  namespace: prod
   image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop   # automatic registration is expected only in dev environment, so :develop is acceptable
   appName: {{ .StateValues.appName }}
   core:
@@ -190,7 +190,7 @@ registration:
   keycloak:
     service: corvina-keycloak
     port: 80
-    secret: corvina-keycloak-admin-secret
+    secret: corvina-core-admin-client-secret
   manifest:
     url: https://{{ .StateValues.appHost }}/v1/manifest.json
 

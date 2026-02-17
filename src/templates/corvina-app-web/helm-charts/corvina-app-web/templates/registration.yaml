@@ -22,7 +22,7 @@ spec:
           set -euo pipefail
 
           admin_conf="$(mktemp)"
-          timeout 5s kcadm.sh config credentials --config "${admin_conf}" --server http://{{ .keycloak.service }}:{{ .keycloak.port }}/auth --realm master --user "${KEYCLOAK_ADMIN_USERNAME}" --password "${KEYCLOAK_ADMIN_PASSWORD}"
+          timeout 5s kcadm.sh config credentials --config "${admin_conf}" --server http://{{ .keycloak.service }}:{{ .keycloak.port }}/auth --realm master --client "${CORE_ADMIN_CLIENT_ID}" --secret "${CORE_ADMIN_CLIENT_SECRET}"
           token=$(jq -r -e '.endpoints[].master.token' < "${admin_conf}")
           # get appName from service
           appKey=""
@@ -44,15 +44,15 @@ spec:
         securityContext:
           runAsUser: 0
         env:
-        - name: KEYCLOAK_ADMIN_USERNAME
+        - name: CORE_ADMIN_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              key: username
+              key: clientId
               name: {{ .keycloak.secret }}
-        - name: KEYCLOAK_ADMIN_PASSWORD
+        - name: CORE_ADMIN_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              key: password
+              key: clientSecret
               name: {{ .keycloak.secret }}
       restartPolicy: Never
 {{- end }}
