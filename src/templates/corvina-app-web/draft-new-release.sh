@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-. $(dirname $0)/scripts/common.sh
+. "$(dirname "$0")/scripts/common.sh"
 
 if [ $# -lt 1 ]; then
     echo "Usage: $0 major|minor|patch"
@@ -35,37 +35,52 @@ if [ "$version_type" != "minor" ] && [ "$version_type" != "major" ] && [ "$versi
     exit 1
 fi
 # increment the version
-new_app_version=$(npx semver -i $version_type $current_app_version)
+new_app_version=$(npx --yes semver -i "$version_type" $current_app_version)
 
 echo "New computed version is $new_app_version (was $current_app_version)"
 
 new_branch=""
-if [ "$version_type" != "patch" ]; then
+if [[ "$version_type" != "patch" ]]; then
     current_app_major_minor_version="$(grep -Eo '^[0-9]*\.[0-9]*' <<< "$current_app_version")"
-    echo "Releasing a new major/minor: version bump is now applied to your current branch ($current_branch), while the existing app version is now branched in chart-${current_app_major_minor_version}-hotfix"
     new_branch="chart-${current_app_major_minor_version}-hotfix"
     git switch -c "$new_branch"
-    truncate -s 0 helm-charts/envs/{this,hotfix}-branch-tags.yaml
-    git add helm-charts/envs/{this,hotfix}-branch-tags.yaml
-    git commit --allow-empty helm-charts/envs/{this,hotfix}-branch-tags.yaml -m "Release chart-${current_app_version} (hotfix branch created)"
+    truncate -s 0 helm-charts/envs/branch-tags.yaml
+    git add helm-charts/envs/branch-tags.yaml
+    git commit --allow-empty helm-charts/envs/branch-tags.yaml -m "Release chart-${current_app_version} (hotfix branch created)"
+    git push -u origin "$new_branch"
+    echo "Released a new major/minor: the existing app version ($current_app_version) is now branched to chart-${current_app_major_minor_version}-hotfix"
+    echo "Builds for the app are now running, a PR will be automatically opened to set the new image tags in helm-charts/envs/branch-tags.yaml"
     git checkout "$current_branch"
-else
-    echo "Releasing a new patch version: version bump is now applied to the current branch only"
+fi
+
+# now commit the version bump, possibly with a PR
+commit_branch=$current_branch
+if [[ $current_branch = "master" ]]; then
+  read -p "Please specify a new branch name (ECC-xxxx) to open a PR to master, with the version bump $new_app_version (leave empty to commit directly on master): " -r
+  if [[ -n $REPLY ]]; then
+    commit_branch="$REPLY"
+    git switch -c "$commit_branch"
+  fi
 fi
 
 # update the appVersion in the chart
 yq eval ".appVersion = \"chart-${new_app_version}\"" -i helm-charts/corvina-app-${app_name}/Chart.yaml
 
-git diff
+git diff -- helm-charts/corvina-app-${app_name}/Chart.yaml || true
 
 # Add a confirmation prompt before applying changes
-read -p "Are you sure you want to apply these changes to ${current_branch}? (y/n) " -n 1 -r
+read -p "Are you sure you want to apply these changes to ${commit_branch}? (y/n) " -n 1 -r
 echo    # move to a new line
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Changes not applied."
+    git restore helm-charts/corvina-app-${app_name}/Chart.yaml
     exit 1
 fi
-# commit all the changes
+
 git commit helm-charts/corvina-app-${app_name}/Chart.yaml -m "Release chart-${new_app_version}"
-git push -u origin "$current_branch" $new_branch
-echo "Branches $current_branch $new_branch pushed, now wait for the image builds and tag updates in helm-charts/envs/hotfix-branch-tags.yaml (hotfix branches)"
+git push -u origin "$commit_branch"
+git checkout "$current_branch"
+if [[ "$current_branch" != "$commit_branch" ]]; then
+  echo "Opening new pull request..."
+  gh pr create --base "$current_branch" --head "$commit_branch" --title "Bump chart version to $new_app_version" -w
+fi

@@ -35,10 +35,7 @@ releases:
     values:
       - base.yaml.gotmpl
       - values.{{ .Environment.Name }}.yaml
-      - envs/hotfix-branch-tags.yaml
-      {{- if eq .Environment.Name "minikube" }}
-      - envs/this-branch-tags.yaml
-      {{- end }}
+      - envs/branch-tags.yaml
     transformers:
     - apiVersion: builtin
       kind: AnnotationsTransformer
