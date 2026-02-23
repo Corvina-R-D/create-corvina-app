@@ -67,8 +67,14 @@ spec:
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: corvina-app-[| .Name |]-rabbitmq-default-user
+                  name: {{ .Values.rabbitmq.clusterName }}-default-user
                   key: password
+                  optional: false
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rabbitmq.clusterName }}-default-user
+                  key: username
                   optional: false
             [|- end |]
             {{- with .Values.service.extraCa }}

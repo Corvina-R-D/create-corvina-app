@@ -23,6 +23,16 @@ spec:
             - "{{ .Release.Name }}-redis-headless"
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
+        [|- if .RabbitEnabled |]
+        - name: rabbitmq-wait
+          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          args:
+            - "service"
+            - "{{ .Values.rabbitmq.clusterName }}"
+          resources:
+            {{ toYaml .Values.stasher.resources | nindent 12 }}
+        [|- end |]
         - name: init-password
           image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop
           env:
@@ -67,6 +77,20 @@ spec:
           - name: extra-ca
             mountPath: /cacerts
           {{- end }}
+          [|- if .RabbitEnabled |]
+          - name: RABBITMQ_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.rabbitmq.clusterName }}-default-user
+                key: password
+                optional: false
+          - name: RABBITMQ_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.rabbitmq.clusterName }}-default-user
+                key: username
+                optional: false
+          [|- end |]
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
       volumes:
