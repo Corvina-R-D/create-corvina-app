@@ -15,6 +15,7 @@ spec:
     spec:
       serviceAccountName: stasher-sa
       initContainers:
+        [|- if .RedisEnabled |]
         - name: redis-wait
           image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
           imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -23,6 +24,7 @@ spec:
             - "{{ .Release.Name }}-redis-headless"
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
+        [|- end |]
         [|- if .RabbitEnabled |]
         - name: rabbitmq-wait
           image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
@@ -33,6 +35,7 @@ spec:
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
         [|- end |]
+        [|- if .RedisEnabled |]
         - name: init-password
           image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop
           env:
@@ -56,6 +59,7 @@ spec:
             mountPath: /etc/stasher
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
+        [|- end |]
       containers:
         - name: stasher
           image: {{ .Values.stasher.image }}
@@ -69,13 +73,6 @@ spec:
           {{- with .Values.service.extraCa }}
           - name: SSL_CERT_FILE
             value: /cacerts/ca.crt
-          {{- end }}
-          volumeMounts:
-          - name: stasher-config
-            mountPath: /etc/config
-          {{- with .Values.service.extraCa }}
-          - name: extra-ca
-            mountPath: /cacerts
           {{- end }}
           [|- if .RabbitEnabled |]
           - name: RABBITMQ_PASSWORD
@@ -91,6 +88,15 @@ spec:
                 key: username
                 optional: false
           [|- end |]
+          volumeMounts:
+          [|- if .RedisEnabled |]
+          - name: stasher-config
+            mountPath: /etc/config
+          [|- end |]
+          {{- with .Values.service.extraCa }}
+          - name: extra-ca
+            mountPath: /cacerts
+          {{- end }}
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
       volumes:
@@ -111,6 +117,7 @@ spec:
               path: ca.crt
         {{- end }}
 ---
+[|- if .RedisEnabled |]
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -133,6 +140,7 @@ data:
         retry_interval: 30
         max_queue_size: 1
 ---
+[|- end |]
 apiVersion: v1
 kind: ServiceAccount
 metadata:
