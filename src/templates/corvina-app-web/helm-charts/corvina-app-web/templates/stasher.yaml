@@ -93,7 +93,7 @@ spec:
           - name: stasher-config
             mountPath: /etc/config
           [|- end |]
-          {{- with .Values.service.extraCa }}
+          {{- with .Values.stasher.extraCa }}
           - name: extra-ca
             mountPath: /cacerts
           {{- end }}

@@ -126,7 +126,7 @@ data:
   REDIS_PORT: '6379'
   CACHE_DEFAULT_TTL: '30' # in seconds
   [|- if .RabbitEnabled |]
-  RABBITMQ_HOST: '{{ .Release.Name }}-rabbitmq'
+  RABBITMQ_HOST: '{{ .Values.rabbitmq.clusterName }}'
   RABBITMQ_PORT: '5672'
   RABBITMQ_ADMIN_PORT: '15672'
   [|- end |]
