@@ -67,8 +67,14 @@ spec:
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: corvina-app-[| .Name |]-rabbitmq-default-user
+                  name: {{ .Values.rabbitmq.clusterName }}-default-user
                   key: password
+                  optional: false
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rabbitmq.clusterName }}-default-user
+                  key: username
                   optional: false
             [|- end |]
             {{- with .Values.service.extraCa }}
@@ -120,7 +126,7 @@ data:
   REDIS_PORT: '6379'
   CACHE_DEFAULT_TTL: '30' # in seconds
   [|- if .RabbitEnabled |]
-  RABBITMQ_HOST: '{{ .Release.Name }}-rabbitmq'
+  RABBITMQ_HOST: '{{ .Values.rabbitmq.clusterName }}'
   RABBITMQ_PORT: '5672'
   RABBITMQ_ADMIN_PORT: '15672'
   [|- end |]
