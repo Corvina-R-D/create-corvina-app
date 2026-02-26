@@ -70,7 +70,7 @@ spec:
             - --config
             - /etc/config/config.yaml
           env:
-          {{- with .Values.service.extraCa }}
+          {{- with .Values.stasher.extraCa }}
           - name: SSL_CERT_FILE
             value: /cacerts/ca.crt
           {{- end }}
