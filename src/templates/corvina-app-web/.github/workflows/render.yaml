@@ -1,4 +1,5 @@
-name: Render and publish Kubernetes templates for corvina-app-[| .Name |]
+name: Render and publish Kubernetes templates
+run-name: Render and publish Kubernetes templates to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'internal-qa' }}
 
 on:
   workflow_dispatch:
