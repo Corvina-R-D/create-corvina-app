@@ -22,7 +22,7 @@ do
 		output_name+='.exe'
 	fi	
 
-	env GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=1 go build -tags netgo --ldflags "-s -w -X corvina/create-corvina-app/src/cmd.CliVersion=$version" -o build/$output_name $package
+	env GOOS=$GOOS GOARCH=$GOARCH go build -tags netgo --ldflags "-s -w -X corvina/create-corvina-app/src/cmd.CliVersion=$version" -o build/$output_name $package
 	if [ $? -ne 0 ]; then
    		echo 'An error has occurred! Aborting the script execution...'
 		exit 1
