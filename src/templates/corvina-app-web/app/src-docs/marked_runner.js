@@ -4,7 +4,7 @@ const fs = require("fs");
 const Mustache = require("mustache");
 
 const md = require("markdown-it")({ html: true });
-const mk = require("@iktakahiro/markdown-it-katex");
+const mk = require("@vscode/markdown-it-katex").default;
 
 
 // Simple plugin to customize the image URL
@@ -58,6 +58,6 @@ try {
 
 let inputData = fs.readFileSync(process.argv[process.argv.length - 1]);
 console.log(
-  '<style>.katex-block .text {display:inline;}</style><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" />' +
-    md.render(Mustache.render(inputData.toString(), vars))
+  '<style>.katex-block .text {display:inline;}</style><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>'
+  + md.render(Mustache.render(inputData.toString(), vars))
 );
