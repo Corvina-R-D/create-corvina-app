@@ -1,0 +1,37 @@
+# https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/manage-your-dependency-security/customizing-dependabot-security-prs#example-1-configuration-for-security-updates-only
+# https://docs.github.com/en/code-security/concepts/supply-chain-security/about-dependabot-security-updates
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directories:
+      - "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0 # disable version updates
+    allow:
+      - dependency-type: "production"
+    groups:
+      development-dependencies:
+        applies-to: "security-updates"
+        dependency-type: "development"
+        exclude-patterns:
+          - "*"
+      monorepo-dependencies:
+        applies-to: "security-updates"
+        group-by: dependency-name
+
+  # Version updates
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/" # For GitHub Actions, use the value /. Dependabot will search the /.github/workflows directory, as well as the action.yml/action.yaml file from the root directory.
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "pisto"
+      - "mcieno"
+      - "FabioFi"
+    groups:
+      version-updates:
+        group-by: dependency-name
