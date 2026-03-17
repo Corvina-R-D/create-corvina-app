@@ -9,7 +9,7 @@ helmDefaults:
 releases:
   - name: istio-discovery
     chart: istio/istiod
-    version: 1.20.4
+    version: 1.29.0
     kubeContext: {{ .StateValues.kubeContext }}
     namespace: {{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
     labels:

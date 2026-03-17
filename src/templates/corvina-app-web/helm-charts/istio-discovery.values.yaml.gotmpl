@@ -1,11 +1,13 @@
 revision: {{ .StateValues.releaseName }}
 global:
   istioNamespace: {{ .Release.Namespace }}
+  hub: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/istio
   configValidation: true
   defaultPodDisruptionBudget:
     enabled: false
   proxy:
     clusterDomain: {{ .StateValues.clusterDomain }}
+    image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/istio/proxyv2:1.29.0
 pilot:
   autoscaleEnabled: false
   env:

@@ -326,7 +326,7 @@ func createWebApp(ctx context.Context) error {
 	destinationFolder := ctx.Value(DestinationFolder).(string)
 	rabbit := ctx.Value(RabbitBool).(bool)
 	stasher := ctx.Value(StasherBool).(bool)
-	redis := ctx.Value(RedisBool).(bool) || stasher
+	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
 	singleDockerfile := ctx.Value(ExperimentalSingleDockerfile).(bool)
 	options := ""
