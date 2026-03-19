@@ -13,6 +13,7 @@ const arch = os.arch();
 
 const supportedEnvs = [
   'linux/x64',
+  'linux/arm64',
   'darwin/x64',
   'darwin/arm64',
   'win32/x64',
@@ -43,6 +44,18 @@ const allArgs = process.argv.slice(2).join(" ");
 
 // execute the script with all the arguments in interactive mode
 // so that the user can interact with the script
-spawn(`"${binPath}" ${allArgs}`, { stdio: "inherit", shell: true });
+const child = spawn(`"${binPath}" ${allArgs}`, { stdio: "inherit", shell: true });
 
+child.on("error", (err) => {
+  console.error(err);
+  process.exit(1);
+});
 
+child.on("exit", (code, signal) => {
+  if (signal) {
+    // If the process was terminated by a signal, use exit code 1
+    process.exit(1);
+  }
+  // If code is null/undefined, treat as failure
+  process.exit(typeof code === "number" ? code : 1);
+});

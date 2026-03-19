@@ -10,8 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@iktakahiro/markdown-it-katex": "^4.0.1",
-    "markdown-it": "^14.1.0",
+    "@vscode/markdown-it-katex": "^1.1.2",
+    "markdown-it": "^14.1.1",
     "mustache": "^4.2.0"
   }
 }

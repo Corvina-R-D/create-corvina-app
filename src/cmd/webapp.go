@@ -468,6 +468,9 @@ func runNpmInstallForEachPackageJson(ctx context.Context) (err error) {
 }
 
 func skipThisFolder(path string, k8s bool) bool {
+	if strings.Contains(path, "/dist") {
+		return true
+	}
 	if k8s {
 		return false
 	}
