@@ -42,7 +42,7 @@ spec:
         - authorization
         - content-type
         - accept
-      {{ if $cors.exposeHeaders }}
+      {{- if $cors.exposeHeaders }}
       exposeHeaders:
         {{- toYaml $cors.exposeHeaders | nindent 8 }}
       {{- end }}
