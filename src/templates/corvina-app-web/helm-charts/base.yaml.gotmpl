@@ -39,7 +39,8 @@ gateway:
 cors:
   enabled: true
   allowOrigins:
-    - regex: 'https://{{ replace "." "\\." .StateValues.appHost }}$'
+    - regex: '^https://{{ replace "." "\\." .StateValues.appHost }}$'
+    - regex: '^https://([a-zA-Z0-9]+\.)?{{ replace "." "\\." .StateValues.corvinaAppHost }}$'
     - regex: '^http(s?)://localhost:5173$'
 
 postgresql:
