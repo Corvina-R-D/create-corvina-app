@@ -1,4 +1,5 @@
 ---
+{{- $cors := .Values.cors }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -16,6 +17,29 @@ spec:
         prefix: /v1
     - uri:
         prefix: /swagger-ui
+    {{- if $cors.enabled }}
+    corsPolicy:
+      allowOrigins:
+        {{- toYaml $cors.allowOrigins | nindent 8 }}
+        {{- if $cors.additionalOrigins }}
+        {{- range $cors.additionalOrigins }}
+        - exact: {{ . | quote }}
+        {{- end }}
+        {{- end }}
+      allowMethods:
+        - GET
+        - POST
+        - PATCH
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowHeaders:
+        - authorization
+        - content-type
+        - accept
+      maxAge: "3600s"
+      allowCredentials: false
+    {{- end }}
     route:
     - destination:
         port:

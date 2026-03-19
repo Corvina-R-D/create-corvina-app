@@ -73,3 +73,6 @@ registration:
 
 backup:
   enabled: false
+
+cors:
+  additionalOrigins: []
