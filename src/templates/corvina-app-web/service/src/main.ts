@@ -12,13 +12,6 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  app.enableCors({
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    exposedHeaders: ['*'],
-  });
-
   app.use(
     helmet({
       contentSecurityPolicy: false,
