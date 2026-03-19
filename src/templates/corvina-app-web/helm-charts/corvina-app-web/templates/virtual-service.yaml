@@ -17,6 +17,11 @@ spec:
         prefix: /v1
     - uri:
         prefix: /swagger-ui
+    route:
+    - destination:
+        port:
+          number: 80
+        host: service-service
     {{- if $cors.enabled }}
     corsPolicy:
       allowOrigins:
@@ -40,11 +45,6 @@ spec:
       maxAge: "3600s"
       allowCredentials: false
     {{- end }}
-    route:
-    - destination:
-        port:
-          number: 80
-        host: service-service
   - match:
     - uri:
         prefix: /
