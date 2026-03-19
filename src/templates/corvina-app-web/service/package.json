@@ -20,9 +20,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.15",
-    "@nestjs/core": "^11.1.15",
-    "@nestjs/platform-express": "^11.1.15",
+    "@nestjs/common": "^11.1.17",
+    "@nestjs/core": "^11.1.17",
+    "@nestjs/platform-express": "^11.1.17",
     "@nestjs/sequelize": "^11.0.0",
     "@nestjs/serve-static": "^5.0.0",
     "@nestjs/swagger": "^11.2.6",
