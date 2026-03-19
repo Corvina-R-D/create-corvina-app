@@ -42,6 +42,10 @@ spec:
         - authorization
         - content-type
         - accept
+      {{ if $cors.exposeHeaders }}
+      exposeHeaders:
+        {{- toYaml $cors.exposeHeaders | nindent 8 }}
+      {{- end }}
       maxAge: "3600s"
       allowCredentials: false
     {{- end }}
