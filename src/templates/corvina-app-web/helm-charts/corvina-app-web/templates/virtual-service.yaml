@@ -1,4 +1,5 @@
 ---
+{{- $cors := .Values.cors }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -21,6 +22,33 @@ spec:
         port:
           number: 80
         host: service-service
+    {{- if $cors.enabled }}
+    corsPolicy:
+      allowOrigins:
+        {{- toYaml $cors.allowOrigins | nindent 8 }}
+        {{- if $cors.additionalOrigins }}
+        {{- range $cors.additionalOrigins }}
+        - exact: {{ . | quote }}
+        {{- end }}
+        {{- end }}
+      allowMethods:
+        - GET
+        - POST
+        - PATCH
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowHeaders:
+        - authorization
+        - content-type
+        - accept
+      {{- if $cors.exposeHeaders }}
+      exposeHeaders:
+        {{- toYaml $cors.exposeHeaders | nindent 8 }}
+      {{- end }}
+      maxAge: "3600s"
+      allowCredentials: false
+    {{- end }}
   - match:
     - uri:
         prefix: /
