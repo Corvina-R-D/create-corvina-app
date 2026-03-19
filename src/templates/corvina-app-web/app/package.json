@@ -11,7 +11,7 @@
     "build-docs": "cd src-docs && npm install && ./build.sh && cd .."
   },
   "dependencies": {
-    "@corvina/corvina-app-connect": "^1.9.1",
+    "@corvina/corvina-app-connect": "^1.9.2",
     "@mdi/font": "^7.4.47",
     "driver.js": "git+https://github.com/zanettea/driver.js",
     "echarts": "^6.0.0",
