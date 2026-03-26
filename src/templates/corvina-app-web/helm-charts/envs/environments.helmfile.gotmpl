@@ -1,0 +1,14 @@
+{{- $envMap := (readFile "envs/environments.yaml" | fromYaml) | default (dict) -}}
+
+environments:
+{{- range $envName := keys $envMap | sortAlpha }}
+{{- $cfg := index $envMap $envName }}
+  {{ $envName }}:
+    values:
+      - envs/common-defaults.yaml
+      - envs/{{ $envName }}.yaml
+      - kubeContext: {{ index $cfg "hosting" | quote }}
+        renderBranch: {{ index $cfg "branch" | quote }}
+        additionalOrigins:
+{{ toYaml ((index $cfg "additionalOrigins") | default (list)) | nindent 10 }}
+{{- end }}
