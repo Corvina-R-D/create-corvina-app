@@ -7,7 +7,7 @@ internal:
 
 internal-qa:
   hosting: internal-qa
-  branch: *defaultBranch
+  branch: master
   additionalOrigins:
     - '^https://[| .Name |]\.dev\.corvina\.cloud$'
     - '^https://([a-zA-Z0-9]+\.)?app\.dev\.corvina\.cloud$'
