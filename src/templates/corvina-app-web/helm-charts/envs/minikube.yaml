@@ -1,4 +1,3 @@
 appHost: [| .Name |].corvina.mk
 corvinaAppHost: app.corvina.mk
-kubeContext: corvina-minikube
 clusterDomain: corvina-minikube.local

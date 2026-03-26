@@ -4,7 +4,11 @@ repositories:
 
 helmDefaults:
   timeout: 1800
-  kubeContext: {{ .StateValues.kubeContext }}
+  kubeContext: {{ index .StateValues "kubeContext" | default "" }}
+
+{{ tpl (readFile "envs/environments.helmfile.gotmpl") . }}
+
+---
 
 releases:
   - name: istio-discovery
@@ -48,21 +52,3 @@ releases:
         group: ""
         path: metadata/annotations
         create: true
-
-environments:
-  internal-qa:
-    values:
-      - envs/common-defaults.yaml
-      - envs/internal-qa.yaml
-  us:
-    values:
-      - envs/common-defaults.yaml
-      - envs/us.yaml
-  minikube:
-    values:
-      - envs/common-defaults.yaml
-      - envs/minikube.yaml
-  internal:
-    values:
-      - envs/common-defaults.yaml
-      - envs/internal.yaml

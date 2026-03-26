@@ -1,5 +1,4 @@
 appHost: [| .Name |].corvina.io
 corvinaAppHost: app.corvina.io
-kubeContext: internal
 clusterDomain: cluster.local
 gcpNetworkingProject: corvina-internal

@@ -86,6 +86,46 @@ Once the build is done, you can deploy the new version of the app with the follo
 
 * `./deploy.sh <environment>`
 
+## YAML source of truth for Helmfile environments
+
+Environment metadata is centralized in `helm-charts/envs/environments.yaml`, keyed by Helmfile environment name (`instance`), with fields:
+
+* `hosting`: Kubernetes context (cluster) where the app instance is hosted.
+* `branch`: branch used for chart rendering (`master` or `chart-<major>.<minor>-hotfix`).
+* `additionalOrigins`: list of additional CORS origins.
+
+The `helm-charts/helmfile.yaml` file uses Helmfile templating to:
+
+* generate the `environments:` list dynamically from the YAML map;
+* inject `hosting` as `kubeContext`;
+* inject `additionalOrigins` as `cors.additionalOrigins` (consumed by `virtual-service.yaml`).
+
+### Trigger rendering
+
+Use the script below to trigger the GitHub render pipeline with the correct branch for an instance:
+
+```bash
+./scripts/render-env.sh <instance>
+```
+
+Example:
+
+```bash
+./scripts/render-env.sh internal-qa
+```
+
+If no instance is provided, the script dispatches rendering for all configured environments:
+
+```bash
+./scripts/render-env.sh
+```
+
+The script reads the instance entry in `helm-charts/envs/environments.yaml` and runs:
+
+* GitHub workflow: `render.yaml`
+* ref/branch: from the `branch` field
+* workflow input `environment`: from the environment key
+
 [|- end |]
 
 [|- if .SingleDockerfile |]

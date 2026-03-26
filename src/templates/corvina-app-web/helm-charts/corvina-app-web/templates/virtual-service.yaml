@@ -28,7 +28,7 @@ spec:
         {{- toYaml $cors.allowOrigins | nindent 8 }}
         {{- if $cors.additionalOrigins }}
         {{- range $cors.additionalOrigins }}
-        - exact: {{ . | quote }}
+        - regex: {{ . | quote }}
         {{- end }}
         {{- end }}
       allowMethods:

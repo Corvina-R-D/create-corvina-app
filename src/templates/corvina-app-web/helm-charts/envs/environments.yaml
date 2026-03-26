@@ -1,0 +1,23 @@
+internal:
+  hosting: internal
+  branch: &defaultBranch chart-1.0-hotfix
+  additionalOrigins:
+    - '^https://[| .Name |]\.corvina-de\.io$'
+    - '^https://([a-zA-Z0-9]+\.)?app\.corvina-de\.io$'
+
+internal-qa:
+  hosting: internal-qa
+  branch: *defaultBranch
+  additionalOrigins:
+    - '^https://[| .Name |]\.dev\.corvina\.cloud$'
+    - '^https://([a-zA-Z0-9]+\.)?app\.dev\.corvina\.cloud$'
+
+us:
+  hosting: us
+  branch: *defaultBranch
+  additionalOrigins: []
+
+minikube:
+  hosting: corvina-minikube
+  branch: master
+  additionalOrigins: []
