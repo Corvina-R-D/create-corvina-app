@@ -175,8 +175,14 @@ rabbitmq:
 
 [| if .StasherEnabled -|]
 stasher:
-  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-1.1.1
-  queue: stasher
+  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-2.1.0
+  envVar:
+    RABBITMQ_QUEUE: my-queue
+    LOG_LEVEL: info
+    ACCEPTED_HTTP_RESULTS: 200,201,202
+    PERMANENT_HTTP_ERRORS: 208,404,405,406,501,505
+    NETWORK_RETRY_INTERVAL: 10
+    NETWORK_RETRY_MAX_TIMEOUT: 120
   resources:
     requests:
         memory: "16Mi"

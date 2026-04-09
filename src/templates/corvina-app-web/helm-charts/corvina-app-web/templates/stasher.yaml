@@ -15,16 +15,6 @@ spec:
     spec:
       serviceAccountName: stasher-sa
       initContainers:
-        [|- if .RedisEnabled |]
-        - name: redis-wait
-          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
-          args:
-            - "service"
-            - "{{ .Release.Name }}-redis-headless"
-          resources:
-            {{ toYaml .Values.stasher.resources | nindent 12 }}
-        [|- end |]
         [|- if .RabbitEnabled |]
         - name: rabbitmq-wait
           image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
@@ -35,40 +25,15 @@ spec:
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
         [|- end |]
-        [|- if .RedisEnabled |]
-        - name: init-password
-          image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop
-          env:
-          - name: REDIS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.redis.auth.existingSecret | default "corvina-app-[| .Name |]-redis" }}
-                key: redis-password
-                optional: false
-          command:
-          - /bin/sh
-          - -c
-          args:
-          - |
-            set -euo pipefail
-            envsubst < /tmp/stasher/config.yaml > /etc/stasher/config.yaml
-          volumeMounts:
-          - name: stasher-config-template
-            mountPath: /tmp/stasher
-          - name: stasher-config
-            mountPath: /etc/stasher
-          resources:
-            {{ toYaml .Values.stasher.resources | nindent 12 }}
-        [|- end |]
       containers:
         - name: stasher
           image: {{ .Values.stasher.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           command:
             - stash
-          args:
-            - --config
-            - /etc/config/config.yaml
+          envFrom:
+            - configMapRef:
+                name: stasher-config-map
           env:
           {{- with .Values.stasher.extraCa }}
           - name: SSL_CERT_FILE
@@ -89,10 +54,6 @@ spec:
                 optional: false
           [|- end |]
           volumeMounts:
-          [|- if .RedisEnabled |]
-          - name: stasher-config
-            mountPath: /etc/config
-          [|- end |]
           {{- with .Values.stasher.extraCa }}
           - name: extra-ca
             mountPath: /cacerts
@@ -100,14 +61,6 @@ spec:
           resources:
             {{ toYaml .Values.stasher.resources | nindent 12 }}
       volumes:
-        - name: stasher-config
-          emptyDir: {}
-        - name: stasher-config-template
-          configMap:
-            name: stasher-config-map
-            items:
-              - key: config.yaml
-                path: config.yaml
         {{- with .Values.stasher.extraCa }}
         - name: extra-ca
           secret:
@@ -117,30 +70,21 @@ spec:
               path: ca.crt
         {{- end }}
 ---
-[|- if .RedisEnabled |]
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: stasher-config-map
   namespace: {{ .Release.Namespace }}
 data:
-  config.yaml: |
-    input:
-      - type: redis
-        host: {{ .Release.Name }}-redis-headless:6379
-        key: {{ .Values.stasher.queue }}
-        password: $REDIS_PASSWORD
-        connections: 10
-        batch_count: 100
-        blocking_timeout: 600s
-    output:
-      - type: http
-        http_status_codes: [200, 201, 202]
-        http_error_codes: [501, 405, 404, 208, 505]
-        retry_interval: 30
-        max_queue_size: 1
+  LOG_LEVEL: "{{ .Values.stasher.envVar.LOG_LEVEL }}"
+  RABBITMQ_HOST: '{{ .Values.rabbitmq.clusterName }}'
+  RABBITMQ_PORT: '5672'
+  RABBITMQ_QUEUE: '{{ .Values.stasher.envVar.RABBITMQ_QUEUE }}'
+  NETWORK_RETRY_INTERVAL: '{{ .Values.stasher.envVar.NETWORK_RETRY_INTERVAL }}'
+  NETWORK_RETRY_MAX_TIMEOUT: '{{ .Values.stasher.envVar.NETWORK_RETRY_MAX_TIMEOUT }}'
+  ACCEPTED_HTTP_RESULTS: '{{ .Values.stasher.envVar.ACCEPTED_HTTP_RESULTS }}'
+  PERMANENT_HTTP_ERRORS: '{{ .Values.stasher.envVar.PERMANENT_HTTP_ERRORS }}'
 ---
-[|- end |]
 apiVersion: v1
 kind: ServiceAccount
 metadata:
