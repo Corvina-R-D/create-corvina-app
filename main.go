@@ -58,8 +58,8 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Name, c.String("name"))
 				c.Context = context.WithValue(c.Context, cmd.Redis, getRedisValueFromCliContext(countRedis, c))
 				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(countK8s, c))
-				c.Context = context.WithValue(c.Context, cmd.Rabbit, getRabbitValueFromCliContext(countRabbit, c))
 				c.Context = context.WithValue(c.Context, cmd.Stasher, getStasherValueFromCliContext(countStasher, c))
+				c.Context = context.WithValue(c.Context, cmd.Rabbit, getRabbitValueFromCliContext(countRabbit, c))
 				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
 				c.Context = context.WithValue(c.Context, cmd.DisableNameValidation, c.Bool("disable-name-validation"))
 				c.Context = context.WithValue(c.Context, cmd.SkipPackageLockGeneration, c.Bool("skip-package-lock-generation"))
@@ -143,6 +143,12 @@ func getRedisValueFromCliContext(count int, c *cli.Context) cmd.RedisValue {
 }
 
 func getRabbitValueFromCliContext(count int, c *cli.Context) cmd.RabbitValue {
+	if c.Context.Value(cmd.Stasher) == cmd.StasherTrue {
+		log.Info().Msg("Considering --rabbit=true because stasher is enabled")
+		// if stasher is enabled, rabbit must be enabled as well
+		return cmd.RabbitTrue
+	}
+
 	rabbitContextValue := cmd.RabbitAsk
 	if count == 1 && c.Bool("rabbit") {
 		rabbitContextValue = cmd.RabbitTrue
