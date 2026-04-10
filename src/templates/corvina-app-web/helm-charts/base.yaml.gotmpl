@@ -175,7 +175,7 @@ rabbitmq:
 
 [| if .StasherEnabled -|]
 stasher:
-  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-2.1.0
+  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-2.1.1
   envVar:
     RABBITMQ_QUEUE: stasher
     LOG_LEVEL: info
