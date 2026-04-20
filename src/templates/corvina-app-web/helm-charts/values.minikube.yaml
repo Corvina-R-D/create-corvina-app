@@ -64,7 +64,7 @@ stasher:
     secret: corvina-app-[| .Name |]-prod-tls
   resources:
     requests:
-        cpu: 10m
+      cpu: 10m
 [|- end |]
 
 registration:

@@ -36,7 +36,7 @@ func formatMessage(i interface{}) string {
 
 func setLoggingLevel(level string) {
 	if level == "" {
-		level = "WARN"
+		level = "INFO"
 	}
 
 	level = strings.ToUpper(level)

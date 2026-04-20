@@ -79,12 +79,12 @@ func WebApp(ctx context.Context) error {
 		return err
 	}
 
-	ctx, err = takeRabbitFromCtxOrAskIt(ctx)
+	ctx, err = takeStasherFromCtxOrAskIt(ctx)
 	if err != nil {
 		return err
 	}
 
-	ctx, err = takeStasherFromCtxOrAskIt(ctx)
+	ctx, err = takeRabbitFromCtxOrAskIt(ctx)
 	if err != nil {
 		return err
 	}
@@ -197,6 +197,11 @@ func takeRedisFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
 }
 
 func takeRabbitFromCtxOrAskIt(ctx context.Context) (context.Context, error) {
+	if stasherBool, ok := ctx.Value(StasherBool).(bool); ok && stasherBool {
+		// if stasher is enabled, we enable rabbit by default
+		return context.WithValue(ctx, RabbitBool, true), nil
+	}
+
 	rabbit := ctx.Value(Rabbit).(RabbitValue)
 
 	switch rabbit {
@@ -372,7 +377,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
-		log.Info().Str("path", path).Msg("Processing file")
+		log.Debug().Str("path", path).Msg("Processing file")
 
 		if d.IsDir() {
 			if skipThisFolder(path, k8s) {
@@ -380,7 +385,7 @@ func createWebApp(ctx context.Context) error {
 			}
 
 			dirName := strings.Replace(path, "corvina-app-web", destinationFolder, 2)
-			log.Info().Str("path", dirName).Msg("Creating folder")
+			log.Debug().Str("path", dirName).Msg("Creating folder")
 
 			if _, err := os.Stat(dirName); os.IsNotExist(err) {
 				return os.Mkdir(dirName, 0755)
@@ -400,7 +405,7 @@ func createWebApp(ctx context.Context) error {
 		defer file.Close()
 
 		if isFileToCopyAsIs(path) {
-			log.Info().Str("path", path).Msg("Copying file as is")
+			log.Debug().Str("path", path).Msg("Copying file as is")
 			err = CopyAsIs(path, file)
 			if err != nil {
 				return err
@@ -408,7 +413,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
-		log.Info().Str("path", path).Msg("Parsing file and executing template")
+		log.Debug().Str("path", path).Msg("Parsing file and executing template")
 		err = ParseFileAndExecuteTemplate(path, projectInfo, file)
 		if err != nil {
 			return err
@@ -450,7 +455,7 @@ func runNpmInstallForEachPackageJson(ctx context.Context) (err error) {
 		}
 
 		if filepath.Base(path) == "package.json" {
-			log.Info().Str("path", filepath.Dir(path)).Msg("Running npm install")
+			log.Info().Str("path", filepath.Dir(path)).Msg("Running npm install --package-lock-only")
 			err = runCommand("npm install --package-lock-only", filepath.Join(destinationFolder, filepath.Dir(path)))
 			if err != nil {
 				log.Error().Err(err).Msg("Error running npm install")

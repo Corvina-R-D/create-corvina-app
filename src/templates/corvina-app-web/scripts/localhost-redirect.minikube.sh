@@ -20,7 +20,7 @@ already_applied="$(kubectl --context corvina-minikube -n "$namespace" get servic
 
 if [[ "$already_applied" != "null" ]]; then
   echo "Service $service in namespace $namespace is already redirected to $host_ip"
-  echo "Stop prvious redirection or use \" ./minikube-redirect-stop.sh $service \" to undo the redirection"
+  echo "Stop previous redirection or use \" ./localhost-redirect-stop.minikube.sh $service \" to undo the redirection"
   exit
 fi
 
