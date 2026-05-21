@@ -20,6 +20,14 @@ releases:
       pkg: istio
     values:
       - istio-discovery.values.yaml.gotmpl
+    strategicMergePatches:
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      metadata:
+        name: istio-validator-{{ .StateValues.releaseName }}-{{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
+      webhooks:
+      - name: rev.validation.istio.io
+        failurePolicy: Fail
     transformers:
     - apiVersion: builtin
       kind: AnnotationsTransformer
