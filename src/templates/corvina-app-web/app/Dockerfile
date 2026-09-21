@@ -1,5 +1,5 @@
 ##### build environment #####
-FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v1 AS build
+FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v2 AS build
 
 # make the 'app' folder the current working directory
 WORKDIR /app
