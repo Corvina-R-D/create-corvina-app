@@ -60,7 +60,7 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.Kubernetes, getK8sValueFromCliContext(countK8s, c))
 				c.Context = context.WithValue(c.Context, cmd.Stasher, getStasherValueFromCliContext(countStasher, c))
 				c.Context = context.WithValue(c.Context, cmd.Rabbit, getRabbitValueFromCliContext(countRabbit, c))
-				c.Context = context.WithValue(c.Context, cmd.ExperimentalSingleDockerfile, c.Bool("experimental-single-dockerfile"))
+				c.Context = context.WithValue(c.Context, cmd.ExperimentalDevcontainer, c.Bool("experimental-devcontainer"))
 				c.Context = context.WithValue(c.Context, cmd.DisableNameValidation, c.Bool("disable-name-validation"))
 				c.Context = context.WithValue(c.Context, cmd.SkipPackageLockGeneration, c.Bool("skip-package-lock-generation"))
 				c.Context = context.WithValue(c.Context, cmd.DestinationFolder, c.String("destinationFolder"))
@@ -101,8 +101,8 @@ func main() {
 					Count: &countStasher,
 				},
 				&cli.BoolFlag{
-					Name:  "experimental-single-dockerfile",
-					Usage: "Use a single Dockerfile for both FE and BE. We also add some instructions to deploy the app on Heroku.",
+					Name:  "experimental-devcontainer",
+					Usage: "Enable experimental container tooling: a devcontainer setup for local development and tests.",
 				},
 				&cli.BoolFlag{
 					Name:  "disable-name-validation",

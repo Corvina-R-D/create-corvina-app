@@ -1,0 +1,30 @@
+{
+  "name": "corvina-app-[| .Name |] app",
+  "dockerComposeFile": "compose.yaml",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.10.1": {
+      "moby": false
+    },
+    "ghcr.io/devcontainers/features/node:2.1.0": {
+      "version": "22"
+    }
+  },
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace/app",
+
+  // Ensure the corvina-minikube network exists and export LOCAL_GIT_ROOT so the container can be
+  // started from the root of the repo (e.g. a codespace) or from this specific folder
+  "initializeCommand": "docker network create corvina-minikube 2>/dev/null || true; echo LOCAL_GIT_ROOT=$(git -C ${localWorkspaceFolder} rev-parse --show-toplevel 2>/dev/null || echo ${localWorkspaceFolder}) > ${localWorkspaceFolder}/.devcontainer/app/.env",
+
+  "postCreateCommand": "npm install",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "vue.volar"
+      ]
+    }
+  }
+}

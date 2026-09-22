@@ -1,0 +1,76 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: devcontainer.Dockerfile
+    stop_grace_period: 5s
+    command: sleep infinity
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${LOCAL_GIT_ROOT:-/var/lib/docker/codespacemount/workspace/corvina-app-[| .Name |]}:/workspace:cached
+    networks:
+      - default
+      - corvina-minikube
+    depends_on:
+      postgresql:
+        condition: service_healthy
+[|- if .RedisEnabled |]
+      redis:
+        condition: service_healthy
+[|- end |]
+[|- if .RabbitEnabled |]
+      rabbitmq:
+        condition: service_healthy
+[|- end |]
+
+  postgresql:
+    image: postgres:16.2-alpine
+    environment:
+      POSTGRES_USER: "corvina_app_[| .Name |]"
+      POSTGRES_PASSWORD: "corvina_app_[| .Name |]"
+    volumes:
+      - ../../data/postgresql:/var/lib/postgresql/data
+    networks:
+      - default
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corvina_app_[| .Name |]"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+[|- if .RedisEnabled |]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+[|- end |]
+[|- if .RabbitEnabled |]
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_ERLANG_COOKIE: known_cookie
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+[|- end |]
+
+networks:
+  corvina-minikube:
+    external: true
