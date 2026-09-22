@@ -19,6 +19,18 @@ const createUmzug = async (nestApp: INestApplication): Promise<Umzug<any>> => {
         name: '2023.03.23T12.00.00.addInstanceId',
         ...(await import('./2023.03.23T12.00.00.addInstanceId.mig')),
       },
+      {
+        name: '2026.09.22T09.03.40.addPaymentPlanFields',
+        ...(await import('./2026.09.22T09.03.40.addPaymentPlanFields.mig')),
+      },
+      {
+        name: '2026.09.22T10.00.00.addOrgResourceId',
+        ...(await import('./2026.09.22T10.00.00.addOrgResourceId.mig')),
+      },
+      {
+        name: '2026.09.22T10.05.00.changeOrganizationIdToBigint',
+        ...(await import('./2026.09.22T10.05.00.changeOrganizationIdToBigint.mig')),
+      },
     ],
     context: nestApp,
     storage: new SequelizeStorage({ sequelize }),

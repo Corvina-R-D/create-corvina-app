@@ -8,6 +8,8 @@ import { CacheMethod } from '../../utils/cache.decorator';
 import { CustomError } from '../../utils/CustomError';
 import { ICacheService } from '../cache.service';
 import { IOpenIDConfiguration } from './IOpenIdConfiguration';
+import { getPaymentPlans, IPaymentPlanDTO } from '../../dtos/general-info/paymentPlan.dto';
+import { addPeriod } from '../../utils/calculatePeriod';
 
 export interface IGetInstallationInput {
   corvinaHost: string;
@@ -30,7 +32,24 @@ export interface IInstallationDeleteOutput {
   message?: string;
 }
 
+export interface IInstallationRenewInput {
+  instanceId: string;
+  organizationId: string;
+  endDate: Date;
+  planId?: string;
+  freeTrial?: boolean;
+  transaction?: Transaction;
+}
+
+export interface IInstallationRenewOutput {
+  success: boolean;
+  message?: string;
+}
+
 const ONE_WEEK = 60 * 60 * 24 * 7;
+
+// Fallback expiry used when a resolved plan has neither a recurrent nor a trial period (effectively "no expiry").
+const FAR_FUTURE_END_DATE = new Date('2999-12-31T23:59:59Z');
 
 export interface IInstallationService {
   getInstallation({
@@ -45,6 +64,7 @@ export interface IInstallationService {
   getOpenIdConfiguration(input: string): Promise<IOpenIDConfiguration>;
   create(input: IInstallInstallationInput): Promise<Installation>;
   delete(input: IInstallationDeleteInput): Promise<IInstallationDeleteOutput>;
+  renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput>;
 }
 
 @Injectable()
@@ -65,7 +85,18 @@ export class InstallationService implements IInstallationService {
   async create(input: IInstallInstallationInput): Promise<Installation> {
     const { transaction } = input;
 
-    const [outputInstallation, isCreated] = await this._installationRepository.upsert(input as any, { transaction });
+    const availablePaymentPlans = getPaymentPlans().filter((plan) => !plan.deprecated);
+    const paymentPlan = input.planId ? availablePaymentPlans.find((plan) => plan.id === input.planId) : availablePaymentPlans[0];
+
+    const installationInput = { ...input, planId: paymentPlan?.id ?? input.planId };
+
+    if (!installationInput.endDate) {
+      const { endDate, freeTrial } = this.resolvePlanEndDate(paymentPlan);
+      installationInput.endDate = endDate;
+      installationInput.freeTrial = freeTrial;
+    }
+
+    const [outputInstallation, isCreated] = await this._installationRepository.upsert(installationInput as any, { transaction });
 
     await this.purgeInstallationCache(input);
 
@@ -106,6 +137,47 @@ export class InstallationService implements IInstallationService {
     await this.purgeInstallationCache(installation);
 
     return { success: true };
+  }
+
+  @SequelizeTransaction()
+  async renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput> {
+    const { instanceId, organizationId, endDate, planId, freeTrial, transaction } = input;
+
+    const installation = await this.getInstallation({ instanceId, organizationId, transaction });
+
+    if (!installation) {
+      return { success: false, message: `Installation not found` };
+    }
+
+    if (installation.endDate && installation.endDate > endDate) {
+      throw new CustomError(702, 'The endDate is before the current one', { endDate, currentEndDate: installation.endDate });
+    }
+
+    const paymentPlans = getPaymentPlans();
+    const paymentPlan = planId ? paymentPlans.find((plan) => plan.id === planId) : paymentPlans[0];
+
+    await this._installationRepository.update(
+      { endDate, planId: paymentPlan?.id ?? planId, freeTrial: freeTrial || false },
+      { where: { instanceId, organizationId }, transaction }
+    );
+
+    await this.purgeInstallationCache(installation);
+
+    return { success: true };
+  }
+
+  private resolvePlanEndDate(paymentPlan?: IPaymentPlanDTO): { endDate: Date; freeTrial: boolean } {
+    const now = new Date();
+
+    if (paymentPlan?.trial?.period) {
+      return { endDate: addPeriod(now, paymentPlan.trial.period), freeTrial: true };
+    }
+
+    if (paymentPlan?.recurrent?.period) {
+      return { endDate: addPeriod(now, paymentPlan.recurrent.period), freeTrial: false };
+    }
+
+    return { endDate: FAR_FUTURE_END_DATE, freeTrial: false };
   }
 
   private async invalidateCache(key: string) {

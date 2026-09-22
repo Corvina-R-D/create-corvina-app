@@ -1,11 +1,12 @@
 import { Controller, Body, Post, UseInterceptors, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import * as semver from 'semver';
-import { createInstallation, EVENT_TYPE, InstalledInputDTO, UninstalledInputDTO, BaseLifecycleDTO } from '../dtos/lifecycle.dto';
+import { createInstallation, EVENT_TYPE, InstalledInputDTO, UninstalledInputDTO, RenewInputDTO, BaseLifecycleDTO } from '../dtos/lifecycle.dto';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
 import { IInstallationDeleteInput, InstallationService } from '../services/installation/installation.service';
 import { matchUrl } from '../utils/matchUrl';
 import { CorvinaAuthGuard } from '../guards/corvinaAuth.guard';
+import { CorvinaCoreGuard } from '../guards/corvinaCore.guard';
 import { Logger } from '../utils/logger';
 import { CustomError } from '../utils/CustomError';
 
@@ -13,7 +14,7 @@ import { CustomError } from '../utils/CustomError';
 @ApiTags('lifecycle')
 @ApiBearerAuth()
 @UseInterceptors(LoggingInterceptor)
-@UseGuards(CorvinaAuthGuard)
+@UseGuards(CorvinaAuthGuard, CorvinaCoreGuard)
 export class LifecycleController {
   private readonly _logger: Logger;
 
@@ -95,6 +96,33 @@ export class LifecycleController {
       .catch((error) => {
         this._logger.error({ msg: 'Unable to complete uninstallation', body, error });
       });
+
+    return 'OK';
+  }
+
+  @Post('renew')
+  async renew(@Body() body: RenewInputDTO): Promise<string> {
+    this.isEventForMeValidation(body);
+
+    if (body.eventType !== EVENT_TYPE.RENEW) {
+      throw new CustomError(507, `I'm the renew endpoint, I can process only the eventType ${EVENT_TYPE.RENEW}`, {
+        RENEWED: EVENT_TYPE.RENEW,
+      });
+    }
+
+    const output = await this._installationService.renew({
+      instanceId: body.instanceId,
+      organizationId: String(body.organizationId),
+      endDate: body.endDate,
+      planId: body.planId,
+      freeTrial: body.freeTrial || false,
+    });
+
+    if (!output.success) {
+      throw new CustomError(508, output.message || 'Unable to complete renew', { body });
+    }
+
+    this._logger.info({ msg: 'Renew completed successfully', body });
 
     return 'OK';
   }

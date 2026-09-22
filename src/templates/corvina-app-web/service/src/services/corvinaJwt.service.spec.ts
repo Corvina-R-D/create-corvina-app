@@ -46,7 +46,7 @@ describe('CorvinaJwt', () => {
 
     const installation = await installationService.create({
       apiVersion: '1',
-      organizationId: randomUUID(),
+      organizationId: Math.ceil(Math.random() * 1000000).toString(),
       instanceId: randomUUID(),
       baseUrl: 'https://www.test.corvina.io',
       apiBaseUrl: 'https://www.api.test.corvina.io',
@@ -76,7 +76,7 @@ describe('CorvinaJwt', () => {
 
   it('I cannot verify a jwt for uninstalled organizationId', async () => {
     const instanceId = randomUUID();
-    const organizationId = randomUUID();
+    const organizationId = Math.ceil(Math.random() * 1000000).toString();
     try {
       await service.validateBearerToken({
         token: 'whatever',
