@@ -23,10 +23,15 @@ const i18n = createI18n({
   }
 })
 
+import CorvinaComponents from "@corvina/vue-components-library";
+import "@corvina/vue-components-library/vue-components-library.css";
+
+
 loadFonts()
 
 createApp(App)
   .use(vuetify)
+  .use(CorvinaComponents)
   .use(router)
   .use(i18n)
   .mount('#app')

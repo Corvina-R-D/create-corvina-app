@@ -1,15 +1,14 @@
 <template>
   <div>
-    <Breadcrumb :path="breadcrumb.path" :icon="breadcrumb.icon" :disableSort="breadcrumb.disableSort" :currentTab="fromIndexToTabKeysValue(activeTab)"
-      :searchKey="fromIndexToTabKeysValue(activeTab)" :searchModel="''" :sortQueryKeys="breadcrumb.sortQueryKeys"
-      :sortingKeys="breadcrumb.sortingKeys" :searchTitle="breadcrumb.searchTitle" :disableSearch="breadcrumb.disableSearch" />
+    <Breadcrumb :icon="breadcrumb.icon" :path="breadcrumb.path" :showSearchBar="!breadcrumb.disableSearch"
+      :searchPlaceholder="breadcrumb.searchTitle" :searchModel="search" @update:searchModel="search = $event" />
     <v-container fluid class="container maincontainer">
       <v-row>
         <v-spacer />
         <v-col>
-          <div style="text-align: center;">
-            <h1 style="color: var(--color-primary)">Congratulations!</h1>
-            <h4 style="color: var(--color-primary-dk2)">You successfully create your first corvina app!</h4>
+          <div class="text-center">
+            <h1 class="col-primary">Congratulations!</h1>
+            <h4 class="col-primary-dk2">You successfully created your first corvina app!</h4>
           </div>
         </v-col>
         <v-spacer />
@@ -25,9 +24,46 @@
         </v-col>
         <v-spacer />
       </v-row>
+      <v-row>
+        <v-spacer />
+        <v-col>
+          <h3 class="text-center">Examples of components with the Corvina style:</h3>
+        </v-col>
+        <v-spacer />
+      </v-row>
+      <v-row>
+        <v-spacer />
+        <v-col style="display: flex; justify-content: center; align-items: center; gap: 12px;">
+          <CorvinaButton
+            text="Click me"
+            icon="ecc-M-Home"
+            tooltip="This is a tooltip"
+            :variant="CORVINA.BUTTON.VARIANT.OUTLINED"
+            dataQa="example-button"
+            @clicked="onExampleButtonClick"
+          />
+          <span>Clicked {{ clickCount }} times</span>
+        </v-col>
+        <v-spacer />
+      </v-row>
+      <v-row>
+        <v-spacer />
+        <v-col style="display: flex; justify-content: center; align-items: center; gap: 12px;">
+          <CorvinaIcon icon="ecc-E-Edit" :color="CORVINA.COLOR.PRIMARY" />
+          <CorvinaSelect
+            :items="selectItems"
+            :model="selectedItem"
+            :returnObject="true"
+            placeholder="Choose an option"
+            style="min-width: 200px;"
+            @update:model="selectedItem = $event"
+          />
+          <span v-if="selectedItem">Selected: {{ selectedItem.title }}</span>
+        </v-col>
+        <v-spacer />
+      </v-row>
     </v-container>
     <v-container fluid class="container maincontainer">
-      <p>This is an example of table with the corvina style:</p>
       <v-tabs class="main-tabs fill-height mt-5" v-model="activeTab" align-tabs="title">
         <v-tab style="text-transform: capitalize">
           {{ $t("entity") }}
@@ -38,46 +74,23 @@
         </v-layout>
       </v-tabs>
 
-      <v-window v-model="activeTab">
+      <v-window disabled v-model="activeTab">
         <v-window-item>
-          <div class="overflow-y-auto fill-height tabs-top-separator" infinite-wrapper>
-            <v-table density="comfortable" class="main-table mt-5" data-qa="main-table">
-              <thead>
-                <tr>
-                  <th class="text-left" id="repo-table-name">
-                    Name
-                  </th>
-                  <th class="text-left" id="repo-table-last-uploaded-version">
-                    Version
-                  </th>
-                  <th class="text-left" id="repo-table-actions">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="repository in [{ name: 'name1', version: 5 }, { name: 'name2', version: 92 }]"
-                  :key="repository.name">
-                  <td data-qa="repository-name">
-                    {{ repository.name }}
-                  </td>
-                  <td data-qa="repository-version">{{ repository.version }}</td>
-                  <td style="min-width: 90px" data-qa="repository-actions">
-                    ...
-                  </td>
-                </tr>
-              </tbody>
-            </v-table>
+          <div class="overflow-y-auto fill-height tabs-top-separator">
+            <corvina-table
+              class="main-table mt-5"
+              id="main-table"
+              :headers="reportHeaders"
+              :items="filteredRepositories"
+              :itemsPerPage="pageSize"
+              :currentPage="page"
+              :itemsLength="filteredRepositories.length"
+              @currentPageChanged="currentPageChanged"
+              @currentItemsPerPageChanged="currentItemsPerPageChanged"
+              :isExpandable="false"
+              data-qa="main-table"
+            />
           </div>
-          <v-row no-gutter>
-            <v-col>
-              <v-spacer />
-            </v-col>
-            <v-col cols="4">
-              <v-pagination :length="Math.ceil(totalNumberOfRepositories / pageSize)" v-model="page"
-                density="compact"></v-pagination>
-            </v-col>
-          </v-row>
         </v-window-item>
       </v-window>
     </v-container>
@@ -86,51 +99,88 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Breadcrumb from "../../cc2/components/Breadcrumb.vue";
 import { useSecurity } from "../../stores/security";
-
-const TAB_KEYS = {
-  ENTITIES: "entities",
-};
+import { CORVINA } from '@corvina/vue-components-library';
+import { v } from "vue-router/dist/index-DFCq6eJK.js";
 
 export default defineComponent({
   name: "List",
-  components: {
-    Breadcrumb,
-  },
   data() {
     return {
+      CORVINA,
+      clickCount: 0,
+      selectedItem: null as { title: string; value: string } | null,
+      selectItems: [
+        { title: "Option 1", value: "option1" },
+        { title: "Option 2", value: "option2" },
+        { title: "Option 3", value: "option3" },
+      ],
       security: null,
       pageSize: 10,
       page: 1,
       search: "",
-      totalNumberOfRepositories: 0,
       sizeAllKey: 0,
       activeTab: 0,
+      repositories: [
+        { name: "name1", version: 5, actions: "..." },
+        { name: "name2", version: 92, actions: "..." },
+      ],
+      reportHeaders: [
+        {
+          type: CORVINA.TABLE.CELL_TYPE.STRING,
+          key: "name",
+          title: "Name",
+          propString: "name",
+          align: "left",
+          sortable: false,
+          id: "repo-table-name",
+        },
+        {
+          type: CORVINA.TABLE.CELL_TYPE.STRING,
+          key: "version",
+          title: "Version",
+          propString: "version",
+          align: "left",
+          sortable: false,
+          id: "repo-table-last-uploaded-version",
+        },
+        {
+          type: CORVINA.TABLE.CELL_TYPE.STRING,
+          key: "actions",
+          title: "Actions",
+          propString: "actions",
+          align: "left",
+          sortable: false,
+          id: "repo-table-actions",
+        },
+      ],
       breadcrumb: {
         path: ["[| .Name |]", 'Your Entity'],
         icon: "ecc-B-Dashboard",
         searchTitle: "Search...",
-        sortQueryKeys: {
-          [TAB_KEYS.ENTITIES]: "sortByRepositories",
-        },
-        sortingKeys: {
-          [TAB_KEYS.ENTITIES]: {
-            name: "Sort by name",
-            creationDate: "Sort by uploaded date",
-          },
-        },
         disableSearch: false,
-        disableSort: true,
       },
     };
   },
   methods: {
-    fromIndexToTabKeysValue(index: number) {
-      return Object.values(TAB_KEYS)[index];
+    onExampleButtonClick() {
+      this.clickCount++;
+    },
+    currentPageChanged(newVal: number) {
+      this.page = newVal;
+    },
+    currentItemsPerPageChanged(newVal: number) {
+      this.pageSize = newVal;
+      this.page = 1;
     },
   },
   computed: {
+    filteredRepositories() {
+      if (!this.search) return this.repositories;
+      return this.repositories.filter((repository) =>
+        repository.name.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
     runtimeInfo() {
       return this.security
         ? JSON.stringify({
