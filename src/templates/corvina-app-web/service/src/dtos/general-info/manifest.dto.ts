@@ -92,7 +92,8 @@ export function setManifestJson(manifestBrand: object): void {
       },
       vendor: {
         name: 'Corvina',
-        website: 'http://www.corvina.io',
+        website: 'https://corvina.io',
+        email: 'support@corvina.io',
       },
       links: {
         self: '/v1/manifest.json',
