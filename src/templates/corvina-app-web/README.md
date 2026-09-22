@@ -162,7 +162,7 @@ This project ships a devcontainer for the `app` and one for the `service`, each 
 * in another terminal, start the app devcontainer and run it:
   ```bash
   devcontainer up --workspace-folder . --config .devcontainer/app/devcontainer.json
-  devcontainer exec --workspace-folder . --config .devcontainer/app/devcontainer.json npm run dev
+  devcontainer exec --workspace-folder . --config .devcontainer/app/devcontainer.json sh -c "cp -n .env.dist .env && npm run dev"
   ```
 * if you prefer a GUI, VS Code's "Dev Containers: Reopen in Container" command works the same way when pointed at `.devcontainer/app` or `.devcontainer/service`
 * to run the service on your host instead (e.g. `cd service && npm run start:dev`) while still using the devcontainer's postgresql[| if .RedisEnabled |]/redis[| end |][| if .RabbitEnabled |]/rabbitmq[| end |] (their ports are published to localhost), run `cp -n service/.env.dev service/.env` after bringing the service devcontainer up
