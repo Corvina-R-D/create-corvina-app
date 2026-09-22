@@ -33,7 +33,8 @@ async function buildSecurityContext() {
 
       let security = await useSecurity();
 
-      this.$i18n.locale = locale?.replace('_', '-');
+      this.$i18n.locale = locale?.replace('_', '-') || "en-US";
+      this.$vuetify.locale.current = this.$i18n.locale.split("-")[0];
 
       await security.buildCorvinaConnect({ corvinaHost, instanceId });
 

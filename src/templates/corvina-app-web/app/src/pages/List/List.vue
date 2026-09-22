@@ -7,8 +7,8 @@
         <v-spacer />
         <v-col>
           <div class="text-center">
-            <h1 class="col-primary">Congratulations!</h1>
-            <h4 class="col-primary-dk2">You successfully created your first corvina app!</h4>
+            <h1 class="col-primary">{{ $t('list.congratulationsTitle') }}</h1>
+            <h4 class="col-primary-dk2">{{ $t('list.congratulationsSubtitle') }}</h4>
           </div>
         </v-col>
         <v-spacer />
@@ -17,7 +17,7 @@
         <v-spacer />
         <v-col>
           <p>
-            This is the runtime information taken thanks to connection to Corvina
+            {{ $t('list.runtimeInfoIntro') }}
             <br />
             <code>{{ runtimeInfo }}</code>
           </p>
@@ -27,7 +27,7 @@
       <v-row>
         <v-spacer />
         <v-col>
-          <h3 class="text-center">Examples of components with the Corvina style:</h3>
+          <h3 class="text-center">{{ $t('list.examplesHeading') }}</h3>
         </v-col>
         <v-spacer />
       </v-row>
@@ -35,14 +35,14 @@
         <v-spacer />
         <v-col style="display: flex; justify-content: center; align-items: center; gap: 12px;">
           <CorvinaButton
-            text="Click me"
+            :text="$t('list.clickMeButton')"
             icon="ecc-M-Home"
-            tooltip="This is a tooltip"
+            :tooltip="$t('list.clickMeTooltip')"
             :variant="CORVINA.BUTTON.VARIANT.OUTLINED"
             dataQa="example-button"
             @clicked="onExampleButtonClick"
           />
-          <span>Clicked {{ clickCount }} times</span>
+          <span>{{ $t('list.clickedTimes', { count: clickCount }) }}</span>
         </v-col>
         <v-spacer />
       </v-row>
@@ -54,11 +54,11 @@
             :items="selectItems"
             :model="selectedItem"
             :returnObject="true"
-            placeholder="Choose an option"
+            :placeholder="$t('list.chooseOptionPlaceholder')"
             style="min-width: 200px;"
             @update:model="selectedItem = $event"
           />
-          <span v-if="selectedItem">Selected: {{ selectedItem.title }}</span>
+          <span v-if="selectedItem">{{ $t('list.selectedLabel', { title: selectedItem.title }) }}</span>
         </v-col>
         <v-spacer />
       </v-row>
@@ -110,11 +110,6 @@ export default defineComponent({
       CORVINA,
       clickCount: 0,
       selectedItem: null as { title: string; value: string } | null,
-      selectItems: [
-        { title: "Option 1", value: "option1" },
-        { title: "Option 2", value: "option2" },
-        { title: "Option 3", value: "option3" },
-      ],
       security: null,
       pageSize: 10,
       page: 1,
@@ -125,41 +120,6 @@ export default defineComponent({
         { name: "name1", version: 5, actions: "..." },
         { name: "name2", version: 92, actions: "..." },
       ],
-      reportHeaders: [
-        {
-          type: CORVINA.TABLE.CELL_TYPE.STRING,
-          key: "name",
-          title: "Name",
-          propString: "name",
-          align: "left",
-          sortable: false,
-          id: "repo-table-name",
-        },
-        {
-          type: CORVINA.TABLE.CELL_TYPE.STRING,
-          key: "version",
-          title: "Version",
-          propString: "version",
-          align: "left",
-          sortable: false,
-          id: "repo-table-last-uploaded-version",
-        },
-        {
-          type: CORVINA.TABLE.CELL_TYPE.STRING,
-          key: "actions",
-          title: "Actions",
-          propString: "actions",
-          align: "left",
-          sortable: false,
-          id: "repo-table-actions",
-        },
-      ],
-      breadcrumb: {
-        path: ["[| .Name |]", 'Your Entity'],
-        icon: "ecc-B-Dashboard",
-        searchTitle: "Search...",
-        disableSearch: false,
-      },
     };
   },
   methods: {
@@ -175,6 +135,52 @@ export default defineComponent({
     },
   },
   computed: {
+    selectItems() {
+      return [
+        { title: this.$t("list.optionOne"), value: "option1" },
+        { title: this.$t("list.optionTwo"), value: "option2" },
+        { title: this.$t("list.optionThree"), value: "option3" },
+      ];
+    },
+    reportHeaders() {
+      return [
+        {
+          type: CORVINA.TABLE.CELL_TYPE.STRING,
+          key: "name",
+          title: this.$t("list.columnName"),
+          propString: "name",
+          align: "left",
+          sortable: false,
+          id: "repo-table-name",
+        },
+        {
+          type: CORVINA.TABLE.CELL_TYPE.STRING,
+          key: "version",
+          title: this.$t("list.columnVersion"),
+          propString: "version",
+          align: "left",
+          sortable: false,
+          id: "repo-table-last-uploaded-version",
+        },
+        {
+          type: CORVINA.TABLE.CELL_TYPE.STRING,
+          key: "actions",
+          title: this.$t("list.columnActions"),
+          propString: "actions",
+          align: "left",
+          sortable: false,
+          id: "repo-table-actions",
+        },
+      ];
+    },
+    breadcrumb() {
+      return {
+        path: ["[| .Name |]", this.$t("list.breadcrumbYourEntity")],
+        icon: "ecc-B-Dashboard",
+        searchTitle: this.$t("common.searchPlaceholder"),
+        disableSearch: false,
+      };
+    },
     filteredRepositories() {
       if (!this.search) return this.repositories;
       return this.repositories.filter((repository) =>

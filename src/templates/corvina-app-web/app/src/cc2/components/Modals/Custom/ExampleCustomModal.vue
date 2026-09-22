@@ -1,6 +1,6 @@
 <template>
   <v-container>
-      <p>Example Custom Modal Template</p>
+      <p>{{ $t('exampleCustomModal.templateText') }}</p>
       <p class="custom-class">{{modalData.customParamExample}}</p>
   </v-container>
 </template>

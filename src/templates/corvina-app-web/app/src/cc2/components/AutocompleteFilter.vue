@@ -73,8 +73,7 @@
     	open-on-clear
     >
 		<v-list-item v-if="search && addNewData" slot="prepend-item" class="grey--text">
-			<!-- TODO remove this --><p> {{ search }} does not exists. <br /> <a @click="addNewValue(search)"> Create a new</a> one! </p>
-			<!-- TODO to integrate later <p> {{i18n.t("autocompleteFilter.searchDoesNotExists",{search:search})}} <br /> <a @click="addNewValue(search)"> {{i18n.t("autocompleteFilter.createANewOne")}} </a></p>-->
+			<p> {{ $t("autocompleteFilter.searchDoesNotExists", { search }) }} <br /> <a @click="addNewValue(search)"> {{ $t("autocompleteFilter.createANewOne") }} </a></p>
 		</v-list-item>
       	<template v-slot:item="data" v-if="$slots.item">
 			<!-- AC {{Object.keys(data)}} -->
