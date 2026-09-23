@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb :icon="breadcrumb.icon" :path="breadcrumb.path" :showSearchBar="!breadcrumb.disableSearch"
+    <CorvinaBreadcrumb :icon="breadcrumb.icon" :path="breadcrumb.path" :showSearchBar="!breadcrumb.disableSearch"
       :searchPlaceholder="breadcrumb.searchTitle" :searchModel="search" @update:searchModel="search = $event" />
     <v-container fluid class="container maincontainer">
       <v-row>
@@ -56,7 +56,7 @@
             :returnObject="true"
             :placeholder="$t('list.chooseOptionPlaceholder')"
             style="min-width: 200px;"
-            @update:model="selectedItem = $event"
+            @update:model="onSelectChange"
           />
           <span v-if="selectedItem">{{ $t('list.selectedLabel', { title: selectedItem.title }) }}</span>
         </v-col>
@@ -77,7 +77,7 @@
       <v-window disabled v-model="activeTab">
         <v-window-item>
           <div class="overflow-y-auto fill-height tabs-top-separator">
-            <corvina-table
+            <CorvinaTable
               class="main-table mt-5"
               id="main-table"
               :headers="reportHeaders"
@@ -125,6 +125,10 @@ export default defineComponent({
     onExampleButtonClick() {
       this.clickCount++;
     },
+    onSelectChange(value: string | object | null) {
+      // returnObject is enabled, so the select emits the whole item
+      this.selectedItem = value as { title: string; value: string } | null;
+    },
     currentPageChanged(newVal: number) {
       this.page = newVal;
     },
@@ -141,34 +145,31 @@ export default defineComponent({
         { title: this.$t("list.optionThree"), value: "option3" },
       ];
     },
-    reportHeaders() {
+    reportHeaders(): CORVINA.TABLE.TableHeaderEntries {
       return [
         {
           type: CORVINA.TABLE.CELL_TYPE.STRING,
           key: "name",
           title: this.$t("list.columnName"),
           propString: "name",
-          align: "left",
+          align: CORVINA.TABLE.ALIGN.START,
           sortable: false,
-          id: "repo-table-name",
         },
         {
           type: CORVINA.TABLE.CELL_TYPE.STRING,
           key: "version",
           title: this.$t("list.columnVersion"),
           propString: "version",
-          align: "left",
+          align: CORVINA.TABLE.ALIGN.START,
           sortable: false,
-          id: "repo-table-last-uploaded-version",
         },
         {
           type: CORVINA.TABLE.CELL_TYPE.STRING,
           key: "actions",
           title: this.$t("list.columnActions"),
           propString: "actions",
-          align: "left",
+          align: CORVINA.TABLE.ALIGN.START,
           sortable: false,
-          id: "repo-table-actions",
         },
       ];
     },
