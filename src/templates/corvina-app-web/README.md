@@ -175,8 +175,9 @@ This project ships a devcontainer for the `app` and one for the `service`, each 
 ### How to expose your local app to the Corvina Store without Minikube
 
 * install ngrok and login in your account
-* take the ngrok authtoken and put it in the ngrok.yml file
-* create a domain to get a stable URL across restarts (otherwise ngrok assigns a new random one every time you run it): in the ngrok dashboard go to Universal Gateway > Domains, click "New Domain", and reserve a domain (a free static domain is included on the free plan, e.g. `your-name.ngrok-free.app`; a custom domain requires a paid plan)
+* copy the `ngrok.example.yml` file to `ngrok.yml`
+* take the ngrok authtoken and put it in the `ngrok.yml` file
+* create a domain to get a stable URL across restarts (otherwise ngrok assigns a new random one every time you run it): in the ngrok dashboard go to Domains, click "New Domain", and reserve a domain (a free static domain is included on the free plan, e.g. `your-name.ngrok-free.app`; a custom domain requires a paid plan)
 * put that domain in the `hostname` field of the `service` tunnel in `ngrok.yml`
 * install the "simple-modify-headers" browser extension and configure it for the url pattern `https://<ngrok-domain-url>/*` to add the request header `ngrok-skip-browser-warning: true` — otherwise ngrok's free tier shows an interstitial browser warning page instead of proxying the request
 * run `ngrok start --config ngrok.yml service`
