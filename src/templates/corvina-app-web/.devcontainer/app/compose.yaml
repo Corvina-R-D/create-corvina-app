@@ -1,3 +1,5 @@
+name: corvina-app-[| .Name |]-app
+
 services:
   devcontainer:
     build:
