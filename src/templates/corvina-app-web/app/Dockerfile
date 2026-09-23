@@ -1,5 +1,5 @@
 ##### build environment #####
-FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v1 AS build
+FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v2 AS build
 
 # make the 'app' folder the current working directory
 WORKDIR /app
@@ -20,8 +20,6 @@ ENV VITE_SERVICE_URL=${VITE_SERVICE_URL}
 RUN npm run build
 
 ##### production environment #####
-FROM nginx:stable-alpine AS prod
+FROM eu.gcr.io/corvina-exorint/corvina-base-nginx:v1 AS prod
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
