@@ -101,7 +101,6 @@
 import { defineComponent } from "vue";
 import { useSecurity } from "../../stores/security";
 import { CORVINA } from '@corvina/vue-components-library';
-import { v } from "vue-router/dist/index-DFCq6eJK.js";
 
 export default defineComponent({
   name: "List",
