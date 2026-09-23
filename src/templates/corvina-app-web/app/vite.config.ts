@@ -4,7 +4,7 @@ import vuetify from 'vite-plugin-vuetify'
 import mkcert from'vite-plugin-mkcert'
 import path from "path";
 
-const brand = process.env.BRAND_NAME || "brand-name";
+const brand = process.env.BRAND_NAME || "corvina"; // brand-name
 
 export default defineConfig({
   plugins: [

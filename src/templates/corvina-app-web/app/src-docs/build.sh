@@ -5,7 +5,7 @@ DST_IMG="../public/docs"
 MARKED_BIN="node ./marked_runner.js"
 echo BUILDING DOCUMENTATION
 
-BRAND=brand-name
+BRAND=corvina # brand-name
 LOCALE=en
 
 buildBrand() {
