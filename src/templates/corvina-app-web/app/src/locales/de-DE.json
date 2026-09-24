@@ -60,5 +60,9 @@
   },
   "exampleCustomModal": {
     "templateText": "Beispiel für benutzerdefiniertes Modal-Template"
+  },
+  "help": {
+    "show": "Hilfe anzeigen",
+    "close": "Schließen"
   }
 }

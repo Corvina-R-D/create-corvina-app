@@ -60,5 +60,9 @@
   },
   "exampleCustomModal": {
     "templateText": "Example Custom Modal Template"
+  },
+  "help": {
+    "show": "Show help",
+    "close": "Close"
   }
 }

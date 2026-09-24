@@ -60,5 +60,9 @@
   },
   "exampleCustomModal": {
     "templateText": "Modello di esempio per modale personalizzata"
+  },
+  "help": {
+    "show": "Mostra aiuto",
+    "close": "Chiudi"
   }
 }

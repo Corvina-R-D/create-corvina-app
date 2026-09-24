@@ -64,13 +64,24 @@
       </v-row>
     </v-container>
     <v-container fluid class="container maincontainer">
+      <HelpDrawer :id="HELP_DRAWER_ID">
+        <div v-html="helpHtml" data-qa="help-content"></div>
+      </HelpDrawer>
       <v-tabs class="main-tabs fill-height mt-5" v-model="activeTab" align-tabs="title">
         <v-tab style="text-transform: capitalize">
           {{ $t("entity") }}
         </v-tab>
 
-        <v-layout class="additionalHeader">
+        <v-layout class="additionalHeader align-center">
           <v-spacer></v-spacer>
+          <CorvinaButton
+            style="margin-left: 10px;"
+            :variant="CORVINA.BUTTON.VARIANT.FREE"
+            icon="ecc-T-Help"
+            :tooltip="$t('help.show')"
+            dataQa="help-button"
+            @clicked="showHelp"
+          />
         </v-layout>
       </v-tabs>
 
@@ -101,12 +112,21 @@
 import { defineComponent } from "vue";
 import { useSecurity } from "../../stores/security";
 import { CORVINA } from '@corvina/vue-components-library';
+import HelpDrawer from "../../components/Help/HelpDrawer.vue";
+import { store as HelpStore } from "../../components/Help/Help.store";
+//@ts-ignore
+import { pageHtml } from "BrandData";
+
+const HELP_DRAWER_ID = "PageBottomHelp";
 
 export default defineComponent({
   name: "List",
+  components: { HelpDrawer },
   data() {
     return {
       CORVINA,
+      HELP_DRAWER_ID,
+      helpHtml: "",
       clickCount: 0,
       selectedItem: null as { title: string; value: string } | null,
       security: null,
@@ -122,6 +142,19 @@ export default defineComponent({
     };
   },
   methods: {
+    showHelp($event: Event) {
+      HelpStore.drawerItems[HELP_DRAWER_ID]?.toggle($event);
+    },
+    async fetchHelpData() {
+      // help pages are generated from src-docs/brands/<brand>/<locale>/*.md, fallback to en
+      const locale = this.$i18n.locale.split("-")[0];
+      try {
+        this.helpHtml = await pageHtml(locale);
+      } catch (error) {
+        console.warn(`Help not available for locale ${locale}, fallback to en:`, error);
+        this.helpHtml = await pageHtml("en");
+      }
+    },
     onExampleButtonClick() {
       this.clickCount++;
     },
@@ -199,6 +232,7 @@ export default defineComponent({
     }
   },
   async mounted() {
+    this.fetchHelpData();
     this.security = await useSecurity();
   },
 });
