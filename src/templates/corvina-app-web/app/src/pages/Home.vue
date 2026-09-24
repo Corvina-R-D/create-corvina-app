@@ -4,12 +4,13 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import { useSecurity } from "../stores/security";
 import { constants } from "../utils/constants";
-import { ITheme } from "@corvina/corvina-app-connect/dist/ITheme";
+import { ITheme } from "@corvina/corvina-app-connect";
 import FullPageProgressCircular from "../components/FullPageProgressCircular.vue";
 
-async function checkAuth({ instanceId, organizationId, accessToken }): Promise<boolean> {
+async function checkAuth({ instanceId, organizationId, accessToken }: { instanceId?: string; organizationId: string; accessToken: string }): Promise<boolean> {
   let response = await fetch(`${constants.serviceUrl}/${instanceId}/${organizationId}/check-auth`, {
     method: "GET",
     headers: {
@@ -18,40 +19,6 @@ async function checkAuth({ instanceId, organizationId, accessToken }): Promise<b
   });
 
   return response.ok;
-}
-
-async function buildSecurityContext() {
-  let { corvinaHost, accessToken, organizationId, instanceId, locale } = this.$route?.query || {};
-
-  if (corvinaHost && organizationId && accessToken) {
-    try {
-      const authorized = await checkAuth({ instanceId, organizationId, accessToken });
-      if (!authorized) {
-        this.errorMessage = this.$t("NoPermissions");
-        return;
-      }
-
-      let security = await useSecurity();
-
-      this.$i18n.locale = locale?.replace('_', '-') || "en-US";
-      this.$vuetify.locale.current = this.$i18n.locale.split("-")[0];
-
-      await security.buildCorvinaConnect({ corvinaHost, instanceId });
-
-      if (security.connect?.theme) {
-        setConnectThemeIntoVuetifyLightTheme(security.connect?.theme, this.$vuetify.theme.themes.light.colors);
-      }
-
-      this.errorMessage = "";
-      this.$router.replace({ path: "/list" });
-      console.log(this.$router)
-    } catch (error) {
-      console.error(error);
-      this.errorMessage = `${this.$t('unableLoadDomainData')} ${corvinaHost} ${this.$t('and')} organizationId ${organizationId}. ${this.$t('contactAdministrator')}.`;
-    }
-  } else {
-    this.errorMessage = this.$t('YouMustProvideThreeQuerystringParams');
-  }
 }
 
 function setConnectThemeIntoVuetifyLightTheme(connectTheme: ITheme, vuetifyColors: any) {
@@ -76,15 +43,12 @@ function setConnectThemeIntoVuetifyLightTheme(connectTheme: ITheme, vuetifyColor
   document.documentElement.style.setProperty('--color-good', connectTheme.colors.good);
 }
 
-export default {
+export default defineComponent({
   name: "Home",
   data() {
     return {
       errorMessage: "",
     };
-  },
-  created() {
-    this.buildSecurityContext = buildSecurityContext;
   },
   async mounted() {
     await this.buildSecurityContext();
@@ -92,6 +56,41 @@ export default {
   async updated() {
     await this.buildSecurityContext();
   },
+  methods: {
+    async buildSecurityContext() {
+      let { corvinaHost, accessToken, organizationId, instanceId, locale } = (this.$route?.query || {}) as Record<string, string | undefined>;
+
+      if (corvinaHost && organizationId && accessToken) {
+        try {
+          const authorized = await checkAuth({ instanceId, organizationId, accessToken });
+          if (!authorized) {
+            this.errorMessage = this.$t("NoPermissions");
+            return;
+          }
+
+          let security = await useSecurity();
+
+          this.$i18n.locale = locale?.replace('_', '-') || "en-US";
+          this.$vuetify.locale.current = this.$i18n.locale.split("-")[0];
+
+          await security.buildCorvinaConnect({ corvinaHost, instanceId });
+
+          if (security.connect?.theme) {
+            setConnectThemeIntoVuetifyLightTheme(security.connect?.theme, this.$vuetify.theme.themes.light.colors);
+          }
+
+          this.errorMessage = "";
+          this.$router.replace({ path: "/list" });
+          console.log(this.$router)
+        } catch (error) {
+          console.error(error);
+          this.errorMessage = `${this.$t('unableLoadDomainData')} ${corvinaHost} ${this.$t('and')} organizationId ${organizationId}. ${this.$t('contactAdministrator')}.`;
+        }
+      } else {
+        this.errorMessage = this.$t('YouMustProvideThreeQuerystringParams');
+      }
+    },
+  },
   components: { FullPageProgressCircular }
-};
+});
 </script>
