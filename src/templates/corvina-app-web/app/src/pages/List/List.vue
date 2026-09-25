@@ -116,6 +116,7 @@ import HelpDrawer from "../../components/Help/HelpDrawer.vue";
 import { store as HelpStore } from "../../components/Help/Help.store";
 //@ts-ignore
 import { pageHtml } from "BrandData";
+import { getCurrentLocaleLang } from "../../i18n/i18n";
 
 const HELP_DRAWER_ID = "PageBottomHelp";
 
@@ -147,12 +148,13 @@ export default defineComponent({
     },
     async fetchHelpData() {
       // help pages are generated from src-docs/brands/<brand>/<locale>/*.md, fallback to en
-      const locale = this.$i18n.locale.split("-")[0];
+      const localeLang = getCurrentLocaleLang();
+      const brand = this.security?.connect?.brandName || "corvina";
       try {
-        this.helpHtml = await pageHtml(locale);
+        this.helpHtml = await pageHtml(localeLang, brand);
       } catch (error) {
-        console.warn(`Help not available for locale ${locale}, fallback to en:`, error);
-        this.helpHtml = await pageHtml("en");
+        console.warn(`Help not available for locale ${localeLang}, fallback to en:`, error);
+        this.helpHtml = await pageHtml("en", brand);
       }
     },
     onExampleButtonClick() {
@@ -232,8 +234,8 @@ export default defineComponent({
     }
   },
   async mounted() {
-    this.fetchHelpData();
     this.security = await useSecurity();
+    this.fetchHelpData();
   },
 });
 </script>

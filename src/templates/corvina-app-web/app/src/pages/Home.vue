@@ -9,6 +9,10 @@ import { useSecurity } from "../stores/security";
 import { constants } from "../utils/constants";
 import { ITheme } from "@corvina/corvina-app-connect";
 import FullPageProgressCircular from "../components/FullPageProgressCircular.vue";
+// @ts-ignore
+import { getI18nMessages } from "BrandData";
+import i18n, { getCurrentLocaleLang } from "../i18n/i18n";
+import { useI18n } from "vue-i18n";
 
 async function checkAuth({ instanceId, organizationId, accessToken }: { instanceId?: string; organizationId: string; accessToken: string }): Promise<boolean> {
   let response = await fetch(`${constants.serviceUrl}/${instanceId}/${organizationId}/check-auth`, {
@@ -43,8 +47,14 @@ function setConnectThemeIntoVuetifyLightTheme(connectTheme: ITheme, vuetifyColor
   document.documentElement.style.setProperty('--color-good', connectTheme.colors.good);
 }
 
+let i18nSetDateTimeFormat: (locale: string, options: any) => void;
+
 export default defineComponent({
   name: "Home",
+  setup() {
+    const { setDateTimeFormat } = useI18n();
+    i18nSetDateTimeFormat = setDateTimeFormat;
+  },
   data() {
     return {
       errorMessage: "",
@@ -71,12 +81,26 @@ export default defineComponent({
           let security = await useSecurity();
 
           this.$i18n.locale = locale?.replace('_', '-') || "en-US";
-          this.$vuetify.locale.current = this.$i18n.locale.split("-")[0];
+          this.$vuetify.locale.current = getCurrentLocaleLang() || "en";
 
           await security.buildCorvinaConnect({ corvinaHost, instanceId });
 
+          // set the actual messages for the brand
+          const brandMessages = await getI18nMessages(security.connect?.brandName);
+          Object.entries(brandMessages).forEach(([locale, messages]) => {
+            i18n.global.setLocaleMessage(locale, messages)
+          })
+
           if (security.connect?.theme) {
             setConnectThemeIntoVuetifyLightTheme(security.connect?.theme, this.$vuetify.theme.themes.light.colors);
+          }
+
+          if (security.connect?.defaultStandardTime) {
+            i18nSetDateTimeFormat('en-US', security.connect.defaultStandardTime)
+            i18nSetDateTimeFormat('de-DE', security.connect.defaultStandardTime)
+            i18nSetDateTimeFormat('es-ES', security.connect.defaultStandardTime)
+            i18nSetDateTimeFormat('fr-FR', security.connect.defaultStandardTime)
+            i18nSetDateTimeFormat('it-IT', security.connect.defaultStandardTime)
           }
 
           this.errorMessage = "";
