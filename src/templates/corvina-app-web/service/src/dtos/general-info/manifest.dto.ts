@@ -1,67 +1,129 @@
 import { merge } from 'lodash';
 import { getPaymentPlans, IPaymentPlanDTO } from './paymentPlan.dto';
 
+export interface IManifestLocalizable {
+  value: string; // default text
+  i18n?: string; // Localizable text (from translation key in manifest)
+}
+
+export enum AppStatus {
+  ACTIVE = 'ACTIVE',
+  UNDER_EVALUATION = 'UNDER_EVALUATION',
+}
+
+export enum AppManifestType {
+  APP = 'APP',
+  WIDGET = 'WIDGET',
+}
+
 export interface IImage {
-  url: string; // URL of the image
-  alt?: string; // Optional alt text for the image
-  title?: string; // Optional title for the image
-  description?: string; // Optional description for the image
+  url: string; // Image url
+  thumbnailUrl?: string; // Image thumbnail url
 }
 
 export interface IAuthentication {
-  type: string; // Type of authentication (e.g., JWT)
+  type: 'JWT';
 }
 
 export interface IVendor {
-  name: string; // Name of the vendor
-  website: string; // Website URL of the vendor
+  name: string;
+  website: string;
+  email?: string;
 }
 
 export interface ILinks {
-  self: string; // Self link
-  [key: string]: string; // Allow additional properties
+  self: string; // Where Corvina polls the manifest.json to check for updates
+  changelog?: string; // Changelog shown in the app store details page
 }
 
 export interface ILifecycle {
-  installed: string; // URL for the installed lifecycle event
-  uninstalled: string; // URL for the uninstalled lifecycle event
-  renew: string; // URL for the renew lifecycle event
+  installed?: string; // Webhook called when the app is installed in an organization
+  uninstalled?: string; // Webhook called when the app is uninstalled from an organization
+  upgradeOk?: string; // Webhook called when the app is successfully upgraded
+  upgradeKo?: string; // Webhook called when the app upgrade fails
+  renew?: string; // Webhook called when a payment happens towards the application
+}
+
+export interface IDevicePermission {
+  deviceGroups: string[];
+  generalPermission: string;
+  modelPermissions: string[];
 }
 
 export interface IScopes {
-  applications: string[]; // Array of application scopes
-  [key: string]: any; // Allow additional properties
+  applications: string[]; // Application permissions required
+  devices?: IDevicePermission[]; // Device permissions required
+  userImpersonation?: boolean; // Allow the app service account to impersonate user permissions
 }
 
 export interface IGlobalPage {
-  id: string; // ID of the global page
-  title: string; // Title of the global page
-  url: string; // URL of the global page
-  iconUrl: string; // Icon URL for the global page
+  id: string;
+  title: IManifestLocalizable;
+  url: string; // Url rendered inside the iframe container
+  iconUrl?: string;
+  avoidCorvinaQueryParams?: boolean;
+}
+
+export interface INavigationDrawerPage {
+  title: IManifestLocalizable;
+  url: string; // Url rendered inside the iframe container
+  iconUrl: string;
+  avoidCorvinaQueryParams?: boolean;
 }
 
 export interface IHooks {
-  globalPage: IGlobalPage; // Global page hook
-  [key: string]: IGlobalPage; // Allow additional properties
+  globalPage: IGlobalPage;
+  navigationDrawerPages?: INavigationDrawerPage[];
+}
+
+export interface IAdditionalRole {
+  name: string;
+  description: string;
+  linkedRoles?: string[];
+}
+
+export interface IOidcPublicClient {
+  name: string; // max 50 chars
+  description?: string; // max 100 chars
+  redirectUris: string[];
+  webOrigins: string[];
+  logoUrl?: string;
+  policyUrl?: string;
+  tosUrl?: string;
+}
+
+export interface IManifestTranslationsDTO {
+  urls: Record<string, string>; // locale -> url
 }
 
 export interface IManifestDTO {
   key: string;
   name: string;
-  description: string;
-  status: string;
-  images: IImage[];
+  description: IManifestLocalizable;
   coverImageUrl: string;
-  baseUrl: string;
-  free: boolean;
+  images?: IImage[];
+  iconUrl?: string;
+  status?: AppStatus;
+  type?: AppManifestType;
   apiVersion: string;
+  baseUrl: string;
+  trustedOrigins?: string[];
+  enableDeviceAccess?: boolean;
   authentication: IAuthentication;
   vendor: IVendor;
-  links: ILinks;
-  lifecycle: ILifecycle;
-  scopes: IScopes;
+  lifecycle?: ILifecycle;
+  scopes?: IScopes;
   hooks: IHooks;
-  paymentPlans: IPaymentPlanDTO[];
+  links: ILinks;
+  free?: boolean;
+  inAppPurchases?: boolean;
+  translations?: IManifestTranslationsDTO;
+  dependsOn?: string[];
+  additionalRoles?: IAdditionalRole[];
+  linkedRoles?: string[];
+  paymentPlans?: IPaymentPlanDTO[];
+  hidden?: boolean;
+  oidcPublicClient?: IOidcPublicClient;
   [key: string]: any; // Allow additional properties
 }
 
@@ -76,8 +138,11 @@ export function setManifestJson(manifestBrand: object): void {
     {
       key: process.env.MANIFEST_ID,
       name: '[| .Name |]',
-      description: 'Description of the app',
-      status: 'ACTIVE',
+      description: {
+        value: 'Description of the app',
+        i18n: 'manifest.description',
+      },
+      status: AppStatus.ACTIVE,
       images: [
         {
           url: '/cover.jpeg',
@@ -106,13 +171,19 @@ export function setManifestJson(manifestBrand: object): void {
       hooks: {
         globalPage: {
           id: `${process.env.MANIFEST_ID}-globalPage`,
-          title: '[| .Name |]',
+          title: {
+            value: '[| .Name |]',
+            i18n: 'manifest.globalPage.title',
+          },
           url: `${process.env.MANIFEST_BASE_URL_FE_APP}/#/`,
           iconUrl: '/icon.svg',
         },
       },
       scopes: {
         applications: ['iam.organizations.read'],
+      },
+      translations: {
+        urls: {},
       },
       paymentPlans: getPaymentPlans(),
     },

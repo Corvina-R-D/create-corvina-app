@@ -1,11 +1,12 @@
-interface IManifestLocalizable {
-  value: string;
-  i18n: string;
+import { IManifestLocalizable } from './manifest.dto';
+
+interface IRecurrentPlan {
+  period: string; // ISO-8601 period PnYnMnD
+  amount: number; // renewal amount
 }
 
-interface IPeriodPlan {
-  period: string;
-  amount?: number;
+interface ITrialPlan {
+  period: string; // ISO-8601 period PnYnMnD
 }
 
 interface IOptionPlan {
@@ -18,11 +19,11 @@ export interface IPaymentPlanDTO {
   id: string;
   label: IManifestLocalizable;
   description: IManifestLocalizable;
-  level: number;
+  level?: number;
   amount: number;
-  recurrent?: IPeriodPlan;
-  trial?: IPeriodPlan;
-  options: IOptionPlan[];
+  recurrent?: IRecurrentPlan;
+  trial?: ITrialPlan;
+  options?: IOptionPlan[];
   deprecated?: boolean;
 }
 
