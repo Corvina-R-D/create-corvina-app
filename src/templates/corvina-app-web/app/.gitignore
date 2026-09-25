@@ -28,5 +28,3 @@ dist-ssr
 /coverage
 
 .env
-
-static/docs/brands/**/*.html
