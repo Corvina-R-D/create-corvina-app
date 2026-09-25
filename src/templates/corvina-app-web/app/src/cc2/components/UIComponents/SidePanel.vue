@@ -22,8 +22,7 @@
     <v-layout class="help-header align-center justify-space-between">
       <v-layout class="align-center">
         <v-icon>ecc-T-Help</v-icon><span data-qa="help-title" style="padding-left: 10px;">
-          Need help?
-          <!-- TODO: {{i18n.t("needHelp")}} -->
+          {{ $t('sidePanel.needHelp') }}
         </span>
       </v-layout>
       <v-layout class="help-close-button align-center justify-end"
@@ -34,8 +33,7 @@
         :class="{ 'help-close-button-hover': closeHover }">
         <!-- TODO: set correct icon once added to font -->
         <span style="padding-right: 10px">
-          Close
-          <!-- TODO: {{i18n.t("close")}} -->
+          {{ $t('sidePanel.close') }}
         </span><v-icon>ecc-M-Chiudi</v-icon>
       </v-layout>
     </v-layout>

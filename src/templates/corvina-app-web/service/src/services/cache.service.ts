@@ -32,6 +32,11 @@ export class CacheService implements ICacheService, OnApplicationBootstrap {
 
   public async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     const internalTtl = ttl || Number(CACHE_DEFAULT_TTL);
+
+    if (!internalTtl || Number.isNaN(internalTtl)) {
+      throw new Error('CACHE_DEFAULT_TTL is not set or invalid, and no ttl was provided to CacheService.set');
+    }
+
     const isMillis = internalTtl < 1;
     const options = {
       [isMillis ? 'PX' : 'EX']: isMillis ? internalTtl * 1000 : internalTtl,

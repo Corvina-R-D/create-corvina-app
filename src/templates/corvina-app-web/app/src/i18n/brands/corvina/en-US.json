@@ -1,0 +1,68 @@
+{
+  "entity": "Entity",
+  "NoPermissions": "Current user doesn't have permissions (invalid role)",
+  "YouMustProvideThreeQuerystringParams": "You must provide three querystring parameters called \"corvinaHost\", \"organizationId\" and \"accessToken\"",
+  "unableLoadDomainData": "Unable to load application data for domain",
+  "and": "and",
+  "contactAdministrator": "Please contact your administrator",
+  "NotFound": "Page not found",
+  "common": {
+    "searchPlaceholder": "Search...",
+    "notAvailable": "N/A"
+  },
+  "modal": {
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
+  "errorModal": {
+    "orgId": "Organization ID",
+    "service": "Service",
+    "reason": "Reason",
+    "timestamp": "Timestamp",
+    "trackingNumber": "Tracking number",
+    "continue": "continue",
+    "unknownService": "unknown",
+    "serviceNotAvailable": " - Service not available",
+    "serverError": " - Server error",
+    "badRequest": " - Bad request",
+    "unauthorized": " - Unauthorized",
+    "networkError": " - Network error"
+  },
+  "autocompleteFilter": {
+    "searchDoesNotExists": "{search} does not exist.",
+    "createANewOne": "Create a new one!"
+  },
+  "breadcrumb": {
+    "sortBy": "Sort by:",
+    "filterBy": "Filter by"
+  },
+  "sidePanel": {
+    "needHelp": "Need help?",
+    "close": "Close"
+  },
+  "list": {
+    "congratulationsTitle": "Congratulations!",
+    "congratulationsSubtitle": "You successfully created your first corvina app!",
+    "runtimeInfoIntro": "This is the runtime information taken thanks to connection to Corvina",
+    "examplesHeading": "Examples of components with the Corvina style:",
+    "clickMeButton": "Click me",
+    "clickMeTooltip": "This is a tooltip",
+    "clickedTimes": "Clicked {count} times",
+    "chooseOptionPlaceholder": "Choose an option",
+    "selectedLabel": "Selected: {title}",
+    "optionOne": "Option 1",
+    "optionTwo": "Option 2",
+    "optionThree": "Option 3",
+    "columnName": "Name",
+    "columnVersion": "Version",
+    "columnActions": "Actions",
+    "breadcrumbYourEntity": "Your Entity"
+  },
+  "exampleCustomModal": {
+    "templateText": "Example Custom Modal Template"
+  },
+  "help": {
+    "show": "Show help",
+    "close": "Close"
+  }
+}

@@ -2,7 +2,14 @@
 import { Transaction } from 'sequelize';
 import { Installation } from '../../entities/installation.entity';
 import { IOpenIDConfiguration } from './IOpenIdConfiguration';
-import { IInstallInstallationInput, IInstallationDeleteInput, IInstallationDeleteOutput, IInstallationService } from './installation.service';
+import {
+  IInstallInstallationInput,
+  IInstallationDeleteInput,
+  IInstallationDeleteOutput,
+  IInstallationRenewInput,
+  IInstallationRenewOutput,
+  IInstallationService,
+} from './installation.service';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -49,5 +56,20 @@ export class InstallationServiceMock implements IInstallationService {
     return Promise.resolve({
       success: true,
     });
+  }
+  renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput> {
+    const installation = this._installations.find(
+      (i) => i.instanceId === input.instanceId && i.organizationId === input.organizationId
+    ) as Installation;
+
+    if (!installation) {
+      return Promise.resolve({ success: false, message: 'Installation not found' });
+    }
+
+    installation.endDate = input.endDate;
+    installation.planId = input.planId;
+    installation.freeTrial = input.freeTrial || false;
+
+    return Promise.resolve({ success: true });
   }
 }

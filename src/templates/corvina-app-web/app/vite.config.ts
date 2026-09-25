@@ -4,8 +4,6 @@ import vuetify from 'vite-plugin-vuetify'
 import mkcert from'vite-plugin-mkcert'
 import path from "path";
 
-const brand = process.env.BRAND_NAME || "brand-name";
-
 export default defineConfig({
   plugins: [
     vue(),
@@ -17,13 +15,18 @@ export default defineConfig({
   build: {
     target: 'es2021'
   },
+  esbuild: {
+    supported: {
+      'top-level-await': true //browsers can handle top-level-await features
+    },
+  },
   server: {
     https: true,
     host: true
   },
   resolve: {
     alias: {
-      BrandData: path.resolve(__dirname, `./static/docs/brands/${brand}/index.ts`),
+      BrandData: path.resolve(__dirname, `./static/brands/index.ts`),
     },
   },
 })

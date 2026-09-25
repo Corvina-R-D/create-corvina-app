@@ -1,0 +1,68 @@
+{
+  "entity": "Entität",
+  "NoPermissions": "Der aktuelle Benutzer hat keine Berechtigungen (ungültige Rolle)",
+  "YouMustProvideThreeQuerystringParams": "Sie müssen drei Querystring-Parameter angeben: \"corvinaHost\", \"organizationId\" und \"accessToken\"",
+  "unableLoadDomainData": "Die Anwendungsdaten für die Domain konnten nicht geladen werden",
+  "and": "und",
+  "contactAdministrator": "Bitte wenden Sie sich an Ihren Administrator",
+  "NotFound": "Seite nicht gefunden",
+  "common": {
+    "searchPlaceholder": "Suchen...",
+    "notAvailable": "N/V"
+  },
+  "modal": {
+    "cancel": "Abbrechen",
+    "continue": "Weiter"
+  },
+  "errorModal": {
+    "orgId": "Organisations-ID",
+    "service": "Dienst",
+    "reason": "Grund",
+    "timestamp": "Zeitstempel",
+    "trackingNumber": "Sendungsnummer",
+    "continue": "weiter",
+    "unknownService": "unbekannt",
+    "serviceNotAvailable": " - Dienst nicht verfügbar",
+    "serverError": " - Serverfehler",
+    "badRequest": " - Ungültige Anfrage",
+    "unauthorized": " - Nicht autorisiert",
+    "networkError": " - Netzwerkfehler"
+  },
+  "autocompleteFilter": {
+    "searchDoesNotExists": "{search} existiert nicht.",
+    "createANewOne": "Neuen erstellen!"
+  },
+  "breadcrumb": {
+    "sortBy": "Sortieren nach:",
+    "filterBy": "Filtern nach"
+  },
+  "sidePanel": {
+    "needHelp": "Brauchen Sie Hilfe?",
+    "close": "Schließen"
+  },
+  "list": {
+    "congratulationsTitle": "Glückwunsch!",
+    "congratulationsSubtitle": "Sie haben erfolgreich Ihre erste Corvina-App erstellt!",
+    "runtimeInfoIntro": "Dies sind die Laufzeitinformationen, die dank der Verbindung zu Corvina abgerufen wurden",
+    "examplesHeading": "Beispiele für Komponenten im Corvina-Stil:",
+    "clickMeButton": "Klick mich",
+    "clickMeTooltip": "Dies ist ein Tooltip",
+    "clickedTimes": "{count}-mal geklickt",
+    "chooseOptionPlaceholder": "Option auswählen",
+    "selectedLabel": "Ausgewählt: {title}",
+    "optionOne": "Option 1",
+    "optionTwo": "Option 2",
+    "optionThree": "Option 3",
+    "columnName": "Name",
+    "columnVersion": "Version",
+    "columnActions": "Aktionen",
+    "breadcrumbYourEntity": "Ihre Entität"
+  },
+  "exampleCustomModal": {
+    "templateText": "Beispiel für benutzerdefiniertes Modal-Template"
+  },
+  "help": {
+    "show": "Hilfe anzeigen",
+    "close": "Schließen"
+  }
+}

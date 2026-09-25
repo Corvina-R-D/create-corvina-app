@@ -31,7 +31,7 @@ const Stasher CtxKey = "stasher"
 const StasherBool CtxKey = "stasherBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
-const ExperimentalSingleDockerfile CtxKey = "experimentalSingleDockerfile"
+const ExperimentalDevcontainer CtxKey = "experimentalDevcontainer"
 const DisableNameValidation CtxKey = "disableNameValidation"
 const SkipPackageLockGeneration CtxKey = "skipPackageLockGeneration"
 const DestinationFolder CtxKey = "destinationFolder"
@@ -152,13 +152,13 @@ func validateName(name string) error {
 	}
 
 	// only letters and numbers (but not in the first position)
-	mateched, err := regexp.MatchString("^[a-z][a-z0-9\\-]{0,15}$", name)
+	mateched, err := regexp.MatchString("^[a-z][a-z0-9\\-]{0,16}$", name)
 	if err != nil {
 		return err
 	}
 
 	if !mateched {
-		return errors.New("assign a name only letters and numbers or - are allowed, but not in the first position, and with a maximum of 15 characters")
+		return errors.New("assign a name only letters and numbers or - are allowed, but not in the first position, and with a maximum of 16 characters")
 	}
 
 	return nil
@@ -333,7 +333,7 @@ func createWebApp(ctx context.Context) error {
 	stasher := ctx.Value(StasherBool).(bool)
 	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
-	singleDockerfile := ctx.Value(ExperimentalSingleDockerfile).(bool)
+	experimentalDevcontainer := ctx.Value(ExperimentalDevcontainer).(bool)
 	options := ""
 	if redis {
 		options += "--redis "
@@ -363,7 +363,7 @@ func createWebApp(ctx context.Context) error {
 		RedisEnabled:                    redis,
 		StasherEnabled:                  stasher,
 		RabbitEnabled:                   rabbit,
-		SingleDockerfile:                singleDockerfile,
+		ExperimentalDevcontainer:        experimentalDevcontainer,
 		K8sEnabled:                      k8s,
 		CreateCorvinaAppCreationOptions: options,
 		CreateCorvinaAppVersion:         CliVersion,
@@ -546,8 +546,14 @@ func skipThisFile(path string, projectInfo ProjectInfo) bool {
 		}
 	}
 
-	if !projectInfo.SingleDockerfile {
+	if !projectInfo.ExperimentalDevcontainer {
 		if path == "corvina-app-web/Dockerfile" {
+			return true
+		}
+		if strings.HasPrefix(path, "corvina-app-web/.devcontainer/") {
+			return true
+		}
+		if path == "corvina-app-web/service/.env.devcontainer" || path == "corvina-app-web/service/.env.dev" {
 			return true
 		}
 	}
@@ -586,7 +592,7 @@ type ProjectInfo struct {
 	StasherEnabled                  bool
 	RabbitEnabled                   bool
 	K8sEnabled                      bool
-	SingleDockerfile                bool
+	ExperimentalDevcontainer        bool
 	CreateCorvinaAppCreationOptions string
 	CreateCorvinaAppVersion         string
 }

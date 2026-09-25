@@ -13,12 +13,10 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn data-qa="custom-dialog-alert-cancel" text @click="close" v-show="showButtonCancel">
-            Cancel
-            <!-- {{$i18n.t('modal.cancel')}} -->
+            {{ $t('modal.cancel') }}
           </v-btn>
           <v-btn v-if="!modalData.customActions"  data-qa="custom-dialog-alert-continue" :loading="loading" color="primary" text @click="successAndClose">
-            Continue
-            <!-- {{$i18n.t('modal.continue')}} -->
+            {{ $t('modal.continue') }}
           </v-btn>
           <v-btn v-else v-for="(action) in modalData.customActions" :key="action.key" :data-qa="action.qa" :loading="loading" color="primary" text @click="successAndClose(action.key)"> {{ action.label }} </v-btn>
         </v-card-actions>

@@ -14,9 +14,15 @@
     "start:debug": "env-cmd nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+[|- if .ExperimentalDevcontainer |]
+    "test": "env-cmd -f .env.devcontainer --use-shell \"START_FEATURES=migrator.up,quit nest start && jest\"",
+    "test:watch": "env-cmd -f .env.devcontainer --use-shell \"START_FEATURES=migrator.up,quit nest start && jest --watch\"",
+    "test:cov": "env-cmd -f .env.devcontainer --use-shell \"START_FEATURES=migrator.up,quit nest start && jest --coverage\"",
+ [|- else |]
     "test": "env-cmd --use-shell \"START_FEATURES=migrator.up,quit nest start && jest\"",
     "test:watch": "env-cmd --use-shell \"START_FEATURES=migrator.up,quit nest start && jest --watch\"",
     "test:cov": "env-cmd --use-shell \"START_FEATURES=migrator.up,quit nest start && jest --coverage\"",
+ [|- end |]
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
@@ -31,8 +37,10 @@
     "express": "^5.2.1",
     "handlebars": "^4.7.8",
     "helmet": "^8.1.0",
+    "iso8601-duration": "^2.1.4",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2",
+    "lodash": "^4.18.1",
     "match-url-wildcard": "^0.0.4",
     "pg": "^8.10.0",
     "pg-hstore": "^2.3.4",
