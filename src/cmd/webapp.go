@@ -31,7 +31,7 @@ const Stasher CtxKey = "stasher"
 const StasherBool CtxKey = "stasherBool"
 const Kubernetes CtxKey = "kubernetes"
 const KubernetesBool CtxKey = "kubernetesBool"
-const ExperimentalDevcontainer CtxKey = "experimentalDevcontainer"
+const Devcontainer CtxKey = "devcontainer"
 const DisableNameValidation CtxKey = "disableNameValidation"
 const SkipPackageLockGeneration CtxKey = "skipPackageLockGeneration"
 const DestinationFolder CtxKey = "destinationFolder"
@@ -333,7 +333,7 @@ func createWebApp(ctx context.Context) error {
 	stasher := ctx.Value(StasherBool).(bool)
 	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
-	experimentalDevcontainer := ctx.Value(ExperimentalDevcontainer).(bool)
+	devcontainer := ctx.Value(Devcontainer).(bool)
 	options := ""
 	if redis {
 		options += "--redis "
@@ -355,6 +355,11 @@ func createWebApp(ctx context.Context) error {
 	} else {
 		options += "--rabbit=false "
 	}
+	if devcontainer {
+		options += "--devcontainer "
+	} else {
+		options += "--devcontainer=false "
+	}
 
 	os.Mkdir(destinationFolder, 0755)
 
@@ -363,7 +368,7 @@ func createWebApp(ctx context.Context) error {
 		RedisEnabled:                    redis,
 		StasherEnabled:                  stasher,
 		RabbitEnabled:                   rabbit,
-		ExperimentalDevcontainer:        experimentalDevcontainer,
+		Devcontainer:                    devcontainer,
 		K8sEnabled:                      k8s,
 		CreateCorvinaAppCreationOptions: options,
 		CreateCorvinaAppVersion:         CliVersion,
@@ -546,7 +551,7 @@ func skipThisFile(path string, projectInfo ProjectInfo) bool {
 		}
 	}
 
-	if !projectInfo.ExperimentalDevcontainer {
+	if !projectInfo.Devcontainer {
 		if path == "corvina-app-web/Dockerfile" {
 			return true
 		}
@@ -592,7 +597,7 @@ type ProjectInfo struct {
 	StasherEnabled                  bool
 	RabbitEnabled                   bool
 	K8sEnabled                      bool
-	ExperimentalDevcontainer        bool
+	Devcontainer                    bool
 	CreateCorvinaAppCreationOptions string
 	CreateCorvinaAppVersion         string
 }

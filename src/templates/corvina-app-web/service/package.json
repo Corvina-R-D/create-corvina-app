@@ -14,7 +14,7 @@
     "start:debug": "env-cmd nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-[|- if .ExperimentalDevcontainer |]
+[|- if .Devcontainer |]
     "test": "env-cmd -f .env.devcontainer --use-shell \"START_FEATURES=migrator.up,quit nest start && jest\"",
     "test:watch": "env-cmd -f .env.devcontainer --use-shell \"START_FEATURES=migrator.up,quit nest start && jest --watch\"",
     "test:cov": "env-cmd -f .env.devcontainer --use-shell \"START_FEATURES=migrator.up,quit nest start && jest --coverage\"",

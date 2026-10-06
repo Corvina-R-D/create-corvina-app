@@ -17,7 +17,7 @@
 * jq `arkade get jq`
 * yq `arkade get yq`
 [|- end |]
-[|- if .ExperimentalDevcontainer |]
+[|- if .Devcontainer |]
 * devcontainer CLI `npm i -g @devcontainers/cli`
 [|- end |]
 
@@ -64,7 +64,7 @@ To manually clean the active redirections set up by the localhost-redirect scrip
 
 I'm focusing right now on the test related to the service.
 
-[|- if .ExperimentalDevcontainer |]
+[|- if .Devcontainer |]
 
 The service devcontainer brings up its own postgresql[| if .RedisEnabled |]/redis[| end |][| if .RabbitEnabled |]/rabbitmq[| end |] and `service/.env.devcontainer` already points at them, so tests run in isolation from whatever `service/.env` you use for day-to-day development:
 
@@ -142,7 +142,7 @@ The script reads the instance entry in `helm-charts/envs/environments.yaml` and 
 
 [|- end |]
 
-[|- if .ExperimentalDevcontainer |]
+[|- if .Devcontainer |]
 
 ## Development with Devcontainer
 
