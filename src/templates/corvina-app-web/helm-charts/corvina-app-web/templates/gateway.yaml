@@ -33,3 +33,23 @@ spec:
     - providers:
       - name: envoy
 ---
+# TLS client fingerprints for the access log (%TLS_JA4_FINGERPRINT%)
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: tls-fingerprints
+  namespace: {{ .Release.Namespace }}
+spec:
+  configPatches:
+  - applyTo: LISTENER_FILTER
+    match:
+      context: GATEWAY
+      listener:
+        listenerFilter: envoy.filters.listener.tls_inspector
+    patch:
+      operation: MERGE
+      value:
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.listener.tls_inspector.v3.TlsInspector
+          enable_ja3_fingerprinting: true
+          enable_ja4_fingerprinting: true

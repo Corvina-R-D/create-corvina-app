@@ -1,7 +1,8 @@
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ .Release.Name }}-migr-{{ .Values.service.tag }}
+{{- /* the Job name carries a hash of the whole Job: a changed template is a new Job, never an update of an immutable one */}}
+{{- define "corvina-app-[| .Name |].migrator.job" }}
+  labels:
+    corvina.io/migrator: {{ .Release.Name }}
+    corvina.io/image-tag: "{{ .Values.service.tag }}"
   namespace: {{ .Release.Namespace }}
   {{- if and (not .Values.global.argocdManagement) .Release.IsUpgrade }}
   annotations:
@@ -52,6 +53,13 @@ spec:
           [|- end |]
       restartPolicy: Never # prevent pod removal on job failure so that we can inspect logs
   backoffLimit: 100
+{{- end }}
+{{- $job := include "corvina-app-[| .Name |].migrator.job" . }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-migr-{{ $job | sha256sum | trunc 10 }}"
+{{- $job }}
 ---
 apiVersion: v1
 kind: ServiceAccount
