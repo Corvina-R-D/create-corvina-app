@@ -5,6 +5,7 @@ const Mustache = require("mustache");
 
 const md = require("markdown-it")({ html: true });
 const mk = require("@vscode/markdown-it-katex").default;
+const attrs = require("markdown-it-attrs");
 
 
 // Simple plugin to customize the image URL
@@ -34,6 +35,7 @@ function mkImagePublicURL(md) {
 }
 
 md.use(mk);
+md.use(attrs);
 md.use(mkImagePublicURL);
 
 let vars = {};

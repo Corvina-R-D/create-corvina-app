@@ -95,6 +95,7 @@ service:
   image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-backend
   appId: corvina-app-{{ .StateValues.appName }}
   envVar:
+    MANIFEST_BRAND: corvina
     LOG_LEVEL: info
     PG_PORT: 5432
     PG_MAX_QUERY_EXEC_TIME: 5000

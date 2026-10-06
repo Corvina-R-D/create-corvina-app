@@ -15,24 +15,19 @@
           <div v-if="modalData.error && modalData.error.config" class="error-detail">
             <!-- Show only opaque information to final user -->
             <div><span>
-              Organization ID
-              <!-- {{$i18n.t("errorModal.orgId")}} -->
+              {{ $t("errorModal.orgId") }}
             </span> {{ orgId }}</div>
             <div><span>
-              Service:
-              <!-- {{$i18n.t("errorModal.service")}} -->
+              {{ $t("errorModal.service") }}
             </span> {{ service }}</div>
             <div><span>
-              Reason:
-              <!-- {{$i18n.t("errorModal.reason")}} -->
+              {{ $t("errorModal.reason") }}
             </span> {{ reason }}</div>
             <div><span>
-              Timestamp:
-              <!-- {{$i18n.t("errorModal.timestamp")}} -->
+              {{ $t("errorModal.timestamp") }}
             </span> {{ timestamp }}</div>
             <div v-if="modalData.error.response && modalData.error.response.data && modalData.error.response.data.trackingNumber"><span>
-              Tracking number:
-              <!-- {{$i18n.t("errorModal.trackingNumber")}} -->
+              {{ $t("errorModal.trackingNumber") }}
             </span> {{ modalData.error.response.data.trackingNumber }}</div>
             <!-- <div><span>Code:</span> {{ modalData.error.code }}</div> -->
           </div>
@@ -40,8 +35,7 @@
       <v-card-actions style="padding:0; margin-top:10px;">
         <!-- <v-spacer></v-spacer> -->
         <v-btn data-qa="error-dialog-close" class="err-modal-confirm" style="color: var(--color-alert); padding: 0;" text @click="confirmAndClose">
-          continue
-          <!-- {{$i18n.t("errorModal.continue")}} -->
+          {{ $t("errorModal.continue") }}
         </v-btn>
         <!-- <v-spacer></v-spacer>
         <help-desk-report :modalData="modalData" :error="modalData"></help-desk-report> -->
@@ -79,8 +73,8 @@ export default {
     service: function() {
       if(this.modalData.error.config && this.modalData.error.config.url && this.modalData.error.config.url.split('svc/').length > 0)
         return this.modalData.error.config.url.split('svc/')[1];
-      else 
-        return "unknown";
+      else
+        return this.$t("errorModal.unknownService");
     },
     orgId: function() {
       if(this.$store.getters['permission/getCurrentUserOrg'] != null && this.$store.getters['permission/getCurrentUserOrg'].length > 0)
@@ -93,7 +87,7 @@ export default {
         if(this.modalData.error && this.modalData.error.message) {
           return this.modalData.error.message
         }
-        return 'N/A';
+        return this.$t("common.notAvailable");
       }
 
       switch(this.modalData.error.response.status){

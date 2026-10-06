@@ -49,14 +49,14 @@
         :class="{ backgroundHighlight: isSearching == true && !isTagSelected == true, 'bg-white': !(isSearching == true && !isTagSelected == true) }"
         v-if="tagEnabled || !disableSearch">
         <v-divider :thickness="2" vertical></v-divider>
-        <Searchbar v-if="allowsSearchBar && !disableSearch && !isTagSelected" :searchTitle="searchTitle"
+        <Searchbar v-if="allowsSearchBar && !disableSearch && !isTagSelected" :searchTitle="searchTitle || $t('common.searchPlaceholder')"
           :searchModel="searchModel" :confirmEnabled="searchOnEnter" :clearOnConfirm="false" :iconEnabled="false"
           @onInputChange="filter($event)" @confirm="searchEnter" />
         <animated-button v-if="allowsSearchBar && !disableSearch && !isTagSelected && searchOnEnter" @click="searchEnter"
           icon="ecc-TB-Enter" class="filterEnterChip">
         </animated-button>
         <div v-if="tagEnabled && isTagSelected" class="sort-dropdown bg-g1" style="width:13em">
-          <v-select class="dropdown no-underline" style="font-size: 12px;" :label="'breadcrumb.filterBy'"
+          <v-select class="dropdown no-underline" style="font-size: 12px;" :label="$t('breadcrumb.filterBy')"
             ref="filterDropdown" append-icon="ecc-M-Freccia" :items="filterByItems" :return-object="true"
             @input="changeFilterBy" />
         </div>
@@ -174,7 +174,7 @@ export default defineComponent({
     },
     searchTitle: {
       type: String,
-      default: "Search..."
+      default: undefined
     },
     searchModel: {
       type: String,
@@ -515,7 +515,7 @@ export default defineComponent({
       return this.searchModel != '';
     },
     sortBy(): any /** FIXME: fix this any */ {
-      return 'Sort by:'
+      return this.$t('breadcrumb.sortBy')
     },
     canEnterFilterChip(): boolean {
       return (this.filterBySelected && this.filterModel) ? true : false

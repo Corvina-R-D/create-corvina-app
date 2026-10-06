@@ -4,46 +4,59 @@ import { Model, Table, Column, DataType, AllowNull } from 'sequelize-typescript'
 export class Installation extends Model {
   @AllowNull(false)
   @Column({ type: DataType.STRING(50) })
-  apiVersion: string;
+  declare apiVersion: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(200) })
-  clientId: string;
+  declare clientId: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(200) })
-  clientSecret: string;
+  declare clientSecret: string;
 
   @Column({ type: DataType.STRING(256) })
-  baseUrl: string;
+  declare baseUrl: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(1024) })
-  apiBaseUrl: string;
+  declare apiBaseUrl: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(256) })
-  authBaseUrl: string;
+  declare authBaseUrl: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(1024) })
-  openIdConfigurationUrl: string;
+  declare openIdConfigurationUrl: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(256) })
-  wsBaseUrl: string;
+  declare wsBaseUrl: string;
 
-  @Column({ type: DataType.STRING(50), primaryKey: true })
-  organizationId: string;
+  @Column({ type: DataType.BIGINT, primaryKey: true })
+  declare organizationId: string;
 
   @Column({ type: DataType.UUID, primaryKey: true })
-  instanceId: string;
+  declare instanceId: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(500) })
-  realmValidationRole: string;
+  declare realmValidationRole: string;
 
   @AllowNull(false)
   @Column({ type: DataType.STRING(50) })
-  realm: string;
+  declare realm: string;
+
+  @Column({ type: DataType.STRING(256) })
+  declare orgResourceId: string;
+
+  @Column({ type: DataType.DATE })
+  declare endDate?: Date;
+
+  @Column({ type: DataType.STRING(1024) })
+  declare planId?: string;
+
+  @AllowNull(false)
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  declare freeTrial: boolean;
 }

@@ -12,6 +12,10 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
+  if (process.env.NODE_ENV !== 'production') {
+    app.enableCors({ origin: '*' });
+  }
+
   app.use(
     helmet({
       contentSecurityPolicy: false,
@@ -26,7 +30,7 @@ async function bootstrap() {
   app.useBodyParser('json', { type: 'application/json' });
 
   const config = new DocumentBuilder()
-    .setTitle('corvina app [| .Name |]')
+    .setTitle('app [| .Name |]')
     .setDescription('You can find here the API description')
     .setVersion('1.0')
     .addBearerAuth({

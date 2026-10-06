@@ -69,7 +69,6 @@ stasher:
 
 registration:
   enabled: true
-  namespace: prod
 
 backup:
   enabled: false

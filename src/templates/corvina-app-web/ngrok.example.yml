@@ -1,0 +1,10 @@
+version: "2"
+authtoken: <put you ngrok token here>
+tunnels:
+  service:
+    addr: 3000
+    proto: http
+    hostname: <put your ngrok hostname here>
+  # app:
+  #   addr: 5173
+  #   proto: http

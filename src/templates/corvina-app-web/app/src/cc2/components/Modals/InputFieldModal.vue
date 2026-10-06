@@ -22,12 +22,10 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn data-qa="corfirm-dialog-input-cancel" text @click="close">
-            cancel
-            <!-- {{$i18n.t('modal.cancel')}} -->
+            {{ $t('modal.cancel') }}
           </v-btn>
           <v-btn data-qa="corfirm-dialog-input-continue" id="confirmed-modal" color="primary" text @click="confirm">
-            continue
-            <!-- {{$i18n.t('modal.continue')}} -->
+            {{ $t('modal.continue') }}
           </v-btn>
         </v-card-actions>
       </v-card>

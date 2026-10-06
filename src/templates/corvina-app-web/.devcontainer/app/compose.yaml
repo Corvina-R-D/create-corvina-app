@@ -1,0 +1,20 @@
+name: corvina-app-[| .Name |]-app
+
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: devcontainer.Dockerfile
+    stop_grace_period: 5s
+    command: sleep infinity
+    ports:
+      - "5173:5173"
+    volumes:
+      - ${LOCAL_GIT_ROOT:-/var/lib/docker/codespacemount/workspace/corvina-app-[| .Name |]}:/workspace:cached
+    networks:
+      - default
+      - corvina-minikube
+
+networks:
+  corvina-minikube:
+    external: true

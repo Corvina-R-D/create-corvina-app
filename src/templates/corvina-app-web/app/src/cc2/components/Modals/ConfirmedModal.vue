@@ -11,8 +11,7 @@
         <v-card-actions :style="modalData.actionStyle" style="padding:0">
           <v-spacer v-if='!modalData.disableSpacer'></v-spacer>
           <v-btn class="confirm-modal-actions" data-qa="corfirm-dialog-alert-cancel" text @click="close">
-            Cancel
-            <!-- {{$i18n.t('modal.cancel')}} -->
+            {{ $t('modal.cancel') }}
           </v-btn>
           <template v-if="!modalData.customActions">
             <v-btn class="confirm-modal-actions" data-qa="corfirm-dialog-alert-continue" id="confirmed-modal" color="primary" text @click="successAndClose" :disabled="showSuccessSpinner">
@@ -20,8 +19,7 @@
                 <v-progress-circular indeterminate color="primary" size="25" />
               </div>
               <template v-else>
-                Continue
-                <!-- {{$i18n.t('modal.continue')}} -->
+                {{ $t('modal.continue') }}
               </template>
             </v-btn>
           </template>

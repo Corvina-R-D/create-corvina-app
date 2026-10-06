@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { Installation } from '../entities/installation.entity';
+import { toBoolean, toDate } from '../utils/cast.util';
 
 export enum EVENT_TYPE {
   INSTALLED = 'installed',
   UNINSTALLED = 'uninstalled',
+  RENEW = 'renew',
 }
 
 export class BaseLifecycleDTO {
@@ -45,7 +48,26 @@ export class BaseLifecycleDTO {
   eventType: EVENT_TYPE;
 }
 
-export class InstalledInputDTO extends BaseLifecycleDTO {
+export class LicensedLifecycleDTO extends BaseLifecycleDTO {
+  @ApiProperty({ required: false })
+  @IsDate()
+  @IsOptional()
+  @Transform(({ value }) => toDate(value))
+  endDate?: Date;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  planId?: string;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => toBoolean(value))
+  freeTrial?: boolean;
+}
+
+export class InstalledInputDTO extends LicensedLifecycleDTO {
   @ApiProperty()
   @IsString()
   clientId: string;
@@ -65,6 +87,10 @@ export class InstalledInputDTO extends BaseLifecycleDTO {
   @ApiProperty()
   @IsString()
   realmValidationRole: string;
+
+  @ApiProperty()
+  @IsString()
+  orgResourceId: string;
 }
 
 export const createInstallation = (installationDTO: InstalledInputDTO): Installation => {
@@ -80,10 +106,16 @@ export const createInstallation = (installationDTO: InstalledInputDTO): Installa
     clientId: installationDTO.clientId,
     organizationId: String(installationDTO.organizationId),
     instanceId: installationDTO.instanceId,
+    orgResourceId: installationDTO.orgResourceId,
     clientSecret: installationDTO.clientSecret,
     realm: installationDTO.realm,
     realmValidationRole: installationDTO.realmValidationRole,
+    endDate: installationDTO.endDate,
+    planId: installationDTO.planId,
+    freeTrial: installationDTO.freeTrial || false,
   } as Installation;
 };
 
 export class UninstalledInputDTO extends BaseLifecycleDTO {}
+
+export class RenewInputDTO extends LicensedLifecycleDTO {}
