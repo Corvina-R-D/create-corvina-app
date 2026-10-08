@@ -139,6 +139,16 @@ redis:
     enabled: true
     serviceMonitor:
       enabled: true
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       limits:
         cpu: "250m"
@@ -149,6 +159,16 @@ redis:
   replica:
     replicaCount: 0
   master:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       limits:
         cpu: "1"
@@ -176,7 +196,7 @@ rabbitmq:
 
 [| if .StasherEnabled -|]
 stasher:
-  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-2.1.1
+  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-2.2.0
   envVar:
     RABBITMQ_QUEUE: stasher
     LOG_LEVEL: info
