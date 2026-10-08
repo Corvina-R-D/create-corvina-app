@@ -36,7 +36,7 @@
         <v-col style="display: flex; justify-content: center; align-items: center; gap: 12px;">
           <CorvinaButton
             :text="$t('list.clickMeButton')"
-            icon="ecc-M-Home"
+            icon="ecc:ecc-M-Home"
             :tooltip="$t('list.clickMeTooltip')"
             :variant="CORVINA.BUTTON.VARIANT.OUTLINED"
             dataQa="example-button"
@@ -49,7 +49,7 @@
       <v-row>
         <v-spacer />
         <v-col style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-          <CorvinaIcon icon="ecc-E-Edit" :color="CORVINA.COLOR.PRIMARY" />
+          <CorvinaIcon icon="ecc:ecc-E-Edit" :color="CORVINA.COLOR.PRIMARY" />
           <CorvinaSelect
             :items="selectItems"
             :model="selectedItem"
@@ -77,7 +77,7 @@
           <CorvinaButton
             style="margin-left: 10px;"
             :variant="CORVINA.BUTTON.VARIANT.FREE"
-            icon="ecc-T-Help"
+            icon="ecc:ecc-T-Help"
             :tooltip="$t('help.show')"
             dataQa="help-button"
             @clicked="showHelp"
@@ -211,7 +211,7 @@ export default defineComponent({
     breadcrumb() {
       return {
         path: ["[| .Name |]", this.$t("list.breadcrumbYourEntity")],
-        icon: "ecc-B-Dashboard",
+        icon: "ecc:ecc-B-Dashboard",
         searchTitle: this.$t("common.searchPlaceholder"),
         disableSearch: false,
       };

@@ -4,8 +4,8 @@
     data-qa="help-drawer">
     <v-layout class="help-panel-content flex-column">
       <div class="d-flex justify-space-between" style="width: 100%;">
-        <CorvinaButton icon="ecc-T-Help" :variant="CORVINA.BUTTON.VARIANT.FREE" dataQa="help-drawer-icon" />
-        <CorvinaButton icon="ecc-M-Chiudi" :variant="CORVINA.BUTTON.VARIANT.FREE" :text="$t('help.close')" dataQa="close-help" @clicked="onClose" />
+        <CorvinaButton icon="ecc:ecc-T-Help" :variant="CORVINA.BUTTON.VARIANT.FREE" dataQa="help-drawer-icon" />
+        <CorvinaButton icon="ecc:ecc-M-Chiudi" :variant="CORVINA.BUTTON.VARIANT.FREE" :text="$t('help.close')" dataQa="close-help" @clicked="onClose" />
       </div>
       <br />
       <div style="width: 100%;">

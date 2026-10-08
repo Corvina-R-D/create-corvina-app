@@ -21,7 +21,7 @@
     :style="helpStyle">
     <v-layout class="help-header align-center justify-space-between">
       <v-layout class="align-center">
-        <v-icon>ecc-T-Help</v-icon><span data-qa="help-title" style="padding-left: 10px;">
+        <v-icon>ecc:ecc-T-Help</v-icon><span data-qa="help-title" style="padding-left: 10px;">
           {{ $t('sidePanel.needHelp') }}
         </span>
       </v-layout>
@@ -34,7 +34,7 @@
         <!-- TODO: set correct icon once added to font -->
         <span style="padding-right: 10px">
           {{ $t('sidePanel.close') }}
-        </span><v-icon>ecc-M-Chiudi</v-icon>
+        </span><v-icon>ecc:ecc-M-Chiudi</v-icon>
       </v-layout>
     </v-layout>
     <v-layout class="help-panel-content flex-column">

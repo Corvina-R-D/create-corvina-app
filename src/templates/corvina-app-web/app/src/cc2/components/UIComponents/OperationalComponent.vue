@@ -24,7 +24,7 @@
           :data-qa="`help-dialog-${type}`"
           class="helpButton"
         >
-          <v-icon style="font-size:22px">ecc-T-Help</v-icon>
+          <v-icon style="font-size:22px">ecc:ecc-T-Help</v-icon>
         </v-btn>
         <v-btn
           v-if="denyEnabled"
@@ -108,7 +108,7 @@ export default {
      * If the icon string is a valid url, it will be used as the icon using v-img
      */
     icon: {
-      default: "ecc-E-Edit",
+      default: "ecc:ecc-E-Edit",
       type: String
     },
     iconColor: {
@@ -141,11 +141,11 @@ export default {
     },
     confirmIcon: {
       type: String,
-      default: 'ecc-E-V'
+      default: 'ecc:ecc-E-V'
     },
     closeIcon: {
       type: String,
-      default: 'ecc-E-X'
+      default: 'ecc:ecc-E-X'
     },
     collapsed: {
       type: Boolean,
