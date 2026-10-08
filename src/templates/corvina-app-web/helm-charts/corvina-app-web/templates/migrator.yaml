@@ -28,6 +28,14 @@ spec:
       containers:
       - name: service
         image: "{{ .Values.service.image }}:{{ .Values.service.tag | required ".service.tag is required" }}"
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           {{- toYaml .Values.service.resources | nindent 10 }}
