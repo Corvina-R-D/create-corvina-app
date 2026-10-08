@@ -123,7 +123,7 @@
       },
       icon: {
         type: String,
-        default: 'ecc-TB-Find'
+        default: 'ecc:ecc-TB-Find'
       },
       iconEnabled: {
         type: Boolean,

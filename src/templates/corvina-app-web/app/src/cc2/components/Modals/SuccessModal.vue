@@ -5,7 +5,7 @@
 <!--        @click:outside="successAndClose"-->
         <div class="d-flex" data-qa="success-dialog-alert" >
           <div class="d-flex justify-center align-items-center modal-icon">
-            <v-icon style="font-size:33px">ecc-B-Check</v-icon>
+            <v-icon style="font-size:33px">ecc:ecc-B-Check</v-icon>
           </div>
           <div class="flex flex-direction-column flex-grow-1">
             <div style="font-size: 13px; font-weight: 700;"> {{modalData.title}} </div>
@@ -20,7 +20,7 @@
             :ripple="false"
             >
             <!-- :data-qa="`close-confirmed-${modalData.type}`" -->
-            <v-icon style="font-size:33px">ecc-E-X</v-icon>
+            <v-icon style="font-size:33px">ecc:ecc-E-X</v-icon>
           </v-btn>
         </div>
       </v-snackbar>

@@ -90,7 +90,15 @@ If you want to resync an existing app with the latest scaffold, you can run the 
 ./scripts/resync-create-corvina-app.sh
 ```
 
-The script requires to run in a valid git repo.
+The script requires to run in a valid git repo with a clean working tree (commit or stash your changes first). The local `data/` folder (e.g. postgresql volumes) is never cleaned nor synced.
+
+By default the latest published version is used. To resync from a different command (e.g. a local checkout of create-corvina-app) set `CREATE_CORVINA_APP_COMMAND`:
+
+```bash
+CREATE_CORVINA_APP_COMMAND="npx /path/to/create-corvina-app" ./scripts/resync-create-corvina-app.sh
+```
+
+The scaffold branch is always initialized with the version in `scripts/common.sh`, unless `CREATE_CORVINA_APP_ORIGINAL_COMMAND` is set.
 
 The first time the script will initialize a branch named `create-corvina-app` running the create-corvina-app command at the version used for scaffolding the app.
 
