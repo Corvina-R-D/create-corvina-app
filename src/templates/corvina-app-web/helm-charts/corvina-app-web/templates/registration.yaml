@@ -42,7 +42,15 @@ spec:
           echo Installing app $appKey
           curl -s --fail-with-body --oauth2-bearer "$token" -X POST http://{{ .core.service }}:{{ .core.port }}/api/v1/apps --json '{"manifestUrl":"{{ .manifest.url }}"}'
         securityContext:
-          runAsUser: 0
+          # corvina-devops-utils has no USER: run it as nobody
+          runAsUser: 65534
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
         env:
         - name: CORE_ADMIN_CLIENT_ID
           valueFrom:

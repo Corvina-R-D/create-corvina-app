@@ -26,6 +26,16 @@ spec:
       initContainers:
         - name: init
           image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          securityContext:
+            # third-party image without a USER: run it as nobody
+            runAsUser: 65534
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "job-wr"
