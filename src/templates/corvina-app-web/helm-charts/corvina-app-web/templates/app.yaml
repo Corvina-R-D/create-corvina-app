@@ -17,6 +17,14 @@ spec:
       containers:
         - name: app
           image: "{{ .Values.app.image }}:{{ .Values.app.tag | required ".app.tag is required" }}"
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 8080

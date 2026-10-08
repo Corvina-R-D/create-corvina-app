@@ -25,5 +25,8 @@ RUN npm ci --omit=dev
 
 COPY --from=development /usr/src/app/dist ./dist
 
+# numeric uid of the base image "node" user, so that k8s runAsNonRoot can verify it
+USER 1000
+
 # execute nestjs application
 CMD ["node", "dist/main"]
