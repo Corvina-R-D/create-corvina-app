@@ -32,6 +32,7 @@ spec:
   accessLogging:
     - providers:
       - name: envoy
+{{- if .Values.tlsClientLogging }}
 ---
 # TLS client fingerprints for the access log (%TLS_JA4_FINGERPRINT%)
 apiVersion: networking.istio.io/v1alpha3
@@ -47,9 +48,14 @@ spec:
       listener:
         listenerFilter: envoy.filters.listener.tls_inspector
     patch:
-      operation: MERGE
+      # not MERGE: before istio/istio#61835 it merges into every listener filter and mutates istiod's
+      # shared default
+      operation: REPLACE
       value:
+        name: envoy.filters.listener.tls_inspector
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.listener.tls_inspector.v3.TlsInspector
+          initial_read_buffer_size: 512  # Istio's default
           enable_ja3_fingerprinting: true
           enable_ja4_fingerprinting: true
+{{- end }}

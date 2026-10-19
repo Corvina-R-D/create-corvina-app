@@ -2,3 +2,5 @@ releaseName: corvina-app-[| .Name |]
 appName: [| .Name |]
 workloadIdentity:
   gcpSaLinks: {}
+# client TLS parameters in the ingress access logs
+tlsClientLogging: false
