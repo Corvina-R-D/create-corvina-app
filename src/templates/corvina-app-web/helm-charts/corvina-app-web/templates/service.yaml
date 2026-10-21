@@ -141,9 +141,11 @@ data:
   MANIFEST_BASE_URL_FE_APP: {{ .Values.gateway.protocol }}://{{ .Values.gateway.appHost }}:{{ .Values.gateway.port }}
   MANIFEST_BRAND: '{{ .Values.service.envVar.MANIFEST_BRAND }}'
   INSTALLATION_HOSTS_WHITELIST: '{{ .Values.service.envVar.INSTALLATION_HOSTS_WHITELIST }}'
+  [|- if .RedisEnabled |]
   REDIS_HOST: '{{ .Release.Name }}-redis-headless'
   REDIS_PORT: '6379'
   CACHE_DEFAULT_TTL: '30' # in seconds
+  [|- end |]
   [|- if .RabbitEnabled |]
   RABBITMQ_HOST: '{{ .Values.rabbitmq.clusterName }}'
   RABBITMQ_PORT: '5672'
