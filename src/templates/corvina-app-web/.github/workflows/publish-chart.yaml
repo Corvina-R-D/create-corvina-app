@@ -1,0 +1,21 @@
+name: Publish Helm chart
+
+# Optional: package helm-charts/corvina-app-[| .Name |] and push it as an OCI artifact.
+# Note that the chart values live in helm-charts/base.yaml.gotmpl (helmfile), so the published chart is not
+# self-contained; it requires the `charts` repository in the corvina-app-[| .Name |] project
+# (corvina-terraform app-registry module, create_charts_repository = true).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish-chart:
+    name: Publish corvina-app-[| .Name |] Helm chart
+    uses: Corvina-R-D/corvina-github-actions/.github/workflows/publish-helm-chart.yaml@v5
+    with:
+      chart-path: helm-charts/corvina-app-[| .Name |]
+      oci-repository: europe-docker.pkg.dev/corvina-app-[| .Name |]/charts
+      gcp-project-id: corvina-app-[| .Name |]

@@ -24,3 +24,10 @@ dependencies:
     version: "1.29.0"
     repository: "https://istio-release.storage.googleapis.com/charts"
     alias: istio-gateway
+[|- if .StasherEnabled |]
+  - name: corvina-app-stasher
+    version: "~2.3.0"
+    repository: oci://europe-docker.pkg.dev/corvina-app-stasher/charts
+    alias: stasher
+    condition: stasher.enabled
+[|- end |]

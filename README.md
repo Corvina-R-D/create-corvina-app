@@ -62,6 +62,19 @@ We use to develop our application using minikube on our laptop. For that reason,
 
 Moreover to easily handle deployment on different environments, we leverage the power of helmfile. A utility script `deploy.sh <environment>` wraps call to Helmfile to deploy the application on a specific kubernetes cluster. The script will use the environment name to select the values specific for it.
 
+When the app is scaffolded with `--stasher`, [corvina-app-stasher](https://github.com/Corvina-R-D/corvina-app-stasher) is added as a dependency of the `corvina-app-{name}` chart (`alias: stasher`), pulled from `oci://europe-docker.pkg.dev/corvina-app-stasher/charts`, and configured under the `stasher` key of `helm-charts/base.yaml.gotmpl`. Pulling it locally requires being logged in to the registry (`gcloud auth configure-docker europe-docker.pkg.dev`). The dependency `version` is a patch-level range (`~X.Y.Z`): `helm dependency update` picks up new stasher patch releases, bump it in `Chart.yaml` for minor/major upgrades.
+
+After scaffolding, lock the chart dependencies and commit the lock file:
+
+```bash
+helm dependency update helm-charts/corvina-app-{name}
+git add helm-charts/corvina-app-{name}/Chart.lock
+```
+
+Renders (`render.yaml`) and `deploy.sh` run `helm dependency build` through helmfile, which installs exactly the versions of `Chart.lock`, so every render of a commit uses the same dependencies. Without a committed `Chart.lock` the version ranges are resolved again at every render. Run `helm dependency update` again, and commit `Chart.lock`, whenever the dependencies in `Chart.yaml` change or to pick up new patch releases.
+
+The optional `.github/workflows/publish-chart.yaml` workflow packages the app chart and pushes it to `oci://europe-docker.pkg.dev/corvina-app-{name}/charts` through the `publish-helm-chart.yaml` reusable workflow of corvina-github-actions.
+
 
 ### Develop on this repo ###
 
