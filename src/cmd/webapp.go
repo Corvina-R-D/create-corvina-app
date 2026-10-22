@@ -500,7 +500,6 @@ func skipThisFolder(path string, k8s bool) bool {
 var filesToExcludeK8s = []string{
 	"corvina-app-web/deploy.sh",
 	"corvina-app-web/draft-new-release.sh",
-	"corvina-app-web/.github/workflows/publish-chart.yaml",
 	".minikube.sh",
 }
 

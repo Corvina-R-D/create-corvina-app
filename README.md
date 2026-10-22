@@ -73,9 +73,6 @@ git add helm-charts/corvina-app-{name}/Chart.lock
 
 Renders (`render.yaml`) and `deploy.sh` run `helm dependency build` through helmfile, which installs exactly the versions of `Chart.lock`, so every render of a commit uses the same dependencies. Without a committed `Chart.lock` the version ranges are resolved again at every render. Run `helm dependency update` again, and commit `Chart.lock`, whenever the dependencies in `Chart.yaml` change or to pick up new patch releases.
 
-The optional `.github/workflows/publish-chart.yaml` workflow packages the app chart and pushes it to `oci://europe-docker.pkg.dev/corvina-app-{name}/charts` through the `publish-helm-chart.yaml` reusable workflow of corvina-github-actions.
-
-
 ### Develop on this repo ###
 
 If you want to develop on this repo, you need to install the following softwares:
