@@ -2,3 +2,5 @@ appHost: [| .Name |].corvina.cloud
 corvinaAppHost: app.corvina.cloud
 clusterDomain: cluster.local
 gcpNetworkingProject: corvina-internal-qa
+# client TLS parameters in the ingress access logs
+tlsClientLogging: true

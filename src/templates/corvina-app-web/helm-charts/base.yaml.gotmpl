@@ -1,5 +1,7 @@
 global:
   argocdManagement: {{ sprigGet .Values "argocdManagement" | default false }}
+# client TLS parameters in the ingress access logs
+tlsClientLogging: {{ .StateValues | get "tlsClientLogging" false }}
 
 
 istio-gateway:
