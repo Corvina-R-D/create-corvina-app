@@ -26,7 +26,7 @@ dependencies:
     alias: istio-gateway
 [|- if .StasherEnabled |]
   - name: corvina-app-stasher
-    version: "~2.3.0"
+    version: "~2.2.0"
     repository: oci://europe-docker.pkg.dev/corvina-app-stasher/charts
     alias: stasher
     condition: stasher.enabled
