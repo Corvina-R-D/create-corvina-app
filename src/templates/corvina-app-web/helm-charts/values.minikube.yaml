@@ -60,6 +60,8 @@ service:
 
 [| if .StasherEnabled -|]
 stasher:
+  image:
+    pullPolicy: IfNotPresent
   extraCa:
     secret: corvina-app-[| .Name |]-prod-tls
   resources:

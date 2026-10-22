@@ -62,6 +62,16 @@ We use to develop our application using minikube on our laptop. For that reason,
 
 Moreover to easily handle deployment on different environments, we leverage the power of helmfile. A utility script `deploy.sh <environment>` wraps call to Helmfile to deploy the application on a specific kubernetes cluster. The script will use the environment name to select the values specific for it.
 
+When the app is scaffolded with `--stasher`, [corvina-app-stasher](https://github.com/Corvina-R-D/corvina-app-stasher) is added as a dependency of the `corvina-app-{name}` chart (`alias: stasher`), pulled from `oci://europe-docker.pkg.dev/corvina-app-stasher/charts`, and configured under the `stasher` key of `helm-charts/base.yaml.gotmpl`. Pulling it locally requires being logged in to the registry (`gcloud auth configure-docker europe-docker.pkg.dev`). The dependency `version` is a patch-level range (`~X.Y.Z`): `helm dependency update` picks up new stasher patch releases, bump it in `Chart.yaml` for minor/major upgrades.
+
+After scaffolding, lock the chart dependencies and commit the lock file:
+
+```bash
+helm dependency update helm-charts/corvina-app-{name}
+git add helm-charts/corvina-app-{name}/Chart.lock
+```
+
+Renders (`render.yaml`) and `deploy.sh` run `helm dependency build` through helmfile, which installs exactly the versions of `Chart.lock`, so every render of a commit uses the same dependencies. Without a committed `Chart.lock` the version ranges are resolved again at every render. Run `helm dependency update` again, and commit `Chart.lock`, whenever the dependencies in `Chart.yaml` change or to pick up new patch releases.
 
 ### Develop on this repo ###
 
@@ -90,7 +100,15 @@ If you want to resync an existing app with the latest scaffold, you can run the 
 ./scripts/resync-create-corvina-app.sh
 ```
 
-The script requires to run in a valid git repo.
+The script requires to run in a valid git repo with a clean working tree (commit or stash your changes first). The local `data/` folder (e.g. postgresql volumes) is never cleaned nor synced.
+
+By default the latest published version is used. To resync from a different command (e.g. a local checkout of create-corvina-app) set `CREATE_CORVINA_APP_COMMAND`:
+
+```bash
+CREATE_CORVINA_APP_COMMAND="npx /path/to/create-corvina-app" ./scripts/resync-create-corvina-app.sh
+```
+
+The scaffold branch is always initialized with the version in `scripts/common.sh`, unless `CREATE_CORVINA_APP_ORIGINAL_COMMAND` is set.
 
 The first time the script will initialize a branch named `create-corvina-app` running the create-corvina-app command at the version used for scaffolding the app.
 

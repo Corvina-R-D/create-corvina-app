@@ -31,7 +31,7 @@
 			@keyup.esc="autocompleteClose"
 			@blur="closeAndDelete"
 			:disabled="disabled"
-			clear-icon="ecc-M-Chiudi"
+			clear-icon="ecc:ecc-M-Chiudi"
 			append-icon="">
 		</v-combobox>
 
@@ -67,7 +67,7 @@
     	@keyup="keyUp"
 		@blur="closeAndDelete"
 		:disabled="disabled"
-		clear-icon="ecc-M-Chiudi"
+		clear-icon="ecc:ecc-M-Chiudi"
 		append-icon=""
     	:prefix="prefix"
     	open-on-clear

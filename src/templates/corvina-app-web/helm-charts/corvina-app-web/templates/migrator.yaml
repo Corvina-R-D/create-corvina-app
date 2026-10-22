@@ -18,7 +18,17 @@ spec:
       serviceAccountName: migrator-sa
       initContainers:
         - name: psql-wait
-          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:1.3
+          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          securityContext:
+            # third-party image without a USER: run it as nobody
+            runAsUser: 65534
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "service"

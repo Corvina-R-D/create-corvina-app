@@ -141,6 +141,16 @@ redis:
     enabled: true
     serviceMonitor:
       enabled: true
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       limits:
         cpu: "250m"
@@ -151,6 +161,16 @@ redis:
   replica:
     replicaCount: 0
   master:
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       limits:
         cpu: "1"
@@ -177,15 +197,19 @@ rabbitmq:
 [|- end |]
 
 [| if .StasherEnabled -|]
+# corvina-app-stasher chart dependency, see https://github.com/Corvina-R-D/corvina-app-stasher/blob/master/helm-charts/values.yaml
 stasher:
-  image: europe-docker.pkg.dev/corvina-app-stasher/images/corvina-app-stasher:chart-2.1.1
-  envVar:
-    RABBITMQ_QUEUE: stasher
-    LOG_LEVEL: info
-    ACCEPTED_HTTP_RESULTS: 200,201,202
-    PERMANENT_HTTP_ERRORS: 208,404,405,406,501,505
-    NETWORK_RETRY_INTERVAL: 10
-    NETWORK_RETRY_MAX_TIMEOUT: 120
+  # image tag defaults to the chart appVersion, override with image.tag
+  image:
+    pullPolicy: Always
+  rabbitmq:
+    clusterName: {{ .StateValues.releaseName }}-rabbitmq
+  serviceAccount:
+    gcpServiceAccount: {{ dig "stasher-sa" "" .StateValues.workloadIdentity.gcpSaLinks | quote }}
+  # one stasher deployment per queue
+  instances:
+    default:
+      queue: stasher
   resources:
     requests:
         memory: "16Mi"

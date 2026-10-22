@@ -361,7 +361,7 @@ func createWebApp(ctx context.Context) error {
 		options += "--devcontainer=false "
 	}
 
-	os.Mkdir(destinationFolder, 0755)
+	os.MkdirAll(destinationFolder, 0755)
 
 	projectInfo := ProjectInfo{
 		Name:                            name,
@@ -389,7 +389,7 @@ func createWebApp(ctx context.Context) error {
 				return fs.SkipDir
 			}
 
-			dirName := strings.Replace(path, "corvina-app-web", destinationFolder, 2)
+			dirName := destinationPath(path, destinationFolder, name)
 			log.Debug().Str("path", dirName).Msg("Creating folder")
 
 			if _, err := os.Stat(dirName); os.IsNotExist(err) {
@@ -403,7 +403,7 @@ func createWebApp(ctx context.Context) error {
 			return nil
 		}
 
-		file, err := os.Create(strings.Replace(path, "corvina-app-web", destinationFolder, 2))
+		file, err := os.Create(destinationPath(path, destinationFolder, name))
 		if err != nil {
 			return err
 		}
@@ -477,6 +477,15 @@ func runNpmInstallForEachPackageJson(ctx context.Context) (err error) {
 	return
 }
 
+// destinationPath maps a template path to the generated one: the root "corvina-app-web" folder becomes the
+// destination folder, while the nested chart folder (helm-charts/corvina-app-web) is always named after the app,
+// to match the chart name referenced by Chart.yaml and helmfile.yaml
+func destinationPath(templatePath string, destinationFolder string, name string) string {
+	relativePath := strings.TrimPrefix(templatePath, "corvina-app-web")
+	relativePath = strings.Replace(relativePath, "corvina-app-web", fmt.Sprintf("corvina-app-%s", name), 1)
+	return filepath.Join(destinationFolder, relativePath)
+}
+
 func skipThisFolder(path string, k8s bool) bool {
 	if strings.Contains(path, "/dist") {
 		return true
@@ -506,15 +515,10 @@ var filesToExcludeRabbit = []string{
 	"corvina-app-web/templates/ServiceMonitor-rabbitmq.yaml",
 }
 
-var filesToExcludeStasher = []string{
-	"corvina-app-web/templates/stasher.yaml",
-}
-
 var filesToExclude = map[string][]string{
-	"k8s":     filesToExcludeK8s,
-	"redis":   filesToExcludeRedis,
-	"rabbit":  filesToExcludeRabbit,
-	"stasher": filesToExcludeStasher,
+	"k8s":    filesToExcludeK8s,
+	"redis":  filesToExcludeRedis,
+	"rabbit": filesToExcludeRabbit,
 }
 
 func skipThisFile(path string, projectInfo ProjectInfo) bool {
@@ -537,14 +541,6 @@ func skipThisFile(path string, projectInfo ProjectInfo) bool {
 
 	if !projectInfo.RabbitEnabled {
 		for _, file := range filesToExclude["rabbit"] {
-			if strings.Contains(path, file) {
-				return true
-			}
-		}
-	}
-
-	if !projectInfo.StasherEnabled {
-		for _, file := range filesToExclude["stasher"] {
 			if strings.Contains(path, file) {
 				return true
 			}

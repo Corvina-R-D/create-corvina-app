@@ -35,12 +35,12 @@
         <div class="sort-dropdown xs-flex-grow " data-qa="sort-dropdown">
           <v-select class="corvina-select no-underline" :class="[{ backgroundHighlight: needHighlightSortBy }]"
             ref="sortDropdown" style="font-size: 12px!important" item-title="text" item-value="value" v-model="sortValue"
-            @update:modelValue="sortSelect" menu-icon="ecc-M-Freccia" :items="sortingValues" :label="sortBy"
+            @update:modelValue="sortSelect" menu-icon="ecc:ecc-M-Freccia" :items="sortingValues" :label="sortBy"
             :single-line="true" density="compact" variant="filled" />
         </div>
         <v-divider vertical :thickness="1"></v-divider>
         <v-layout :class="[{ backgroundHighlight: needHighlightSortBy }]" class="mx-2">
-          <v-btn data-qa="sort-btn" class="sort-dropdown-button" :disabled="sortValue == sortBy" icon="ecc-TB-Sort"
+          <v-btn data-qa="sort-btn" class="sort-dropdown-button" :disabled="sortValue == sortBy" icon="ecc:ecc-TB-Sort"
             @click="reverseSort()" :class="[{ backgroundHighlight: needHighlightSortBy }, { rotate180: !sortAsc }]"
             variant="outlined" />
         </v-layout>
@@ -53,11 +53,11 @@
           :searchModel="searchModel" :confirmEnabled="searchOnEnter" :clearOnConfirm="false" :iconEnabled="false"
           @onInputChange="filter($event)" @confirm="searchEnter" />
         <animated-button v-if="allowsSearchBar && !disableSearch && !isTagSelected && searchOnEnter" @click="searchEnter"
-          icon="ecc-TB-Enter" class="filterEnterChip">
+          icon="ecc:ecc-TB-Enter" class="filterEnterChip">
         </animated-button>
         <div v-if="tagEnabled && isTagSelected" class="sort-dropdown bg-g1" style="width:13em">
           <v-select class="dropdown no-underline" style="font-size: 12px;" :label="$t('breadcrumb.filterBy')"
-            ref="filterDropdown" append-icon="ecc-M-Freccia" :items="filterByItems" :return-object="true"
+            ref="filterDropdown" append-icon="ecc:ecc-M-Freccia" :items="filterByItems" :return-object="true"
             @input="changeFilterBy" />
         </div>
         <div v-if="tagEnabled && isTagSelected" class="breadcrumb-divider"></div>
@@ -77,15 +77,15 @@
             :autocompleteItems="autocompleteItems"
           /> -->
         <animated-button v-if="tagEnabled && isTagSelected && !isAutocompleteMode" @click="clickValidateChip"
-          icon="ecc-TB-Enter" :disabled="!canEnterFilterChip" class="filterEnterChip">
+          icon="ecc:ecc-TB-Enter" :disabled="!canEnterFilterChip" class="filterEnterChip">
         </animated-button>
         <!-- v-bind:class="{ 'mr-3': !tagEnabled }" -->
-        <animated-button v-if="allowsSearchBar" icon="ecc-TB-Find" :isFilterActive="tagEnabled"
+        <animated-button v-if="allowsSearchBar" icon="ecc:ecc-TB-Find" :isFilterActive="tagEnabled"
           :darkMode="isSearching && !isTagSelected" :value="!isTagSelected" v-bind:class="{ 'mr-3': !tagEnabled }"
           style="width: 22px; margin-left: 10px;" @click="toggleFilter('search')" />
         <!-- v-bind:class="{ disabled: tagEnabled }" -->
         <div style='position:relative;display:flex'>
-          <animated-button v-if="tagEnabled" icon="ecc-TB-Filter" :value="isTagSelected"
+          <animated-button v-if="tagEnabled" icon="ecc:ecc-TB-Filter" :value="isTagSelected"
             :darkMode="isSearching && !isTagSelected" class="mr-3"
             v-bind:class="{ 'mr-3': tagEnabled, 'ml-3': !allowsSearchBar }" style="width: 22px"
             @click="toggleFilter('filter')" />

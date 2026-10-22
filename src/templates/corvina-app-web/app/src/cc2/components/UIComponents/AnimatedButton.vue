@@ -93,7 +93,7 @@ export default {
   props: {
     icon: {
       type: String,
-      default: "ecc-T-Add"
+      default: "ecc:ecc-T-Add"
     },
     activeIcon: {
       type: String,
