@@ -1,11 +1,11 @@
 ##### build environment #####
-FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v2 AS build
+FROM eu.gcr.io/corvina-exorint/corvina-base-node22:v3 AS build
 
 # make the 'app' folder the current working directory
 WORKDIR /app
 
 # copy both 'package.json' and 'package-lock.json' (if available)
-COPY package*.json ./
+COPY package*.json .npmrc ./
 
 # install project dependencies
 RUN npm ci
