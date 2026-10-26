@@ -82,14 +82,7 @@ If you want to develop on this repo, you need to install the following softwares
 
 ### Deploy a new version ###
 
-You need to be a member of @corvina organization on npm to deploy a new version of this package. If you are, you can run the following command:
-
-```bash
-npm run prepublish
-npm run deploy
-```
-
-NB: remember to update the version in the package.json file before deploying a new version!
+Create a GitHub release with tag `X.Y.Z` (or `X.Y.Z-beta.N` marked as pre-release, published under the `beta` dist-tag). The [Publish](.github/workflows/publish.yaml) workflow cross-compiles the CLI, publishes it on npm and bumps `version` in `package.json` on `master`.
 
 
 ### Resyncing an existing app with scaffold ###

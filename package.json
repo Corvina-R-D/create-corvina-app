@@ -11,14 +11,16 @@
   ],
   "scripts": {
     "clean": "rm -rf main && rm -rf build/",
-    "build": "./cross-arch-compiler.sh",
-    "deploy": "npm publish --access public",
-    "prepublish": "npm run clean && npm run build"
+    "build": "./cross-arch-compiler.sh"
   },
   "keywords": [
     "corvina"
   ],
   "homepage": "https://github.com/Corvina-R-D/create-corvina-app/tree/master/src",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Corvina-R-D/create-corvina-app.git"
+  },
   "author": "Marcello Bellomi",
   "license": "ISC"
 }
