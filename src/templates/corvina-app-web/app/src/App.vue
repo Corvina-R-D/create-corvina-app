@@ -12,6 +12,7 @@
 import { defineComponent } from 'vue';
 import ErrorSnackbar from './components/ErrorSnackbar.vue';
 import { useSecurity } from './stores/security';
+import { applyConnectSettings } from './utils/connectSettings';
 import ModalComponent from './cc2/components/Modals/ModalComponent.vue';
 
 export default defineComponent({
@@ -23,6 +24,11 @@ export default defineComponent({
     },
     async mounted() {
         this.security = await useSecurity();
+
+        // security restored from the session storage after a reload of the iframe: Home is not shown
+        if (this.security.connect) {
+            await applyConnectSettings(this.$vuetify, this.security);
+        }
     },
     components: { ErrorSnackbar, ModalComponent }
 });
