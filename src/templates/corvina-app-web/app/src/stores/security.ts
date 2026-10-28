@@ -5,6 +5,7 @@ export interface ISecurityDTO {
     connect?: CorvinaConnect,
     corvinaHost?: string,
     instanceId?: string,
+    locale?: string,
     key?: string,
 }
 
@@ -67,10 +68,11 @@ export const useSecurity = async () => {
 
                 this.corvinaHost = security.corvinaHost;
                 this.instanceId = security.instanceId;
+                this.locale = security.locale;
                 this.key = this.connect?.organizationId;
                 theme = this.connect?.theme;
 
-                localStorage.setItem("security", JSON.stringify(security));
+                sessionStorage.setItem("security", JSON.stringify(security));
             }
         } as ISecurityStore)
     }
