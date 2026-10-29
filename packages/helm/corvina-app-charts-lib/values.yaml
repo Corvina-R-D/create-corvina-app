@@ -89,3 +89,8 @@
 #         destination: my.queue
 #         # destinationType defaults to queue
 #         routingKey: ""
+
+# prometheus:
+#   # rabbitmqIgnoredQueues (tpl) are left out of the growing queues and no consumer alerts, e.g. parking lots
+#   rabbitmqIgnoredQueues:
+#     - '{{ .Values.rabbitmq.myDeadLetterQueue }}'

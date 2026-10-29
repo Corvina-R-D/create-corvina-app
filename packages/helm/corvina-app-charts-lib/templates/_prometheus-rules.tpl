@@ -153,10 +153,16 @@ spec:
 {{- end }}
 
 {{/*
-RabbitMQ alerts, only with rabbitmq. Values: prometheus.rabbitmqReadyMessagesThreshold, prometheus.rabbitmqUnacknowledgedMessagesThreshold
+RabbitMQ alerts, only with rabbitmq. Values: prometheus.rabbitmqReadyMessagesThreshold, prometheus.rabbitmqUnacknowledgedMessagesThreshold,
+prometheus.rabbitmqIgnoredQueues: queues left out of the growing queues and no consumer alerts (tpl allowed), e.g.
+parking lots that nothing consumes on purpose
 */}}
 {{- define "corvina-app-charts-lib.prometheusRule.rabbitmq" -}}
 {{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
+{{- $ignoredQueues := "" }}
+{{- range (.Values.prometheus | default dict).rabbitmqIgnoredQueues }}
+{{- $ignoredQueues = printf "%s, queue!=%q" $ignoredQueues (tpl . $) }}
+{{- end }}
 kind: PrometheusRule
 apiVersion: monitoring.coreos.com/v1
 metadata:
@@ -229,7 +235,7 @@ spec:
     - name: {{ .Values.prometheus.appName }}-RabbitMQQueues
       rules:
         - alert: {{ .Values.prometheus.appName }}-RabbitMQGrowingQueues
-          expr: deriv(rabbitmq_queue_messages_ready{ namespace="{{ .Release.Namespace }}" }[5m]) > 0
+          expr: deriv(rabbitmq_queue_messages_ready{ namespace="{{ .Release.Namespace }}"{{ $ignoredQueues }} }[5m]) > 0
           for: 5m
           labels:
             severity: fail
@@ -273,7 +279,7 @@ spec:
     - name: {{ .Values.prometheus.appName }}-RabbitMQConsumers
       rules:
         - alert: {{ .Values.prometheus.appName }}-RabbitMQNoConsumer
-          expr: rabbitmq_queue_consumers{ namespace="{{ .Release.Namespace }}" } == 0
+          expr: rabbitmq_queue_consumers{ namespace="{{ .Release.Namespace }}"{{ $ignoredQueues }} } == 0
           for: 5m
           labels:
             severity: fail

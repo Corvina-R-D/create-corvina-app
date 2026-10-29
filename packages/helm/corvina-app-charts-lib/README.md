@@ -85,6 +85,7 @@ They usually go in the app chart `values.yaml`, where templates are allowed in t
 | `virtualService.servicePrefixes` | `[/v1, /swagger-ui]` | URI prefixes routed to the backend |
 | `virtualService.extraRoutes` _tpl_ | | Istio HTTP routes before the default ones |
 | `rabbitmq.additionalConfig` | | extra `rabbitmq.conf` lines, e.g. `consumer_timeout: 14000000` |
+| `prometheus.rabbitmqIgnoredQueues` _tpl_ | | queues left out of the growing queues and no consumer alerts, e.g. parking lots |
 | `rabbitmq.topology.queues` _tpl_ | | `[{name, durable, autoDelete, type, arguments}]` |
 | `rabbitmq.topology.exchanges` _tpl_ | | `[{name, type, durable, autoDelete, arguments}]` |
 | `rabbitmq.topology.bindings` _tpl_ | | `[{name, source, destination, destinationType: queue, routingKey, arguments}]` |
