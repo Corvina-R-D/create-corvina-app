@@ -8,7 +8,7 @@ template fix reaches the apps with a dependency bump instead of a resync:
 # Chart.yaml
 dependencies:
   - name: corvina-app-charts-lib
-    version: "~0.1.0"
+    version: "~1.0.0"
     repository: oci://europe-docker.pkg.dev/corvina-exorint/charts-public
 ```
 
