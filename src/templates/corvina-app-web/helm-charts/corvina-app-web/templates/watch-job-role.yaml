@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.watchJobRole" . }}
+{{ include "corvina-app-charts-lib.watchJobRole" . }}

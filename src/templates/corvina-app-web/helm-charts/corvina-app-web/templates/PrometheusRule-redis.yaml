@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.prometheusRule.redis" . }}
+{{ include "corvina-app-charts-lib.prometheusRule.redis" . }}

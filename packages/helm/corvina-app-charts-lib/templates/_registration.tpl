@@ -3,13 +3,13 @@ Post-install Job registering the app in a Corvina core of the same cluster (dev 
 Values: registration.enabled, registration.namespace, registration.image, registration.core.*,
 registration.keycloak.*, registration.manifest.url
 */}}
-{{- define "corvina-app-lib.registration" -}}
+{{- define "corvina-app-charts-lib.registration" -}}
 {{- with .Values.registration }}
 {{- if .enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "corvina-app-lib.fullname" $ }}-registration
+  name: {{ include "corvina-app-charts-lib.fullname" $ }}-registration
   namespace: {{ .namespace }}
   annotations:
     helm.sh/hook: post-install,post-upgrade

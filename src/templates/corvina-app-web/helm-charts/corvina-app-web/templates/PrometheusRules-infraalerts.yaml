@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.prometheusRule.infraAlerts" . }}
+{{ include "corvina-app-charts-lib.prometheusRule.infraAlerts" . }}

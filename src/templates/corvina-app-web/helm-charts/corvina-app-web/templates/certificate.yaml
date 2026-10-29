@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.certificate" . }}
+{{ include "corvina-app-charts-lib.certificate" . }}

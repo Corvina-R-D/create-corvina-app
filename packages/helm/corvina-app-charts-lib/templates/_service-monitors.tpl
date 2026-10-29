@@ -1,7 +1,7 @@
 {{/*
 Scrapes the Istio ingress gateway
 */}}
-{{- define "corvina-app-lib.serviceMonitor.istio" -}}
+{{- define "corvina-app-charts-lib.serviceMonitor.istio" -}}
 {{- $istioValues := index .Values "istio-gateway" }}
 kind: ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
@@ -26,8 +26,8 @@ spec:
 {{/*
 Scrapes RabbitMQ, only with rabbitmq
 */}}
-{{- define "corvina-app-lib.serviceMonitor.rabbitmq" -}}
-{{- if include "corvina-app-lib.rabbitmqEnabled" . }}
+{{- define "corvina-app-charts-lib.serviceMonitor.rabbitmq" -}}
+{{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
 kind: ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
 metadata:

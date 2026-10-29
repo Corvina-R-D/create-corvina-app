@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.service" . }}
+{{ include "corvina-app-charts-lib.service" . }}

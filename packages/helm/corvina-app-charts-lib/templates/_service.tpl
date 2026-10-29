@@ -3,7 +3,7 @@ Env vars of the backend ConfigMap, as a dict: the defaults below, then .Values.s
 .Values.service.config values may use templates, e.g. MANIFEST_BRAND: '{{ .Values.service.envVar.BRAND }}'.
 .Values.service.pgEnv: false drops the PG_* defaults, for apps that read the connection from other variables.
 */}}
-{{- define "corvina-app-lib.serviceConfig" -}}
+{{- define "corvina-app-charts-lib.serviceConfig" -}}
 {{- $envVar := .Values.service.envVar | default dict }}
 {{- $baseUrl := printf "%s://%s:%v" .Values.gateway.protocol (.Values.gateway.appHost | required ".gateway.appHost is required") .Values.gateway.port }}
 {{- $config := dict
@@ -20,7 +20,7 @@ Env vars of the backend ConfigMap, as a dict: the defaults below, then .Values.s
 {{- end }}
 {{- if ne (toString .Values.service.pgEnv) "false" }}
 {{- $auth := .Values.postgresql.global.postgresql.auth }}
-{{- $_ := set $config "PG_HOST" (include "corvina-app-lib.postgresHost" .) }}
+{{- $_ := set $config "PG_HOST" (include "corvina-app-charts-lib.postgresHost" .) }}
 {{- $_ := set $config "PG_PORT" $envVar.PG_PORT }}
 {{- $_ := set $config "PG_USER" $auth.username }}
 {{- $_ := set $config "PG_DATABASE" $auth.database }}
@@ -28,12 +28,12 @@ Env vars of the backend ConfigMap, as a dict: the defaults below, then .Values.s
 {{- $_ := set $config "PG_POOL_MAX" $envVar.PG_POOL_MAX }}
 {{- $_ := set $config "PG_QUERY_LOGGING" $envVar.PG_QUERY_LOGGING }}
 {{- end }}
-{{- if include "corvina-app-lib.redisEnabled" . }}
+{{- if include "corvina-app-charts-lib.redisEnabled" . }}
 {{- $_ := set $config "REDIS_HOST" (printf "%s-redis-headless" .Release.Name) }}
 {{- $_ := set $config "REDIS_PORT" "6379" }}
 {{- $_ := set $config "CACHE_DEFAULT_TTL" "30" }}
 {{- end }}
-{{- if include "corvina-app-lib.rabbitmqEnabled" . }}
+{{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
 {{- $_ := set $config "RABBITMQ_HOST" .Values.rabbitmq.clusterName }}
 {{- $_ := set $config "RABBITMQ_PORT" "5672" }}
 {{- $_ := set $config "RABBITMQ_ADMIN_PORT" "15672" }}
@@ -50,19 +50,19 @@ Env vars of the backend ConfigMap, as a dict: the defaults below, then .Values.s
 
 {{/*
 Env vars of the backend containers (service Deployment and migrator Job) besides the ConfigMap
-Usage: {{ include "corvina-app-lib.serviceEnv" (dict "startFeatures" "app.listen" "context" $) }}
+Usage: {{ include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" "app.listen" "context" $) }}
 */}}
-{{- define "corvina-app-lib.serviceEnv" -}}
+{{- define "corvina-app-charts-lib.serviceEnv" -}}
 {{- $ := .context -}}
 - name: START_FEATURES
   value: {{ .startFeatures }}
-- name: {{ include "corvina-app-lib.postgresPasswordEnv" $ }}
+- name: {{ include "corvina-app-charts-lib.postgresPasswordEnv" $ }}
   valueFrom:
     secretKeyRef:
       name: {{ $.Values.postgresql.global.postgresql.auth.existingSecret | default (print $.Release.Name "-postgresql") }}
       key: password
       optional: false
-{{- if include "corvina-app-lib.redisEnabled" $ }}
+{{- if include "corvina-app-charts-lib.redisEnabled" $ }}
 - name: REDIS_PASSWORD
   valueFrom:
     secretKeyRef:
@@ -81,7 +81,7 @@ Values:
   service.pgEnv, service.config, service.extraEnv, service.extraCa.secret,
   service.automountServiceAccountToken: true for backends calling the Kubernetes API
 */}}
-{{- define "corvina-app-lib.service" -}}
+{{- define "corvina-app-charts-lib.service" -}}
 {{- $healthPath := .Values.service.healthPath | default "/v1/health" }}
 {{- $automountToken := eq (toString .Values.service.automountServiceAccountToken) "true" }}
 apiVersion: apps/v1
@@ -100,13 +100,13 @@ spec:
         app: service
       annotations:
         # env vars are read only at container start: roll the pods when the ConfigMap changes
-        checksum/config: {{ include "corvina-app-lib.serviceConfig" . | sha256sum }}
+        checksum/config: {{ include "corvina-app-charts-lib.serviceConfig" . | sha256sum }}
     spec:
       serviceAccountName: service-sa
       automountServiceAccountToken: {{ $automountToken }}
       volumes:
         {{- if not $automountToken }}
-        {{- include "corvina-app-lib.kubeApiAccessVolume" . | nindent 8 }}
+        {{- include "corvina-app-charts-lib.kubeApiAccessVolume" . | nindent 8 }}
         {{- end }}
         {{- with .Values.service.extraCa }}
         - name: extra-ca
@@ -120,14 +120,14 @@ spec:
         - name: init
           image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
           securityContext:
-            {{- include "corvina-app-lib.nobodySecurityContext" . | nindent 12 }}
+            {{- include "corvina-app-charts-lib.nobodySecurityContext" . | nindent 12 }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "job-wr"
             - "-lcorvina.io/migrator={{ .Release.Name }},corvina.io/image-tag={{ .Values.service.tag }}"
           {{- if not $automountToken }}
           volumeMounts:
-            {{- include "corvina-app-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
+            {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
           {{- end }}
           resources:
             requests:
@@ -140,7 +140,7 @@ spec:
         - name: service
           image: "{{ .Values.service.image | required ".service.image is required" }}:{{ .Values.service.tag | required ".service.tag is required" }}"
           securityContext:
-            {{- include "corvina-app-lib.containerSecurityContext" . | nindent 12 }}
+            {{- include "corvina-app-charts-lib.containerSecurityContext" . | nindent 12 }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
@@ -148,8 +148,8 @@ spec:
             - configMapRef:
                 name: service-config
           env:
-            {{- include "corvina-app-lib.serviceEnv" (dict "startFeatures" .Values.service.envVar.START_FEATURES "context" .) | nindent 12 }}
-            {{- if include "corvina-app-lib.rabbitmqEnabled" . }}
+            {{- include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" .Values.service.envVar.START_FEATURES "context" .) | nindent 12 }}
+            {{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -201,12 +201,12 @@ metadata:
     app: service
     tier: app-service-deployment
 data:
-  {{- include "corvina-app-lib.serviceConfig" . | nindent 2 }}
+  {{- include "corvina-app-charts-lib.serviceConfig" . | nindent 2 }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "corvina-app-lib.serviceName" . }}
+  name: {{ include "corvina-app-charts-lib.serviceName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
@@ -216,7 +216,7 @@ spec:
       targetPort: 3000
       name: {{ .Values.gateway.protocol }}-service-port
 ---
-{{ include "corvina-app-lib.serviceAccount" (dict "name" "service-sa" "context" .) }}
+{{ include "corvina-app-charts-lib.serviceAccount" (dict "name" "service-sa" "context" .) }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

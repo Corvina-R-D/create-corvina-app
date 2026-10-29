@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.serviceMonitor.istio" . }}
+{{ include "corvina-app-charts-lib.serviceMonitor.istio" . }}

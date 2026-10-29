@@ -2,7 +2,7 @@
 Frontend: Deployment, Service and ServiceAccount
 Values: app.image, app.tag, app.resources, imagePullPolicy, gateway.protocol, workloadIdentity.gcpSaLinks.app-sa
 */}}
-{{- define "corvina-app-lib.app" -}}
+{{- define "corvina-app-charts-lib.app" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,7 +24,7 @@ spec:
         - name: app
           image: "{{ .Values.app.image | required ".app.image is required" }}:{{ .Values.app.tag | required ".app.tag is required" }}"
           securityContext:
-            {{- include "corvina-app-lib.containerSecurityContext" . | nindent 12 }}
+            {{- include "corvina-app-charts-lib.containerSecurityContext" . | nindent 12 }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 8080
@@ -52,5 +52,5 @@ spec:
       targetPort: 8080
       name: {{ .Values.gateway.protocol }}-app-port
 ---
-{{ include "corvina-app-lib.serviceAccount" (dict "name" "app-sa" "context" .) }}
+{{ include "corvina-app-charts-lib.serviceAccount" (dict "name" "app-sa" "context" .) }}
 {{- end }}

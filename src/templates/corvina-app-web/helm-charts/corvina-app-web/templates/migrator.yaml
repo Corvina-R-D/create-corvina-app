@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.migrator" . }}
+{{ include "corvina-app-charts-lib.migrator" . }}

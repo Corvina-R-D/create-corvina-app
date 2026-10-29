@@ -1,7 +1,7 @@
 {{/*
 Role to watch Jobs, bound by the backend to wait for its migrator Job
 */}}
-{{- define "corvina-app-lib.watchJobRole" -}}
+{{- define "corvina-app-charts-lib.watchJobRole" -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

@@ -1,4 +1,4 @@
-{{- define "corvina-app-lib.externalSecretsGenerator" -}}
+{{- define "corvina-app-charts-lib.externalSecretsGenerator" -}}
 apiVersion: generators.external-secrets.io/v1alpha1
 kind: {{ ternary "Password" "Fake" (empty .Values.fakeExternalSecrets) }}
 name: password-generator
@@ -6,9 +6,9 @@ name: password-generator
 
 {{/*
 Generated password ExternalSecret, immutable once created
-Usage: {{ include "corvina-app-lib.generatedSecret" (dict "name" "my-secret" "data" (dict "key" "{{ .password }}") "context" $) }}
+Usage: {{ include "corvina-app-charts-lib.generatedSecret" (dict "name" "my-secret" "data" (dict "key" "{{ .password }}") "context" $) }}
 */}}
-{{- define "corvina-app-lib.generatedSecret" -}}
+{{- define "corvina-app-charts-lib.generatedSecret" -}}
 {{- $ := .context -}}
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
@@ -16,13 +16,13 @@ metadata:
   name: {{ .name }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{ include "corvina-app-lib.selectorLabels" $ | nindent 4 }}
+    {{ include "corvina-app-charts-lib.selectorLabels" $ | nindent 4 }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
 spec:
   dataFrom:
   - sourceRef:
       generatorRef:
-        {{ include "corvina-app-lib.externalSecretsGenerator" $ | nindent 8 }}
+        {{ include "corvina-app-charts-lib.externalSecretsGenerator" $ | nindent 8 }}
   refreshInterval: "0"
   target:
     creationPolicy: Owner
@@ -47,7 +47,7 @@ Password generator (Fake with .Values.fakeExternalSecrets, for minikube) and the
 passwords
 Values: fakeExternalSecrets, postgresql.global.postgresql.auth.existingSecret, redis.auth.existingSecret
 */}}
-{{- define "corvina-app-lib.secrets" -}}
+{{- define "corvina-app-charts-lib.secrets" -}}
 {{- if not .Values.fakeExternalSecrets }}
 apiVersion: generators.external-secrets.io/v1alpha1
 kind: Password
@@ -55,7 +55,7 @@ metadata:
   name: password-generator
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "corvina-app-lib.labels" . | nindent 4 }}
+    {{- include "corvina-app-charts-lib.labels" . | nindent 4 }}
 spec:
   allowRepeat: true
   length: 32
@@ -73,12 +73,12 @@ spec:
 {{- end }}
 {{- with .Values.postgresql.global.postgresql.auth.existingSecret }}
 ---
-{{ include "corvina-app-lib.generatedSecret" (dict "name" . "data" (dict "postgres-password" "{{ trunc 16 .password  }}" "password" "{{ trunc -16 .password }}") "context" $) }}
+{{ include "corvina-app-charts-lib.generatedSecret" (dict "name" . "data" (dict "postgres-password" "{{ trunc 16 .password  }}" "password" "{{ trunc -16 .password }}") "context" $) }}
 {{- end }}
-{{- if include "corvina-app-lib.redisEnabled" . }}
+{{- if include "corvina-app-charts-lib.redisEnabled" . }}
 {{- with .Values.redis.auth.existingSecret }}
 ---
-{{ include "corvina-app-lib.generatedSecret" (dict "name" . "data" (dict "redis-password" "{{ .password  }}") "context" $) }}
+{{ include "corvina-app-charts-lib.generatedSecret" (dict "name" . "data" (dict "redis-password" "{{ .password  }}") "context" $) }}
 {{- end }}
 {{- end }}
 {{- end }}

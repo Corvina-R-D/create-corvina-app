@@ -5,7 +5,7 @@ Values:
   virtualService.servicePrefixes: URI prefixes served by the backend (default /v1 and /swagger-ui)
   virtualService.extraRoutes: Istio HTTP routes evaluated before the default ones (tpl allowed)
 */}}
-{{- define "corvina-app-lib.virtualService" -}}
+{{- define "corvina-app-charts-lib.virtualService" -}}
 {{- $cors := .Values.cors }}
 {{- $virtualService := .Values.virtualService | default dict }}
 {{- $appHost := .Values.gateway.appHost | required ".gateway.appHost is required" }}
@@ -19,7 +19,7 @@ spec:
   - "{{ $appHost }}"
   - '*.{{ $appHost }}'
   gateways:
-  - {{ include "corvina-app-lib.appName" . }}-gateway
+  - {{ include "corvina-app-charts-lib.appName" . }}-gateway
   http:
   {{- with $virtualService.extraRoutes }}
   {{- tpl (toYaml .) $ | nindent 2 }}
@@ -33,7 +33,7 @@ spec:
     - destination:
         port:
           number: 80
-        host: {{ include "corvina-app-lib.serviceName" . }}
+        host: {{ include "corvina-app-charts-lib.serviceName" . }}
     {{- if $cors.enabled }}
     corsPolicy:
       allowOrigins:

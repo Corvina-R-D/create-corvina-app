@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.gateway" . }}
+{{ include "corvina-app-charts-lib.gateway" . }}

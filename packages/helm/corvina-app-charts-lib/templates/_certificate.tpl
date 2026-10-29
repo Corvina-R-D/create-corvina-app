@@ -3,10 +3,10 @@ TLS certificate of the app host: Let's Encrypt (DNS01 on Cloud DNS) for public h
 <appName>.corvina.mk
 Values: gateway.protocol, gateway.appHost, gateway.certificateSecretName, gateway.issuer.*
 */}}
-{{- define "corvina-app-lib.certificate" -}}
+{{- define "corvina-app-charts-lib.certificate" -}}
 {{ $PROTOCOL := (.Values.gateway.protocol | upper) }}
 {{ $appHost := .Values.gateway.appHost | required ".gateway.appHost is required" }}
-{{ $appName := include "corvina-app-lib.appName" . }}
+{{ $appName := include "corvina-app-charts-lib.appName" . }}
 {{ if and (eq $PROTOCOL "HTTPS") (or (hasSuffix ".io" $appHost) (hasSuffix ".cloud" $appHost) (hasSuffix ".com" $appHost)) }}
 apiVersion: cert-manager.io/v1
 kind: Issuer

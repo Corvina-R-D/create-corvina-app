@@ -2,12 +2,12 @@
 Velero Schedule backing up the release namespace
 Values: backup.enabled, backup.cron, backup.ttl, backup.storageLocation, backup.snapshotLocation
 */}}
-{{- define "corvina-app-lib.backup" -}}
+{{- define "corvina-app-charts-lib.backup" -}}
 {{ if .Values.backup.enabled }}
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
-  name: {{ include "corvina-app-lib.fullname" . }}-backup
+  name: {{ include "corvina-app-charts-lib.fullname" . }}-backup
   namespace: velero
 spec:
   schedule: {{ .Values.backup.cron }}

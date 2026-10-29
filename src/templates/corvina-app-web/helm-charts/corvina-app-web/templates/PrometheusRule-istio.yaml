@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.prometheusRule.istio" . }}
+{{ include "corvina-app-charts-lib.prometheusRule.istio" . }}

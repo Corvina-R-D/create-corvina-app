@@ -13,8 +13,8 @@ version: 0.0.11
 appVersion: "chart-1.0.0"
 dependencies:
   # shared templates: the files in templates/ include them, see
-  # https://github.com/Corvina-R-D/create-corvina-app/tree/master/packages/helm/corvina-app-lib
-  - name: corvina-app-lib
+  # https://github.com/Corvina-R-D/create-corvina-app/tree/master/packages/helm/corvina-app-charts-lib
+  - name: corvina-app-charts-lib
     version: "~0.1.0"
     repository: oci://europe-docker.pkg.dev/corvina-exorint/charts-public
   - name: postgresql

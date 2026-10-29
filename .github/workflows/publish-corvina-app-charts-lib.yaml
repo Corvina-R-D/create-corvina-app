@@ -2,12 +2,12 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - corvina-app-lib-*
+      - corvina-app-charts-lib-*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
-name: Publish corvina-app-lib Helm chart
+name: Publish corvina-app-charts-lib Helm chart
 
 permissions:
   contents: read
@@ -18,11 +18,11 @@ jobs:
     name: Publish Helm chart
     uses: Corvina-R-D/corvina-github-actions/.github/workflows/publish-helm-chart.yaml@v5.8.0
     with:
-      chart-path: packages/helm/corvina-app-lib
+      chart-path: packages/helm/corvina-app-charts-lib
       oci-repository: europe-docker.pkg.dev/corvina-exorint/charts-public
       gcp-project-id: corvina-exorint
-      # tag corvina-app-lib-X.Y.Z, matching appVersion in Chart.yaml, publishes version X.Y.Z
-      tag-prefix: corvina-app-lib-
+      # tag corvina-app-charts-lib-X.Y.Z, matching appVersion in Chart.yaml, publishes version X.Y.Z
+      tag-prefix: corvina-app-charts-lib-
   notify_failure:
     runs-on: ubuntu-24.04
     needs: publish-chart
@@ -33,8 +33,8 @@ jobs:
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           title-style-color: Attention
-          title-text: corvina-app-lib Helm chart publish failed
+          title-text: corvina-app-charts-lib Helm chart publish failed
           body-text: >
-            Publishing the corvina-app-lib Helm chart has failed. Please refer to the GitHub Actions log for more details.
+            Publishing the corvina-app-charts-lib Helm chart has failed. Please refer to the GitHub Actions log for more details.
             Workflow: ${{ github.workflow }}
             View logs at: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

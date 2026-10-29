@@ -2,10 +2,10 @@
 Istio Gateway for the app host, access logging and the optional TLS fingerprints in the access log
 Values: gateway.appHost, gateway.port, gateway.protocol, gateway.certificateSecretName, istio-gateway.name, tlsClientLogging
 */}}
-{{- define "corvina-app-lib.gateway" -}}
+{{- define "corvina-app-charts-lib.gateway" -}}
 {{ $PROTOCOL := (.Values.gateway.protocol | upper) }}
 {{ $ISTIO_GATEWAY := index .Values "istio-gateway" }}
-{{ $appName := include "corvina-app-lib.appName" . }}
+{{ $appName := include "corvina-app-charts-lib.appName" . }}
 {{ $appHost := .Values.gateway.appHost | required ".gateway.appHost is required" }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway

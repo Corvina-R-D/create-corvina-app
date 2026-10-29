@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.virtualService" . }}
+{{ include "corvina-app-charts-lib.virtualService" . }}

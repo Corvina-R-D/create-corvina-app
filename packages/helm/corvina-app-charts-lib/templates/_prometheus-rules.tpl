@@ -1,7 +1,7 @@
 {{/*
 Pod health, CPU and memory alerts of the release namespace
 */}}
-{{- define "corvina-app-lib.prometheusRule.healthAlerts" -}}
+{{- define "corvina-app-charts-lib.prometheusRule.healthAlerts" -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -50,7 +50,7 @@ spec:
 {{/*
 5xx rate alerts on the Istio traffic
 */}}
-{{- define "corvina-app-lib.prometheusRule.istio" -}}
+{{- define "corvina-app-charts-lib.prometheusRule.istio" -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -74,7 +74,7 @@ spec:
 {{/*
 Resource quota usage alerts. Values: prometheus.appName
 */}}
-{{- define "corvina-app-lib.prometheusRule.resourceQuotas" -}}
+{{- define "corvina-app-charts-lib.prometheusRule.resourceQuotas" -}}
 kind: PrometheusRule
 apiVersion: monitoring.coreos.com/v1
 metadata:
@@ -132,7 +132,7 @@ spec:
 {{/*
 Container restart alerts
 */}}
-{{- define "corvina-app-lib.prometheusRule.infraAlerts" -}}
+{{- define "corvina-app-charts-lib.prometheusRule.infraAlerts" -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -155,8 +155,8 @@ spec:
 {{/*
 RabbitMQ alerts, only with rabbitmq. Values: prometheus.rabbitmqReadyMessagesThreshold, prometheus.rabbitmqUnacknowledgedMessagesThreshold
 */}}
-{{- define "corvina-app-lib.prometheusRule.rabbitmq" -}}
-{{- if include "corvina-app-lib.rabbitmqEnabled" . }}
+{{- define "corvina-app-charts-lib.prometheusRule.rabbitmq" -}}
+{{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
 kind: PrometheusRule
 apiVersion: monitoring.coreos.com/v1
 metadata:
@@ -286,8 +286,8 @@ spec:
 {{/*
 Redis alerts, only with redis
 */}}
-{{- define "corvina-app-lib.prometheusRule.redis" -}}
-{{- if include "corvina-app-lib.redisEnabled" . }}
+{{- define "corvina-app-charts-lib.prometheusRule.redis" -}}
+{{- if include "corvina-app-charts-lib.redisEnabled" . }}
 kind: PrometheusRule
 apiVersion: monitoring.coreos.com/v1
 metadata:

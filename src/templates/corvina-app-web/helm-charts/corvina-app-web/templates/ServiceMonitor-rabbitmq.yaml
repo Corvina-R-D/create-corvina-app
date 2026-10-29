@@ -1,1 +1,1 @@
-{{ include "corvina-app-lib.serviceMonitor.rabbitmq" . }}
+{{ include "corvina-app-charts-lib.serviceMonitor.rabbitmq" . }}

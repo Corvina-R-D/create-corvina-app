@@ -8,8 +8,8 @@ Values:
   rabbitmq.topology.bindings: [{name, source, destination, destinationType, routingKey, arguments}]
   Topology fields may use templates, e.g. name: '{{ .Values.rabbitmq.alarmQueue }}'
 */}}
-{{- define "corvina-app-lib.rabbitmq" -}}
-{{- if include "corvina-app-lib.rabbitmqEnabled" . }}
+{{- define "corvina-app-charts-lib.rabbitmq" -}}
+{{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
 {{- $_ := .Values.rabbitmq.clusterName | required ".rabbitmq.clusterName is required" }}
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
@@ -83,11 +83,11 @@ stringData:
   port: "5672"
   stream-port: "5552"
 {{- end }}
-{{- include "corvina-app-lib.rabbitmq.topology" . }}
+{{- include "corvina-app-charts-lib.rabbitmq.topology" . }}
 {{- end }}
 {{- end }}
 
-{{- define "corvina-app-lib.rabbitmq.topology" -}}
+{{- define "corvina-app-charts-lib.rabbitmq.topology" -}}
 {{- $topology := .Values.rabbitmq.topology | default dict }}
 {{- range $kind, $key := dict "Queue" "queues" "Exchange" "exchanges" "Binding" "bindings" }}
 {{- range (index $topology $key) }}
