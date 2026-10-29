@@ -79,8 +79,11 @@ They usually go in the app chart `values.yaml`, where templates are allowed in t
 | `service.config` _tpl_ | | extra ConfigMap variables, overriding the defaults |
 | `service.automountServiceAccountToken` | `false` | `true` mounts the ServiceAccount token in the backend container, for backends calling the Kubernetes API |
 | `service.extraEnv` _tpl_ | | extra env vars of the backend and migrator containers |
+| `migrator.backoffLimit` | `100` | retries of the migrator Job |
+| `migrator.waitForServices` _tpl_ | | `[{name, service}]` more services the migrator waits for besides postgresql |
 | `virtualService.servicePrefixes` | `[/v1, /swagger-ui]` | URI prefixes routed to the backend |
 | `virtualService.extraRoutes` _tpl_ | | Istio HTTP routes before the default ones |
+| `rabbitmq.additionalConfig` | | extra `rabbitmq.conf` lines, e.g. `consumer_timeout: 14000000` |
 | `rabbitmq.topology.queues` _tpl_ | | `[{name, durable, autoDelete, type, arguments}]` |
 | `rabbitmq.topology.exchanges` _tpl_ | | `[{name, type, durable, autoDelete, arguments}]` |
 | `rabbitmq.topology.bindings` _tpl_ | | `[{name, source, destination, destinationType: queue, routingKey, arguments}]` |

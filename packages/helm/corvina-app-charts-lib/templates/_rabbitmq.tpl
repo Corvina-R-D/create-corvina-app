@@ -2,7 +2,7 @@
 RabbitMQ cluster, its PodDisruptionBudget, the fake default user for minikube and the topology
 Values:
   rabbitmq.clusterName, rabbitmq.replicas, rabbitmq.image, rabbitmq.storageClass, rabbitmq.storageSize,
-  rabbitmq.resources, rabbitmq.fakeAuth
+  rabbitmq.resources, rabbitmq.fakeAuth, rabbitmq.additionalConfig (extra rabbitmq.conf lines)
   rabbitmq.topology.queues: [{name, durable, autoDelete, type, arguments}]
   rabbitmq.topology.exchanges: [{name, type, durable, autoDelete, arguments}]
   rabbitmq.topology.bindings: [{name, source, destination, destinationType, routingKey, arguments}]
@@ -38,6 +38,9 @@ spec:
     additionalConfig: |
       queue_leader_locator: balanced
       cluster_partition_handling: pause_minority
+      {{- with .Values.rabbitmq.additionalConfig }}
+      {{- . | trim | nindent 6 }}
+      {{- end }}
     additionalPlugins:
         - rabbitmq_management
         - rabbitmq_peer_discovery_k8s

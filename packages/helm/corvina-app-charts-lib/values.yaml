@@ -30,6 +30,14 @@
 #     - name: FOO
 #       value: bar
 
+# migrator:
+#   # backoffLimit is the number of retries of the migrator Job
+#   backoffLimit: 100
+#   # waitForServices (service tpl) are more services the migrator waits for besides postgresql
+#   waitForServices:
+#     - name: redis-wait
+#       service: '{{ .Release.Name }}-redis-headless'
+
 # virtualService:
 #   # servicePrefixes are the URI prefixes routed to the backend
 #   servicePrefixes:
@@ -54,6 +62,9 @@
 #     internetPorts: [443, 8883]
 
 # rabbitmq:
+#   # additionalConfig adds lines to rabbitmq.conf
+#   additionalConfig: |
+#     consumer_timeout: 14000000
 #   # topology (tpl) declares queues, exchanges and bindings on the app cluster
 #   topology:
 #     queues:
