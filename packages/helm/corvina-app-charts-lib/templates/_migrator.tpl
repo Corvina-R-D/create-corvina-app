@@ -34,15 +34,19 @@ spec:
             {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
           resources:
             {{- toYaml .Values.service.resources | nindent 12 }}
-        {{- range .Values.migrator.waitForServices }}
+        {{- range .Values.migrator.waitFor }}
         - name: {{ .name }}
           image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
           securityContext:
             {{- include "corvina-app-charts-lib.nobodySecurityContext" $ | nindent 12 }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
           args:
+            {{- if .args }}
+            {{- tpl (toYaml .args) $ | nindent 12 }}
+            {{- else }}
             - "service"
             - "{{ tpl .service $ }}"
+            {{- end }}
           volumeMounts:
             {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" $ | nindent 12 }}
           resources:
@@ -71,7 +75,8 @@ spec:
 {{/*
 Migrator: the Job running the database migrations, with its ServiceAccount and RBAC to wait for postgresql
 Values: migrator.envVar.START_FEATURES, migrator.backoffLimit (default 100),
-  migrator.waitForServices: [{name, service}] more services to wait for (service tpl allowed),
+  migrator.waitFor: [{name, service}] or [{name, args}] more init containers waiting for a service, or
+    for anything else with the k8s-wait-for args (tpl allowed),
   plus the service.* image, resources and env values
 */}}
 {{- define "corvina-app-charts-lib.migrator" -}}

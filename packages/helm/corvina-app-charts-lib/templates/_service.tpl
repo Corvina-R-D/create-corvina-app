@@ -63,12 +63,14 @@ Usage: {{ include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" "app
       key: password
       optional: false
 {{- if include "corvina-app-charts-lib.redisEnabled" $ }}
+{{- if ne (toString (dig "auth" "enabled" true $.Values.redis)) "false" }}
 - name: REDIS_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ $.Values.redis.auth.existingSecret | default (print $.Release.Name "-redis") }}
       key: {{ $.Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
       optional: false
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -79,7 +81,8 @@ Values:
   service.serviceName (default service-service), service.healthPath (default /v1/health),
   service.probeInitialDelaySeconds, service.postgresHost, service.postgresPasswordEnv (default PG_PASS),
   service.pgEnv, service.config, service.extraEnv, service.extraCa.secret,
-  service.automountServiceAccountToken: true for backends calling the Kubernetes API
+  service.automountServiceAccountToken: true for backends calling the Kubernetes API,
+  service.extraVolumes, service.extraVolumeMounts (tpl allowed)
 */}}
 {{- define "corvina-app-charts-lib.service" -}}
 {{- $healthPath := .Values.service.healthPath | default "/v1/health" }}
@@ -108,6 +111,9 @@ spec:
       volumes:
         {{- if not $automountToken }}
         {{- include "corvina-app-charts-lib.kubeApiAccessVolume" . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.service.extraVolumes }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
         {{- with .Values.service.extraCa }}
         - name: extra-ca
@@ -172,6 +178,9 @@ spec:
             {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
           volumeMounts:
+            {{- with .Values.service.extraVolumeMounts }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
             {{- with .Values.service.extraCa }}
             - name: extra-ca
               mountPath: /cacerts

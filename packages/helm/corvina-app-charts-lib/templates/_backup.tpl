@@ -7,7 +7,8 @@ Values: backup.enabled, backup.cron, backup.ttl, backup.storageLocation, backup.
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
-  name: {{ include "corvina-app-charts-lib.fullname" . }}-backup
+  # Schedule names end up in labels: at most 63 characters
+  name: {{ printf "%s-backup" (include "corvina-app-charts-lib.fullname" .) | trunc 63 | trimSuffix "-" }}
   namespace: velero
 spec:
   schedule: {{ .Values.backup.cron }}

@@ -60,7 +60,7 @@ Pods don't mount the ServiceAccount token: only the `k8s-wait-for` init containe
 mount it through the `corvina-app-charts-lib.kubeApiAccessVolume` volume.
 
 redis and rabbitmq resources render only when the `redis` and `rabbitmq` values exist (`base.yaml.gotmpl` has them
-when the app was generated with them); `enabled: false` turns them off.
+when the app was generated with them); `enabled: false` turns them off. With `redis.auth.enabled: false` the backend gets no `REDIS_PASSWORD`.
 
 ## App-specific knobs
 
@@ -78,9 +78,10 @@ They usually go in the app chart `values.yaml`, where templates are allowed in t
 | `service.postgresPasswordEnv` | `PG_PASS` | env var with the postgresql password |
 | `service.config` _tpl_ | | extra ConfigMap variables, overriding the defaults |
 | `service.automountServiceAccountToken` | `false` | `true` mounts the ServiceAccount token in the backend container, for backends calling the Kubernetes API |
+| `service.extraVolumes`, `service.extraVolumeMounts` _tpl_ | | extra volumes of the backend pod and their mounts |
 | `service.extraEnv` _tpl_ | | extra env vars of the backend and migrator containers |
 | `migrator.backoffLimit` | `100` | retries of the migrator Job |
-| `migrator.waitForServices` _tpl_ | | `[{name, service}]` more services the migrator waits for besides postgresql |
+| `migrator.waitFor` _tpl_ | | `[{name, service}]` more services the migrator waits for besides postgresql, or `[{name, args}]` with other `k8s-wait-for` args |
 | `virtualService.servicePrefixes` | `[/v1, /swagger-ui]` | URI prefixes routed to the backend |
 | `virtualService.extraRoutes` _tpl_ | | Istio HTTP routes before the default ones |
 | `rabbitmq.additionalConfig` | | extra `rabbitmq.conf` lines, e.g. `consumer_timeout: 14000000` |

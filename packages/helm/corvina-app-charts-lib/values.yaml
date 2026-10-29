@@ -25,6 +25,13 @@
 #   # automountServiceAccountToken: true mounts the ServiceAccount token in the backend container, for backends
 #   # calling the Kubernetes API (by default only the init container waiting for the migrator mounts it)
 #   automountServiceAccountToken: false
+#   # extraVolumes and extraVolumeMounts (tpl) add volumes to the backend pod and mount them
+#   extraVolumes:
+#     - name: scratch
+#       emptyDir: {}
+#   extraVolumeMounts:
+#     - name: scratch
+#       mountPath: /tmp
 #   # extraEnv (tpl) adds env vars to the backend and migrator containers
 #   extraEnv:
 #     - name: FOO
@@ -33,10 +40,12 @@
 # migrator:
 #   # backoffLimit is the number of retries of the migrator Job
 #   backoffLimit: 100
-#   # waitForServices (service tpl) are more services the migrator waits for besides postgresql
-#   waitForServices:
+#   # waitFor (tpl) adds init containers waiting for a service, or with other k8s-wait-for args
+#   waitFor:
 #     - name: redis-wait
 #       service: '{{ .Release.Name }}-redis-headless'
+#     - name: harbor-wait
+#       args: [pod-we, -lapp=harbor]
 
 # virtualService:
 #   # servicePrefixes are the URI prefixes routed to the backend
