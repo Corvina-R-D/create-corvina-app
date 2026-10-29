@@ -62,11 +62,15 @@ postgresql:
     registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
-    # admit only the pods labelled <release>-postgresql-client (backend, migrator) and prometheus
+    # admit the pods of the namespace and prometheus
     networkPolicy:
       allowExternal: false
       allowExternalEgress: false
       extraIngress:
+        - from:
+            - podSelector: {}
+          ports:
+            - port: 5432
         - from:
             - namespaceSelector:
                 matchLabels:
@@ -152,10 +156,15 @@ redis:
     storageClass: "ssd-retain"
     defaultStorageClass: "ssd-retain"
   architecture: standalone
-  # admit only the pods labelled <release>-redis-client (backend); egress limited to DNS
+  # admit the pods of the namespace; egress limited to DNS
   networkPolicy:
     enabled: true
     allowExternal: false
+    extraIngress:
+      - from:
+          - podSelector: {}
+        ports:
+          - port: 6379
     extraEgress:
       - ports:
           - port: 53

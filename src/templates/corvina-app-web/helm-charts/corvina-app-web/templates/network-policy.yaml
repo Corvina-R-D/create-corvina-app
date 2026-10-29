@@ -1,7 +1,6 @@
 {{ include "corvina-app-charts-lib.networkPolicy.app" . }}
 {{ include "corvina-app-charts-lib.networkPolicy.service" . }}
 {{ include "corvina-app-charts-lib.networkPolicy.migrator" . }}
-{{ include "corvina-app-charts-lib.networkPolicy.registration" . }}
 {{ include "corvina-app-charts-lib.networkPolicy.gateway" . }}
 {{ include "corvina-app-charts-lib.networkPolicy.istiod" . }}
 {{ include "corvina-app-charts-lib.networkPolicy.rabbitmq" . }}

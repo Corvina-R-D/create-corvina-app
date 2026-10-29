@@ -32,7 +32,7 @@
 #   extraVolumeMounts:
 #     - name: scratch
 #       mountPath: /tmp
-#   # extraEnv (tpl) adds env vars to the backend and migrator containers
+#   # extraEnv (tpl) adds env vars to the backend container
 #   extraEnv:
 #     - name: FOO
 #       value: bar
@@ -40,6 +40,10 @@
 # migrator:
 #   # backoffLimit is the number of retries of the migrator Job
 #   backoffLimit: 100
+#   # extraEnv (tpl) adds env vars to the migrator container
+#   extraEnv: []
+#   # postgresService (tpl) is the postgresql service to wait for, by default service.postgresHost
+#   postgresService: '{{ .Release.Name }}-postgresql-hl'
 #   # waitFor (tpl) adds init containers waiting for a service, or with other k8s-wait-for args
 #   waitFor:
 #     - name: redis-wait
@@ -52,8 +56,17 @@
 #   servicePrefixes:
 #     - /v1
 #     - /swagger-ui
-#   # extraRoutes (tpl) are Istio HTTP routes evaluated before the default ones
-#   extraRoutes: []
+#   # extraRoutes (tpl) are Istio HTTP routes evaluated before the default ones; enabled leaves a route out when false
+#   extraRoutes:
+#     - enabled: '{{ .Values.converter.enabled }}'
+#       match:
+#         - uri:
+#             prefix: /converter
+#       route:
+#         - destination:
+#             host: converter-service
+#             port:
+#               number: 80
 
 # networkPolicy:
 #   # control plane, required: kubeApiServerCidr of envs/<env>.yaml
@@ -61,10 +74,23 @@
 #     cidr: 192.168.0.64/28
 #   # excluded from the internet rules
 #   privateCidrs: [10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
-#   # per workload (app, service, migrator, registration, gateway, istiod, rabbitmq): additions and overrides
+#   # minikube: the in-cluster ingress the Corvina hosts resolve to, egress of every backend
+#   corvinaIngress:
+#     namespace: prod
+#     podLabels:
+#       app.kubernetes.io/name: haproxy-ingress
+#     ports: [443]
+#   # the platform the policies refer to
+#   platform:
+#     coreNamespace: prod
+#     deviceExtAuthzLabels:
+#       istio: corvina-device-ext-authz-ingress
+#     rabbitmqOperatorNamespace: rabbitmq-system
+#   # per workload (app, service, migrator, gateway, istiod, rabbitmq, and the extra frontends and backends):
+#   # additions and overrides; peers keyed by name merge across values files
 #   service:
 #     extraPeers:
-#       - name: converter
+#       converter:
 #         podLabels:
 #           app: converter
 #         ports: [8080]

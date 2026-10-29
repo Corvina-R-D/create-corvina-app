@@ -3,7 +3,8 @@ VirtualService routing the backend prefixes to the backend Service and everythin
 Values:
   gateway.appHost, cors.*
   virtualService.servicePrefixes: URI prefixes served by the backend (default /v1 and /swagger-ui)
-  virtualService.extraRoutes: Istio HTTP routes evaluated before the default ones (tpl allowed)
+  virtualService.extraRoutes: Istio HTTP routes evaluated before the default ones (tpl allowed); a route with
+    enabled: '{{ .Values.feature.enabled }}' is left out when it renders false
 */}}
 {{- define "corvina-app-charts-lib.virtualService" -}}
 {{- $cors := .Values.cors }}
@@ -21,8 +22,11 @@ spec:
   gateways:
   - {{ include "corvina-app-charts-lib.appName" . }}-gateway
   http:
-  {{- with $virtualService.extraRoutes }}
-  {{- tpl (toYaml .) $ | nindent 2 }}
+  {{- range $virtualService.extraRoutes }}
+  {{- $route := tpl (toYaml .) $ | fromYaml }}
+  {{- if ne (toString (dig "enabled" true $route)) "false" }}
+  - {{- toYaml (omit $route "enabled") | nindent 4 }}
+  {{- end }}
   {{- end }}
   - match:
     {{- range ($virtualService.servicePrefixes | default (list "/v1" "/swagger-ui")) }}

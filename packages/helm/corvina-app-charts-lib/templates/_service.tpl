@@ -75,7 +75,7 @@ Usage: {{ include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" "app
 {{- end }}
 
 {{/*
-Backend: Deployment, ConfigMap, Service, ServiceAccount and the RoleBinding to wait for the migrator Job
+Backend: the ConfigMap and the "service" backend workload below
 Values:
   service.image, service.tag, service.resources, service.envVar.*, service.appId
   service.serviceName (default service-service), service.healthPath (default /v1/health),
@@ -85,122 +85,7 @@ Values:
   service.extraVolumes, service.extraVolumeMounts (tpl allowed)
 */}}
 {{- define "corvina-app-charts-lib.service" -}}
-{{- $healthPath := .Values.service.healthPath | default "/v1/health" }}
-{{- $automountToken := eq (toString .Values.service.automountServiceAccountToken) "true" }}
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: service-deployment
-  namespace: {{ .Release.Namespace }}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: service
-  template:
-    metadata:
-      labels:
-        app: service
-        {{- include "corvina-app-charts-lib.dataClientLabels" . | trim | nindent 8 }}
-      annotations:
-        # env vars are read only at container start: roll the pods when the ConfigMap changes
-        checksum/config: {{ include "corvina-app-charts-lib.serviceConfig" . | sha256sum }}
-    spec:
-      serviceAccountName: service-sa
-      automountServiceAccountToken: {{ $automountToken }}
-      volumes:
-        {{- if not $automountToken }}
-        {{- include "corvina-app-charts-lib.kubeApiAccessVolume" . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.service.extraVolumes }}
-        {{- tpl (toYaml .) $ | nindent 8 }}
-        {{- end }}
-        {{- with .Values.service.extraCa }}
-        - name: extra-ca
-          secret:
-            secretName: {{ .secret }}
-            items:
-            - key: ca.crt
-              path: ca.crt
-        {{- end }}
-      initContainers:
-        - name: init
-          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
-          securityContext:
-            {{- include "corvina-app-charts-lib.nobodySecurityContext" . | nindent 12 }}
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
-          args:
-            - "job-wr"
-            - "-lcorvina.io/migrator={{ .Release.Name }},corvina.io/image-tag={{ .Values.service.tag }}"
-          {{- if not $automountToken }}
-          volumeMounts:
-            {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
-          {{- end }}
-          resources:
-            requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
-      containers:
-        - name: service
-          image: "{{ .Values.service.image | required ".service.image is required" }}:{{ .Values.service.tag | required ".service.tag is required" }}"
-          securityContext:
-            {{- include "corvina-app-charts-lib.containerSecurityContext" . | nindent 12 }}
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
-          ports:
-            - containerPort: 3000
-          envFrom:
-            - configMapRef:
-                name: service-config
-          env:
-            {{- include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" .Values.service.envVar.START_FEATURES "context" .) | nindent 12 }}
-            {{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.rabbitmq.clusterName }}-default-user
-                  key: password
-                  optional: false
-            - name: RABBITMQ_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.rabbitmq.clusterName }}-default-user
-                  key: username
-                  optional: false
-            {{- end }}
-            {{- with .Values.service.extraCa }}
-            - name: NODE_EXTRA_CA_CERTS
-              value: /cacerts/ca.crt
-            {{- end }}
-            {{- with .Values.service.extraEnv }}
-            {{- tpl (toYaml .) $ | nindent 12 }}
-            {{- end }}
-          volumeMounts:
-            {{- with .Values.service.extraVolumeMounts }}
-            {{- tpl (toYaml .) $ | nindent 12 }}
-            {{- end }}
-            {{- with .Values.service.extraCa }}
-            - name: extra-ca
-              mountPath: /cacerts
-            {{- end }}
-          readinessProbe:
-            httpGet:
-              path: {{ $healthPath }}
-              port: 3000
-            {{- with .Values.service.probeInitialDelaySeconds }}
-            initialDelaySeconds: {{ . }}
-            {{- end }}
-          livenessProbe:
-            httpGet:
-              path: {{ $healthPath }}
-              port: 3000
-            {{- with .Values.service.probeInitialDelaySeconds }}
-            initialDelaySeconds: {{ . }}
-            {{- end }}
-          resources:
-            {{- toYaml .Values.service.resources | nindent 12 }}
+{{ include "corvina-app-charts-lib.backend" (dict "context" . "serviceName" (include "corvina-app-charts-lib.serviceName" .) "extraEnv" .Values.service.extraEnv) }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -212,33 +97,164 @@ metadata:
     tier: app-service-deployment
 data:
   {{- include "corvina-app-charts-lib.serviceConfig" . | nindent 2 }}
+{{- end }}
+
+{{/*
+Backend workload: Deployment, Service, ServiceAccount and the RoleBinding to wait for the migrator Job. It runs the
+backend image with the service-config ConfigMap and the service.* values; more backends of the same image (e.g. with
+another role) are more includes with another name.
+Usage: {{ include "corvina-app-charts-lib.backend" (dict "context" $ "name" "service-managed" "serviceName" "my-service" "extraEnv" (list ...)) }}
+  name         Deployment <name>-deployment, container <name>, pods labelled app: <name>, ServiceAccount <name>-sa
+               (default service)
+  serviceName  Kubernetes Service (default <name>-service)
+  extraEnv     env vars added to the container (tpl allowed), after the defaults
+*/}}
+{{- define "corvina-app-charts-lib.backend" -}}
+{{- $ := .context }}
+{{- $name := .name | default "service" }}
+{{- $sa := printf "%s-sa" $name }}
+{{- $healthPath := $.Values.service.healthPath | default "/v1/health" }}
+{{- $automountToken := eq (toString $.Values.service.automountServiceAccountToken) "true" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-deployment
+  namespace: {{ $.Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+      annotations:
+        # env vars are read only at container start: roll the pods when the ConfigMap changes
+        checksum/config: {{ include "corvina-app-charts-lib.serviceConfig" $ | sha256sum }}
+    spec:
+      serviceAccountName: {{ $sa }}
+      automountServiceAccountToken: {{ $automountToken }}
+      volumes:
+        {{- if not $automountToken }}
+        {{- include "corvina-app-charts-lib.kubeApiAccessVolume" $ | nindent 8 }}
+        {{- end }}
+        {{- with $.Values.service.extraVolumes }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        {{- with $.Values.service.extraCa }}
+        - name: extra-ca
+          secret:
+            secretName: {{ .secret }}
+            items:
+            - key: ca.crt
+              path: ca.crt
+        {{- end }}
+      initContainers:
+        - name: init
+          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          securityContext:
+            {{- include "corvina-app-charts-lib.nobodySecurityContext" $ | nindent 12 }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          args:
+            - "job-wr"
+            - "-lcorvina.io/migrator={{ $.Release.Name }},corvina.io/image-tag={{ $.Values.service.tag }}"
+          {{- if not $automountToken }}
+          volumeMounts:
+            {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" $ | nindent 12 }}
+          {{- end }}
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      containers:
+        - name: {{ $name }}
+          image: "{{ $.Values.service.image | required ".service.image is required" }}:{{ $.Values.service.tag | required ".service.tag is required" }}"
+          securityContext:
+            {{- include "corvina-app-charts-lib.containerSecurityContext" $ | nindent 12 }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: service-config
+          env:
+            {{- include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" ($.Values.service.envVar.START_FEATURES | default "app.listen") "context" $) | nindent 12 }}
+            {{- if include "corvina-app-charts-lib.rabbitmqEnabled" $ }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.rabbitmq.clusterName }}-default-user
+                  key: password
+                  optional: false
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.rabbitmq.clusterName }}-default-user
+                  key: username
+                  optional: false
+            {{- end }}
+            {{- with $.Values.service.extraCa }}
+            - name: NODE_EXTRA_CA_CERTS
+              value: /cacerts/ca.crt
+            {{- end }}
+            {{- with .extraEnv }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            {{- with $.Values.service.extraVolumeMounts }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+            {{- with $.Values.service.extraCa }}
+            - name: extra-ca
+              mountPath: /cacerts
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ $healthPath }}
+              port: 3000
+            {{- with $.Values.service.probeInitialDelaySeconds }}
+            initialDelaySeconds: {{ . }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ $healthPath }}
+              port: 3000
+            {{- with $.Values.service.probeInitialDelaySeconds }}
+            initialDelaySeconds: {{ . }}
+            {{- end }}
+          resources:
+            {{- toYaml $.Values.service.resources | nindent 12 }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "corvina-app-charts-lib.serviceName" . }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ .serviceName | default (printf "%s-service" $name) }}
+  namespace: {{ $.Release.Namespace }}
 spec:
   selector:
-    app: service # the Service will expose all Pods with a label of app: service
+    app: {{ $name }} # the Service will expose all Pods with a label of app: {{ $name }}
   ports:
     - port: 80
       targetPort: 3000
-      name: {{ .Values.gateway.protocol }}-service-port
+      name: {{ $.Values.gateway.protocol }}-service-port
 ---
-{{ include "corvina-app-charts-lib.serviceAccount" (dict "name" "service-sa" "context" .) }}
+{{ include "corvina-app-charts-lib.serviceAccount" (dict "name" $sa "context" $) }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: service-sa-watch-jobs-rb
-  namespace: {{ .Release.Namespace }}
+  name: {{ $sa }}-watch-jobs-rb
+  namespace: {{ $.Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: watch-jobs
 subjects:
 - kind: ServiceAccount
-  name: service-sa
-  namespace: {{ .Release.Namespace }}
+  name: {{ $sa }}
+  namespace: {{ $.Release.Namespace }}
 {{- end }}

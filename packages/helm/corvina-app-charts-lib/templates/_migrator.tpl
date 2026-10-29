@@ -15,7 +15,6 @@ spec:
       labels:
         sidecar.istio.io/inject: "false"
         app: migrator
-        {{- include "corvina-app-charts-lib.dataClientLabels" . | trim | nindent 8 }}
     spec:
       serviceAccountName: migrator-sa
       automountServiceAccountToken: false
@@ -29,7 +28,7 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "service"
-            - "{{ include "corvina-app-charts-lib.postgresHost" . }}"
+            - "{{ with .Values.migrator.postgresService }}{{ tpl . $ }}{{ else }}{{ include "corvina-app-charts-lib.postgresHost" . }}{{ end }}"
           volumeMounts:
             {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
           resources:
@@ -65,7 +64,7 @@ spec:
             name: service-config
         env:
           {{- include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" .Values.migrator.envVar.START_FEATURES "context" .) | nindent 10 }}
-          {{- with .Values.service.extraEnv }}
+          {{- with .Values.migrator.extraEnv }}
           {{- tpl (toYaml .) $ | nindent 10 }}
           {{- end }}
       restartPolicy: Never # prevent pod removal on job failure so that we can inspect logs
@@ -74,7 +73,8 @@ spec:
 
 {{/*
 Migrator: the Job running the database migrations, with its ServiceAccount and RBAC to wait for postgresql
-Values: migrator.envVar.START_FEATURES, migrator.backoffLimit (default 100),
+Values: migrator.envVar.START_FEATURES, migrator.backoffLimit (default 100), migrator.extraEnv (tpl allowed),
+  migrator.postgresService: the postgresql service to wait for (tpl allowed, default service.postgresHost),
   migrator.waitFor: [{name, service}] or [{name, args}] more init containers waiting for a service, or
     for anything else with the k8s-wait-for args (tpl allowed),
   plus the service.* image, resources and env values

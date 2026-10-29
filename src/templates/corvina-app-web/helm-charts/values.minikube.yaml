@@ -79,12 +79,10 @@ cors:
   additionalOrigins: []
 
 networkPolicy:
-  service:
-    extraPeers:
-      # the Corvina hosts (auth, app...) resolve to the haproxy ingress (corvina-k8s minikube-patch-corefile.sh)
-      - name: corvina-ingress
-        namespace: prod
-        podLabels:
-          app.kubernetes.io/name: haproxy-ingress
-          app.kubernetes.io/instance: corvina-prod-http
-        ports: [443]
+  # the Corvina hosts (auth, app...) resolve to the haproxy ingress (corvina-k8s minikube-patch-corefile.sh)
+  corvinaIngress:
+    namespace: prod
+    podLabels:
+      app.kubernetes.io/name: haproxy-ingress
+      app.kubernetes.io/instance: corvina-prod-http
+    ports: [443]

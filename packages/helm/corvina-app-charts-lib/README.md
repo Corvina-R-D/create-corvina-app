@@ -17,9 +17,8 @@ dependencies:
 {{ include "corvina-app-charts-lib.service" . }}
 ```
 
-An app that needs something the knobs below don't cover replaces the include with its own template in that file
-(the helpers, e.g. `corvina-app-charts-lib.labels` and `corvina-app-charts-lib.serviceAccount`, remain available), or adds new
-files next to the includes.
+An app that needs something the knobs below don't cover replaces the include with its own template in that file, or
+adds new files next to the includes, using the [public helpers](#public-helpers).
 
 ## Templates
 
@@ -38,23 +37,43 @@ files next to the includes.
 | `watchJobRole` | Role to watch Jobs |
 | `prometheusRule.{healthAlerts,istio,resourceQuotas,infraAlerts,rabbitmq,redis}` | PrometheusRules |
 | `serviceMonitor.{istio,rabbitmq}` | ServiceMonitors |
-| `networkPolicy.{app,service,migrator,registration,gateway,istiod,rabbitmq}` | NetworkPolicies |
+| `networkPolicy.{app,service,migrator,gateway,istiod,rabbitmq}` | NetworkPolicies |
+
+## Public helpers
+
+The other templates are internal and may change in any release; these keep their parameters within a major version.
+
+| Helper | |
+|---|---|
+| `frontend` `(dict "context" $ "name" "app-managed" "image" ... "tag" ...)` | another frontend workload (Deployment, Service, ServiceAccount) |
+| `backend` `(dict "context" $ "name" "service-managed" "serviceName" ... "extraEnv" (list ...))` | another backend workload of the backend image with the service-config ConfigMap (Deployment, Service, ServiceAccount, RoleBinding) |
+| `networkPolicy.frontend` / `networkPolicy.backend` `(dict "context" $ "name" ...)` | the policy of such a workload, overridable with `networkPolicy.<name>` |
+| `networkPolicy` `(dict "context" $ "workload" ... "podLabels" ... "spec" ...)` | the policy of any other workload, see the comment in `_network-policy.tpl` |
+| `serviceAccount` `(dict "name" ... "context" $)` | ServiceAccount with the workload identity link of `workloadIdentity.gcpSaLinks.<name>` |
+| `kubeApiAccessVolume` / `kubeApiAccessVolumeMount` | the ServiceAccount token for a container calling the Kubernetes API in a pod with `automountServiceAccountToken: false` |
+| `containerSecurityContext` / `nobodySecurityContext` | restricted security context, the second for images without a USER |
+| `labels` / `selectorLabels` / `fullname` | the usual chart labels and names |
+| `externalSecretsGenerator` / `generatedSecret` | generated passwords |
 
 ## NetworkPolicies
 
 Every workload gets ingress and egress rules (adapted from `corvina-common.networkPolicy` in corvina-k8s): the
 frontend only receives from the istio gateway; the backend reaches DNS, postgres, redis, rabbitmq, the Kubernetes API
 and the public internet on 443 (the metadata server only with a workload identity link; on minikube, where the
-Corvina hosts resolve to the in-cluster haproxy ingress, `values.minikube.yaml` adds it as a peer); the migrator reaches DNS,
+Corvina hosts resolve to the in-cluster haproxy ingress, `values.minikube.yaml` sets it as `networkPolicy.corvinaIngress`); the migrator reaches DNS,
 postgres and the Kubernetes API; istiod, the gateway and rabbitmq only talk to each other, to the app pods, to the
 operators and to prometheus. The gateway also admits the Corvina device ext-authz ingress (`prod`), which forwards the
-device calls to the app host: an `ipBlock` doesn't match pods on every network plugin (GKE Dataplane V2). postgres and redis keep the bitnami policies, narrowed in `base.yaml.gotmpl` to the pods
-labelled `<release>-postgresql-client` / `<release>-redis-client` (backend and migrator).
+device calls to the app host: an `ipBlock` doesn't match pods on every network plugin (GKE Dataplane V2). postgres and
+redis keep the bitnami policies, narrowed in `base.yaml.gotmpl` to the pods of the namespace and prometheus: every
+workload of the app reaches them without labels, the library ones only through their egress rules.
 
 Environment values: `networkPolicy.apiServer.cidr` (required, `kubeApiServerCidr` of `envs/<env>.yaml`),
-`networkPolicy.privateCidrs` (excluded from the internet rules). Per workload, `networkPolicy.<workload>` adds
-`extraPeers`, `extraFrom` (`[{name, podLabels, namespace, cidr, ports}]`), raw `extraEgress` / `extraIngress`, or
-overrides the defaults, e.g. `internetPorts`.
+`networkPolicy.privateCidrs` (excluded from the internet rules), `networkPolicy.corvinaIngress` (`{namespace,
+podLabels, ports}`, egress of every backend), `networkPolicy.platform` (`coreNamespace`, `deviceExtAuthzLabels`,
+`rabbitmqOperatorNamespace`) and `networkPolicy.prometheus` (`{namespace, podLabels}`) for another platform. Per
+workload, `networkPolicy.<workload>` adds `extraPeers`, `extraFrom` (`{<name>: {podLabels, namespace, cidr, ports}}`,
+a map so that values files merge, or a list), raw `extraEgress` / `extraIngress`, or overrides the defaults, e.g.
+`internetPorts`.
 
 Pods don't mount the ServiceAccount token: only the `k8s-wait-for` init containers, which call the Kubernetes API,
 mount it through the `corvina-app-charts-lib.kubeApiAccessVolume` volume.
@@ -74,16 +93,18 @@ They usually go in the app chart `values.yaml`, where templates are allowed in t
 | `service.healthPath` | `/v1/health` | backend readiness and liveness probes |
 | `service.probeInitialDelaySeconds` | | |
 | `service.pgEnv` | `true` | `false` drops the `PG_*` variables from the ConfigMap |
-| `service.postgresHost` _tpl_ | `{{ .Release.Name }}-postgresql` | `PG_HOST` and the service the migrator waits for |
+| `service.postgresHost` _tpl_ | `{{ .Release.Name }}-postgresql` | `PG_HOST`, by default also the service the migrator waits for |
 | `service.postgresPasswordEnv` | `PG_PASS` | env var with the postgresql password |
 | `service.config` _tpl_ | | extra ConfigMap variables, overriding the defaults |
 | `service.automountServiceAccountToken` | `false` | `true` mounts the ServiceAccount token in the backend container, for backends calling the Kubernetes API |
 | `service.extraVolumes`, `service.extraVolumeMounts` _tpl_ | | extra volumes of the backend pod and their mounts |
-| `service.extraEnv` _tpl_ | | extra env vars of the backend and migrator containers |
+| `service.extraEnv` _tpl_ | | extra env vars of the backend container |
+| `migrator.extraEnv` _tpl_ | | extra env vars of the migrator container |
+| `migrator.postgresService` _tpl_ | `service.postgresHost` | postgresql service the migrator waits for |
 | `migrator.backoffLimit` | `100` | retries of the migrator Job |
 | `migrator.waitFor` _tpl_ | | `[{name, service}]` more services the migrator waits for besides postgresql, or `[{name, args}]` with other `k8s-wait-for` args |
 | `virtualService.servicePrefixes` | `[/v1, /swagger-ui]` | URI prefixes routed to the backend |
-| `virtualService.extraRoutes` _tpl_ | | Istio HTTP routes before the default ones |
+| `virtualService.extraRoutes` _tpl_ | | Istio HTTP routes before the default ones; `enabled: '{{ .Values.x.enabled }}'` leaves a route out when false |
 | `rabbitmq.additionalConfig` | | extra `rabbitmq.conf` lines, e.g. `consumer_timeout: 14000000` |
 | `prometheus.rabbitmqIgnoredQueues` _tpl_ | | queues left out of the growing queues and no consumer alerts, e.g. parking lots |
 | `rabbitmq.topology.queues` _tpl_ | | `[{name, durable, autoDelete, type, arguments}]` |

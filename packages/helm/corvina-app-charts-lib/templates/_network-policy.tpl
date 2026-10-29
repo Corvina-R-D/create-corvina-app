@@ -15,7 +15,9 @@ NetworkPolicy of one workload, adapted from corvina-k8s corvina-common.networkPo
     from              ingress from pods or addresses: [{name, podLabels, namespace, cidr, ports}]
     metricsPorts      ingress from prometheus
     extraPeers, extraFrom, extraEgress, extraIngress  additions from the values (the last two raw rules)
-Ports are the container ports of the destination pods: numbers, names, or {port, endPort} ranges.
+Peers are lists, or maps keyed by name: a map merges across values files (e.g. values.minikube.yaml adds a peer
+without repeating the chart ones), a list replaces. Ports are the container ports of the destination pods: numbers,
+names, or {port, endPort} ranges.
 */}}
 {{- define "corvina-app-charts-lib.networkPolicy" -}}
 {{- $ := .context -}}
@@ -27,7 +29,7 @@ Ports are the container ports of the destination pods: numbers, names, or {port,
   "to" (list (dict "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" "kube-system"))) (dict "ipBlock" (dict "cidr" "169.254.0.0/16")))
   "ports" (list (dict "port" 53 "protocol" "UDP") (dict "port" 53 "protocol" "TCP"))) }}
 {{- end }}
-{{- range concat ($spec.peers | default list) ($spec.extraPeers | default list) }}
+{{- range concat (include "corvina-app-charts-lib.networkPolicy.peerList" $spec.peers | fromYamlArray) (include "corvina-app-charts-lib.networkPolicy.peerList" $spec.extraPeers | fromYamlArray) }}
 {{- $egress = append $egress (include "corvina-app-charts-lib.networkPolicy.peerRule" (dict "peer" . "direction" "to") | fromYaml) }}
 {{- end }}
 {{- if $spec.apiServer }}
@@ -51,7 +53,7 @@ Ports are the container ports of the destination pods: numbers, names, or {port,
 {{- end }}
 {{- $egress = concat $egress ($spec.extraEgress | default list) }}
 {{- $ingress := list -}}
-{{- range concat ($spec.from | default list) ($spec.extraFrom | default list) }}
+{{- range concat (include "corvina-app-charts-lib.networkPolicy.peerList" $spec.from | fromYamlArray) (include "corvina-app-charts-lib.networkPolicy.peerList" $spec.extraFrom | fromYamlArray) }}
 {{- $ingress = append $ingress (include "corvina-app-charts-lib.networkPolicy.peerRule" (dict "peer" . "direction" "from") | fromYaml) }}
 {{- end }}
 {{- with $spec.metricsPorts }}
@@ -118,19 +120,36 @@ spec:
 {{- toYaml $ports }}
 {{- end }}
 
-{{/*
-Pod labels admitted by the bitnami postgresql and redis NetworkPolicies (allowExternal: false), for the pods
-connecting to them. Usage, inside a pod template labels block: {{ include "corvina-app-charts-lib.dataClientLabels" . }}
-*/}}
-{{- define "corvina-app-charts-lib.dataClientLabels" -}}
-{{ .Release.Name }}-postgresql-client: "true"
-{{- if include "corvina-app-charts-lib.redisEnabled" . }}
-{{ .Release.Name }}-redis-client: "true"
+{{- /* peers as a list: a list stays as it is, a map becomes the list of its values named by their keys */}}
+{{- define "corvina-app-charts-lib.networkPolicy.peerList" -}}
+{{- if kindIs "map" . }}
+{{- $peers := list }}
+{{- range $name := keys . | sortAlpha }}
+{{- $peers = append $peers (merge (dict "name" $name) (index $ $name)) }}
+{{- end }}
+{{- toYaml $peers }}
+{{- else }}
+{{- toYaml (. | default list) }}
 {{- end }}
 {{- end }}
 
 {{/*
-Policies of the app workloads: frontend, backend, migrator, registration
+Names of the platform the policies refer to, overridable with .Values.networkPolicy.platform:
+  coreNamespace             namespace of Corvina, with the device ext-authz ingress (default prod)
+  deviceExtAuthzLabels      labels of the device ext-authz ingress pods
+  rabbitmqOperatorNamespace namespace of the rabbitmq operators (default rabbitmq-system)
+Prometheus is .Values.networkPolicy.prometheus ({namespace, podLabels}).
+*/}}
+{{- define "corvina-app-charts-lib.networkPolicy.platform" -}}
+{{- $platform := (.Values.networkPolicy | default dict).platform | default dict }}
+coreNamespace: {{ $platform.coreNamespace | default "prod" }}
+deviceExtAuthzLabels:
+  {{- toYaml ($platform.deviceExtAuthzLabels | default (dict "istio" "corvina-device-ext-authz-ingress")) | nindent 2 }}
+rabbitmqOperatorNamespace: {{ $platform.rabbitmqOperatorNamespace | default "rabbitmq-system" }}
+{{- end }}
+
+{{/*
+Policies of the app workloads: frontends and backends (corvina-app-charts-lib.frontend / .backend), migrator
 */}}
 {{- define "corvina-app-charts-lib.networkPolicy.gatewayPeer" -}}
 {{- $istioGateway := index .Values "istio-gateway" -}}
@@ -155,25 +174,53 @@ podLabels:
 {{- end }}
 
 {{- define "corvina-app-charts-lib.networkPolicy.app" -}}
-{{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" . | fromYaml }}
+{{ include "corvina-app-charts-lib.networkPolicy.frontend" (dict "context" .) }}
+{{- end }}
+
+{{/*
+Policy of a frontend workload: ingress from the istio gateway only, no egress
+Usage: {{ include "corvina-app-charts-lib.networkPolicy.frontend" (dict "context" $ "name" "app-managed") }}
+  name  the frontend name (default app): pods labelled app: <name>, overrides in .Values.networkPolicy.<name>
+*/}}
+{{- define "corvina-app-charts-lib.networkPolicy.frontend" -}}
+{{- $ := .context }}
+{{- $name := .name | default "app" }}
+{{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" $ | fromYaml }}
 {{- $spec := dict "dns" false "from" (list (merge (dict "ports" (list 8080)) $gateway)) }}
-{{- include "corvina-app-charts-lib.networkPolicy" (dict "context" . "workload" "app" "podLabels" (dict "app" "app") "spec" $spec) }}
+{{- include "corvina-app-charts-lib.networkPolicy" (dict "context" $ "workload" $name "podLabels" (dict "app" $name) "spec" $spec) }}
 {{- end }}
 
 {{- define "corvina-app-charts-lib.networkPolicy.service" -}}
-{{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" . | fromYaml }}
-{{- $peers := include "corvina-app-charts-lib.networkPolicy.dataPeers" . | fromYamlArray }}
-{{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
-{{- $peers = append $peers (dict "name" "rabbitmq" "podLabels" (dict "app.kubernetes.io/name" .Values.rabbitmq.clusterName) "ports" (list 5672 5552 15672)) }}
+{{ include "corvina-app-charts-lib.networkPolicy.backend" (dict "context" .) }}
+{{- end }}
+
+{{/*
+Policy of a backend workload: ingress from the istio gateway; egress to DNS, postgresql, redis, rabbitmq, the
+Kubernetes API, the public internet on 443, the metadata server with a workload identity link of <name>-sa, and
+.Values.networkPolicy.corvinaIngress when set (minikube, where the Corvina hosts resolve to the in-cluster ingress)
+Usage: {{ include "corvina-app-charts-lib.networkPolicy.backend" (dict "context" $ "name" "service-managed") }}
+  name  the backend name (default service): pods labelled app: <name>, overrides in .Values.networkPolicy.<name>
+*/}}
+{{- define "corvina-app-charts-lib.networkPolicy.backend" -}}
+{{- $ := .context }}
+{{- $name := .name | default "service" }}
+{{- $np := $.Values.networkPolicy | default dict }}
+{{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" $ | fromYaml }}
+{{- $peers := include "corvina-app-charts-lib.networkPolicy.dataPeers" $ | fromYamlArray }}
+{{- if include "corvina-app-charts-lib.rabbitmqEnabled" $ }}
+{{- $peers = append $peers (dict "name" "rabbitmq" "podLabels" (dict "app.kubernetes.io/name" $.Values.rabbitmq.clusterName) "ports" (list 5672 5552 15672)) }}
+{{- end }}
+{{- with $np.corvinaIngress }}
+{{- $peers = append $peers (merge (dict "name" "corvina-ingress") .) }}
 {{- end }}
 {{- $spec := dict
   "from" (list (merge (dict "ports" (list 3000)) $gateway))
   "peers" $peers
   "apiServer" true
   "internetPorts" (list 443)
-  "workloadIdentity" (not (empty (dig "gcpSaLinks" "service-sa" "" (.Values.workloadIdentity | default dict))))
+  "workloadIdentity" (not (empty (dig "gcpSaLinks" (printf "%s-sa" $name) "" ($.Values.workloadIdentity | default dict))))
 }}
-{{- include "corvina-app-charts-lib.networkPolicy" (dict "context" . "workload" "service" "podLabels" (dict "app" "service") "spec" $spec) }}
+{{- include "corvina-app-charts-lib.networkPolicy" (dict "context" $ "workload" $name "podLabels" (dict "app" $name) "spec" $spec) }}
 {{- end }}
 
 {{- define "corvina-app-charts-lib.networkPolicy.migrator" -}}
@@ -185,26 +232,16 @@ podLabels:
 {{- include "corvina-app-charts-lib.networkPolicy" (dict "context" . "workload" "migrator" "podLabels" (dict "app" "migrator") "spec" $spec) }}
 {{- end }}
 
-{{- define "corvina-app-charts-lib.networkPolicy.registration" -}}
-{{- if (.Values.registration | default dict).enabled }}
-{{- /* core and keycloak of the same cluster, and the app manifest through the app host (private on minikube) */}}
-{{- $spec := dict
-  "peers" (list (dict "name" "corvina" "namespace" .Values.registration.namespace))
-  "anywherePorts" (list 443)
-}}
-{{- include "corvina-app-charts-lib.networkPolicy" (dict "context" . "workload" "registration" "podLabels" (dict "app" "registration") "spec" $spec) }}
-{{- end }}
-{{- end }}
-
 {{/*
 Policies of the infrastructure pods of the namespace: istio gateway, istiod, rabbitmq
 */}}
 {{- define "corvina-app-charts-lib.networkPolicy.gateway" -}}
 {{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" . | fromYaml }}
+{{- $platform := include "corvina-app-charts-lib.networkPolicy.platform" . | fromYaml }}
 {{- $spec := dict
   "from" (list
     (dict "name" "clients" "cidr" "0.0.0.0/0" "ports" (list .Values.gateway.port))
-    (dict "name" "device-ext-authz" "namespace" "prod" "podLabels" (dict "istio" "corvina-device-ext-authz-ingress") "ports" (list .Values.gateway.port)))
+    (dict "name" "device-ext-authz" "namespace" $platform.coreNamespace "podLabels" $platform.deviceExtAuthzLabels "ports" (list .Values.gateway.port)))
   "metricsPorts" (list 15090 15020)
   "peers" (list
     (dict "name" "frontend" "podLabels" (dict "app" "app") "ports" (list 8080))
@@ -230,11 +267,12 @@ Policies of the infrastructure pods of the namespace: istio gateway, istiod, rab
 {{- define "corvina-app-charts-lib.networkPolicy.rabbitmq" -}}
 {{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
 {{- $cluster := dict "app.kubernetes.io/name" .Values.rabbitmq.clusterName }}
+{{- $platform := include "corvina-app-charts-lib.networkPolicy.platform" . | fromYaml }}
 {{- $spec := dict
   "from" (list
     (dict "name" "backend" "podLabels" (dict "app" "service") "ports" (list 5672 5552 15672))
     (dict "name" "stasher" "podLabels" (dict "app.kubernetes.io/name" "stasher") "ports" (list 5672 5552))
-    (dict "name" "operators" "namespace" "rabbitmq-system" "ports" (list 15672))
+    (dict "name" "operators" "namespace" $platform.rabbitmqOperatorNamespace "ports" (list 15672))
     (dict "name" "peers" "podLabels" $cluster))
   "metricsPorts" (list 15692)
   "peers" (list (dict "name" "peers" "podLabels" $cluster))
