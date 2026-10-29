@@ -34,6 +34,20 @@ spec:
             {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
           resources:
             {{- toYaml .Values.service.resources | nindent 12 }}
+        {{- range .Values.migrator.waitForServices }}
+        - name: {{ .name }}
+          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          securityContext:
+            {{- include "corvina-app-charts-lib.nobodySecurityContext" $ | nindent 12 }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          args:
+            - "service"
+            - "{{ tpl .service $ }}"
+          volumeMounts:
+            {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" $ | nindent 12 }}
+          resources:
+            {{- toYaml $.Values.service.resources | nindent 12 }}
+        {{- end }}
       containers:
       - name: service
         image: "{{ .Values.service.image | required ".service.image is required" }}:{{ .Values.service.tag | required ".service.tag is required" }}"
@@ -51,12 +65,14 @@ spec:
           {{- tpl (toYaml .) $ | nindent 10 }}
           {{- end }}
       restartPolicy: Never # prevent pod removal on job failure so that we can inspect logs
-  backoffLimit: 100
+  backoffLimit: {{ .Values.migrator.backoffLimit | default 100 }}
 {{- end }}
 
 {{/*
 Migrator: the Job running the database migrations, with its ServiceAccount and RBAC to wait for postgresql
-Values: migrator.envVar.START_FEATURES, plus the service.* image, resources and env values
+Values: migrator.envVar.START_FEATURES, migrator.backoffLimit (default 100),
+  migrator.waitForServices: [{name, service}] more services to wait for (service tpl allowed),
+  plus the service.* image, resources and env values
 */}}
 {{- define "corvina-app-charts-lib.migrator" -}}
 {{- $job := include "corvina-app-charts-lib.migrator.job" . }}
