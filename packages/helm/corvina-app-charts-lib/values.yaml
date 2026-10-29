@@ -2,6 +2,13 @@
 # values from the app chart, usually from ../base.yaml.gotmpl and, for the app-specific knobs, from the app chart
 # values.yaml, where the values marked (tpl) may contain templates (helmfile would render them in base.yaml.gotmpl).
 
+# images overrides the default images of templates/_images.tpl (k8sWaitFor, rabbitmq, registration) by repository and
+# tag. Leave it unset so that a library release bumps the images
+# images:
+#   k8sWaitFor:
+#     # e.g. another mirror; the tag stays the library default
+#     repository: docker.io/groundnuty/k8s-wait-for
+
 # appName is the short app name used by the gateway, certificate and issuer names.
 # Defaults to the chart name without "corvina-app-"
 # appName: ota

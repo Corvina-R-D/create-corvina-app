@@ -59,7 +59,7 @@ cors:
 
 postgresql:
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+    {{- toYaml .StateValues.images.postgresql | nindent 4 }}
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
     # admit the pods of the namespace and prometheus
@@ -101,8 +101,7 @@ postgresql:
   metrics:
     enabled: true
     image:
-      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
-      repository: bitnamilegacy/postgres-exporter
+      {{- toYaml .StateValues.images.postgresqlExporter | nindent 6 }}
     serviceMonitor:
       enabled: true
 
@@ -144,9 +143,7 @@ migrator:
 [| if .RedisEnabled -|]
 redis:
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
-    repository: bitnamilegacy/redis
-    tag: 7.0.9-debian-11-r1
+    {{- toYaml .StateValues.images.redis | nindent 4 }}
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
     enabled: true
@@ -173,9 +170,7 @@ redis:
             protocol: TCP
   metrics:
     image:
-      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
-      repository: bitnamilegacy/redis-exporter
-      tag: 1.47.0-debian-11-r1
+      {{- toYaml .StateValues.images.redisExporter | nindent 6 }}
     enabled: true
     serviceMonitor:
       enabled: true
@@ -222,7 +217,6 @@ redis:
 rabbitmq:
   clusterName: {{ .StateValues.releaseName }}-rabbitmq
   replicas: 1
-  image: eu.gcr.io/corvina-exorint/rabbitmq:v2
   storageClass: "ssd-retain"
   storageSize: 7Gi
   resources:
@@ -267,7 +261,6 @@ backup:
 registration:
   enabled: false
   namespace: prod
-  image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop   # automatic registration is expected only in dev environment, so :develop is acceptable
   appName: {{ .StateValues.appName }}
   core:
     service: corvina-core

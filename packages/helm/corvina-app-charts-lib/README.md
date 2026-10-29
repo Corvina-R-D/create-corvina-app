@@ -50,6 +50,7 @@ The other templates are internal and may change in any release; these keep their
 | `networkPolicy.frontend` / `networkPolicy.backend` `(dict "context" $ "name" ...)` | the policy of such a workload, overridable with `networkPolicy.<name>` |
 | `networkPolicy` `(dict "context" $ "workload" ... "podLabels" ... "spec" ...)` | the policy of any other workload, see the comment in `_network-policy.tpl` |
 | `serviceAccount` `(dict "name" ... "context" $)` | ServiceAccount with the workload identity link of `workloadIdentity.gcpSaLinks.<name>` |
+| `image` `(dict "context" $ "name" "k8sWaitFor")`, `image.k8sWaitFor` | a default image of `_images.tpl` (`k8sWaitFor`, `rabbitmq`, `registration`), with the `images.<name>.repository` and `.tag` overrides |
 | `kubeApiAccessVolume` / `kubeApiAccessVolumeMount` | the ServiceAccount token for a container calling the Kubernetes API in a pod with `automountServiceAccountToken: false` |
 | `containerSecurityContext` / `nobodySecurityContext` | restricted security context, the second for images without a USER |
 | `labels` / `selectorLabels` / `fullname` | the usual chart labels and names |
@@ -89,6 +90,7 @@ They usually go in the app chart `values.yaml`, where templates are allowed in t
 | Value | Default | |
 |---|---|---|
 | `appName` | chart name without `corvina-app-` | gateway, certificate and issuer names |
+| `images.{k8sWaitFor,rabbitmq,registration}.repository`, `.tag` | [`_images.tpl`](templates/_images.tpl) | override a default image; leave them unset so that a library release bumps the image. `rabbitmq.image` and `registration.image` still override the whole image |
 | `service.serviceName` | `service-service` | backend Service, also the VirtualService destination |
 | `service.healthPath` | `/v1/health` | backend readiness and liveness probes |
 | `service.probeInitialDelaySeconds` | | |

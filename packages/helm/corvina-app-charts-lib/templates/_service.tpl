@@ -152,9 +152,9 @@ spec:
         {{- end }}
       initContainers:
         - name: init
-          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          image: {{ include "corvina-app-charts-lib.image.k8sWaitFor" $ }}
           securityContext:
-            {{- include "corvina-app-charts-lib.nobodySecurityContext" $ | nindent 12 }}
+            {{- include "corvina-app-charts-lib.containerSecurityContext" $ | nindent 12 }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
           args:
             - "job-wr"

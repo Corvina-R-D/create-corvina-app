@@ -30,7 +30,7 @@ spec:
     {{ toYaml . | nindent 4 }}
   {{- end }}
   replicas: {{ .Values.rabbitmq.replicas }}
-  image: {{ .Values.rabbitmq.image }}
+  image: {{ .Values.rabbitmq.image | default (include "corvina-app-charts-lib.image" (dict "context" . "name" "rabbitmq")) }}
   persistence:
     storageClassName: {{ .Values.rabbitmq.storageClass }}
     storage: {{ .Values.rabbitmq.storageSize }}

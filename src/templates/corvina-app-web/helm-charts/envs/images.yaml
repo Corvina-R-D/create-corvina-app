@@ -1,0 +1,25 @@
+# where the images of the third-party charts are pulled from, in a single place: base.yaml.gotmpl and
+# istio-discovery.values.yaml.gotmpl read them from here. Only registries and repositories: the tags are the ones of the
+# charts in corvina-app-web/Chart.yaml and helmfile.yaml, so a chart bump brings its images. The images of the
+# corvina-app-charts-lib templates (k8s-wait-for, rabbitmq, registration) are defaults of the library.
+images:
+  # remote of Docker Hub
+  dockerhubRegistry: &dockerhub europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+  # istiod and the proxies of istiod and of the gateway
+  istio:
+    hub: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/istio
+  # bitnami charts: the bitnami/* images left Docker Hub, their old tags are in bitnamilegacy/*
+  postgresql:
+    registry: *dockerhub
+    repository: bitnamilegacy/postgresql
+  postgresqlExporter:
+    registry: *dockerhub
+    repository: bitnamilegacy/postgres-exporter
+[|- if .RedisEnabled |]
+  redis:
+    registry: *dockerhub
+    repository: bitnamilegacy/redis
+  redisExporter:
+    registry: *dockerhub
+    repository: bitnamilegacy/redis-exporter
+[|- end |]

@@ -22,9 +22,9 @@ spec:
         {{- include "corvina-app-charts-lib.kubeApiAccessVolume" . | nindent 8 }}
       initContainers:
         - name: psql-wait
-          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          image: {{ include "corvina-app-charts-lib.image.k8sWaitFor" $ }}
           securityContext:
-            {{- include "corvina-app-charts-lib.nobodySecurityContext" . | nindent 12 }}
+            {{- include "corvina-app-charts-lib.containerSecurityContext" . | nindent 12 }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - "service"
@@ -35,9 +35,9 @@ spec:
             {{- toYaml .Values.service.resources | nindent 12 }}
         {{- range .Values.migrator.waitFor }}
         - name: {{ .name }}
-          image: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for:v2.0
+          image: {{ include "corvina-app-charts-lib.image.k8sWaitFor" $ }}
           securityContext:
-            {{- include "corvina-app-charts-lib.nobodySecurityContext" $ | nindent 12 }}
+            {{- include "corvina-app-charts-lib.containerSecurityContext" $ | nindent 12 }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
           args:
             {{- if .args }}

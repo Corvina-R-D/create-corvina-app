@@ -22,7 +22,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-      - image: {{ .image }}
+      - image: {{ .image | default (include "corvina-app-charts-lib.image" (dict "context" $ "name" "registration")) }}
         name: app-registration
         command:
         - /bin/bash
