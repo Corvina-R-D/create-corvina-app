@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         sidecar.istio.io/inject: "false"
+        app: migrator
+        {{- include "corvina-app-charts-lib.dataClientLabels" . | trim | nindent 8 }}
     spec:
       serviceAccountName: migrator-sa
       automountServiceAccountToken: false

@@ -98,6 +98,7 @@ spec:
     metadata:
       labels:
         app: service
+        {{- include "corvina-app-charts-lib.dataClientLabels" . | trim | nindent 8 }}
       annotations:
         # env vars are read only at container start: roll the pods when the ConfigMap changes
         checksum/config: {{ include "corvina-app-charts-lib.serviceConfig" . | sha256sum }}

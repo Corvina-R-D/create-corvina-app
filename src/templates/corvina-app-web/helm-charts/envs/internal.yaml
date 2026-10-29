@@ -2,3 +2,5 @@ appHost: [| .Name |].corvina.io
 corvinaAppHost: app.corvina.io
 clusterDomain: cluster.local
 gcpNetworkingProject: corvina-internal
+# control plane, called by k8s-wait-for and peer discovery: same as kubeApiServerCidr in corvina-k8s/charts/envs
+kubeApiServerCidr: 192.168.0.16/28

@@ -38,6 +38,23 @@ files next to the includes.
 | `watchJobRole` | Role to watch Jobs |
 | `prometheusRule.{healthAlerts,istio,resourceQuotas,infraAlerts,rabbitmq,redis}` | PrometheusRules |
 | `serviceMonitor.{istio,rabbitmq}` | ServiceMonitors |
+| `networkPolicy.{app,service,migrator,registration,gateway,istiod,rabbitmq}` | NetworkPolicies |
+
+## NetworkPolicies
+
+Every workload gets ingress and egress rules (adapted from `corvina-common.networkPolicy` in corvina-k8s): the
+frontend only receives from the istio gateway; the backend reaches DNS, postgres, redis, rabbitmq, the Kubernetes API
+and the public internet on 443 (the metadata server only with a workload identity link; on minikube, where the
+Corvina hosts resolve to the in-cluster haproxy ingress, `values.minikube.yaml` adds it as a peer); the migrator reaches DNS,
+postgres and the Kubernetes API; istiod, the gateway and rabbitmq only talk to each other, to the app pods, to the
+operators and to prometheus. The gateway also admits the Corvina device ext-authz ingress (`prod`), which forwards the
+device calls to the app host: an `ipBlock` doesn't match pods on every network plugin (GKE Dataplane V2). postgres and redis keep the bitnami policies, narrowed in `base.yaml.gotmpl` to the pods
+labelled `<release>-postgresql-client` / `<release>-redis-client` (backend and migrator).
+
+Environment values: `networkPolicy.apiServer.cidr` (required, `kubeApiServerCidr` of `envs/<env>.yaml`),
+`networkPolicy.privateCidrs` (excluded from the internet rules). Per workload, `networkPolicy.<workload>` adds
+`extraPeers`, `extraFrom` (`[{name, podLabels, namespace, cidr, ports}]`), raw `extraEgress` / `extraIngress`, or
+overrides the defaults, e.g. `internetPorts`.
 
 Pods don't mount the ServiceAccount token: only the `k8s-wait-for` init containers, which call the Kubernetes API,
 mount it through the `corvina-app-charts-lib.kubeApiAccessVolume` volume.

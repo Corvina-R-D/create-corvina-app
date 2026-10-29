@@ -16,6 +16,9 @@ metadata:
 spec:
   backoffLimit: 100
   template:
+    metadata:
+      labels:
+        app: registration
     spec:
       automountServiceAccountToken: false
       containers:

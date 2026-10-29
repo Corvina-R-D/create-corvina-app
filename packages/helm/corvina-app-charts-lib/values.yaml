@@ -38,6 +38,21 @@
 #   # extraRoutes (tpl) are Istio HTTP routes evaluated before the default ones
 #   extraRoutes: []
 
+# networkPolicy:
+#   # control plane, required: kubeApiServerCidr of envs/<env>.yaml
+#   apiServer:
+#     cidr: 192.168.0.64/28
+#   # excluded from the internet rules
+#   privateCidrs: [10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
+#   # per workload (app, service, migrator, registration, gateway, istiod, rabbitmq): additions and overrides
+#   service:
+#     extraPeers:
+#       - name: converter
+#         podLabels:
+#           app: converter
+#         ports: [8080]
+#     internetPorts: [443, 8883]
+
 # rabbitmq:
 #   # topology (tpl) declares queues, exchanges and bindings on the app cluster
 #   topology:

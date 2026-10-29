@@ -3,6 +3,11 @@ global:
 # client TLS parameters in the ingress access logs
 tlsClientLogging: {{ .StateValues | get "tlsClientLogging" false }}
 
+# NetworkPolicies (corvina-app-charts-lib)
+networkPolicy:
+  apiServer:
+    cidr: {{ .StateValues | get "kubeApiServerCidr" "" | quote }}
+
 
 istio-gateway:
   revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
@@ -57,6 +62,20 @@ postgresql:
     registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
+    # admit only the pods labelled <release>-postgresql-client (backend, migrator) and prometheus
+    networkPolicy:
+      allowExternal: false
+      allowExternalEgress: false
+      extraIngress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: prometheus-system
+              podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: prometheus
+          ports:
+            - port: 9187
     persistence:
       size: 10Gi
     resources:
@@ -133,6 +152,16 @@ redis:
     storageClass: "ssd-retain"
     defaultStorageClass: "ssd-retain"
   architecture: standalone
+  # admit only the pods labelled <release>-redis-client (backend); egress limited to DNS
+  networkPolicy:
+    enabled: true
+    allowExternal: false
+    extraEgress:
+      - ports:
+          - port: 53
+            protocol: UDP
+          - port: 53
+            protocol: TCP
   metrics:
     image:
       registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
