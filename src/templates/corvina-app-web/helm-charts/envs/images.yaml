@@ -3,11 +3,11 @@
 # charts in corvina-app-web/Chart.yaml and helmfile.yaml, so a chart bump brings its images. The images of the
 # corvina-app-charts-lib templates (k8s-wait-for, rabbitmq, registration) are defaults of the library.
 images:
-  # remote of Docker Hub
-  dockerhubRegistry: &dockerhub europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+  # Docker Hub, through the corvina docker virtual repository
+  dockerhubRegistry: &dockerhub europe-docker.pkg.dev/corvina-exorint/corvina-docker-connector/corvina-exorint/corvina-docker-virtual
   # istiod and the proxies of istiod and of the gateway
   istio:
-    hub: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/istio
+    hub: europe-docker.pkg.dev/corvina-exorint/corvina-docker-connector/corvina-exorint/corvina-docker-virtual/istio
   # bitnami charts: the bitnami/* images left Docker Hub, their old tags are in bitnamilegacy/*
   postgresql:
     registry: *dockerhub

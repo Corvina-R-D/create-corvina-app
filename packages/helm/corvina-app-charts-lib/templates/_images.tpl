@@ -6,7 +6,7 @@ The images of the third-party charts (bitnami postgresql and redis, istio, stash
 {{- define "corvina-app-charts-lib.images" -}}
 # runs as its own non-root USER (1100): an override must be a non-root image too
 k8sWaitFor:
-  repository: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote/groundnuty/k8s-wait-for
+  repository: europe-docker.pkg.dev/corvina-exorint/corvina-docker-connector/corvina-exorint/corvina-docker-virtual/groundnuty/k8s-wait-for
   tag: no-root-v2.0
 rabbitmq:
   repository: eu.gcr.io/corvina-exorint/rabbitmq
