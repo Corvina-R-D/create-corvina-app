@@ -1,1 +1,3 @@
 # superseded by ../base.yaml.gotmpl
+# app-specific knobs of the corvina-app-lib templates (backend config, routes, rabbitmq topology...) go here,
+# see https://github.com/Corvina-R-D/create-corvina-app/tree/master/packages/helm/corvina-app-lib

@@ -1,0 +1,56 @@
+# Reference only: Helm does not merge the values of a library chart into the app chart. The templates read these
+# values from the app chart, usually from ../base.yaml.gotmpl and, for the app-specific knobs, from the app chart
+# values.yaml, where the values marked (tpl) may contain templates (helmfile would render them in base.yaml.gotmpl).
+
+# appName is the short app name used by the gateway, certificate and issuer names.
+# Defaults to the chart name without "corvina-app-"
+# appName: ota
+
+# service:
+#   # serviceName is the backend Service, also the VirtualService destination
+#   serviceName: service-service
+#   # healthPath is the path of the backend readiness and liveness probes
+#   healthPath: /v1/health
+#   # probeInitialDelaySeconds delays the backend probes
+#   probeInitialDelaySeconds: 30
+#   # pgEnv: false drops the PG_* variables from the backend ConfigMap
+#   pgEnv: true
+#   # postgresHost (tpl) is PG_HOST and the service the migrator waits for
+#   postgresHost: '{{ .Release.Name }}-postgresql'
+#   # postgresPasswordEnv is the env var with the postgresql password
+#   postgresPasswordEnv: PG_PASS
+#   # config (tpl) adds variables to the backend ConfigMap, overriding the defaults
+#   config:
+#     MANIFEST_BRAND: '{{ .Values.service.envVar.BRAND }}'
+#   # automountServiceAccountToken: true mounts the ServiceAccount token in the backend container, for backends
+#   # calling the Kubernetes API (by default only the init container waiting for the migrator mounts it)
+#   automountServiceAccountToken: false
+#   # extraEnv (tpl) adds env vars to the backend and migrator containers
+#   extraEnv:
+#     - name: FOO
+#       value: bar
+
+# virtualService:
+#   # servicePrefixes are the URI prefixes routed to the backend
+#   servicePrefixes:
+#     - /v1
+#     - /swagger-ui
+#   # extraRoutes (tpl) are Istio HTTP routes evaluated before the default ones
+#   extraRoutes: []
+
+# rabbitmq:
+#   # topology (tpl) declares queues, exchanges and bindings on the app cluster
+#   topology:
+#     queues:
+#       - name: my.queue
+#         durable: true
+#     exchanges:
+#       - name: my.exchange
+#         type: direct
+#         durable: true
+#     bindings:
+#       - name: my.binding
+#         source: my.exchange
+#         destination: my.queue
+#         # destinationType defaults to queue
+#         routingKey: ""

@@ -1,18 +1,1 @@
-{{- $istioValues := index .Values "istio-gateway" }}
-kind: ServiceMonitor
-apiVersion: monitoring.coreos.com/v1
-metadata:
-  labels:
-    app: {{ $istioValues.name }}
-  name: {{ $istioValues.name }}
-  namespace: {{ .Release.Namespace }}
-spec:
-  endpoints:
-    - path: /stats/prometheus
-      targetPort: http-envoy-prom
-  namespaceSelector:
-    matchNames:
-      - {{ .Release.Namespace }}
-  selector:
-    matchLabels:
-      app: {{ $istioValues.name }}
+{{ include "corvina-app-lib.serviceMonitor.istio" . }}
