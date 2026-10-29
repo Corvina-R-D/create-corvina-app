@@ -36,9 +36,14 @@ clean_untracked() {
 # Move the generated app to the repo root and stage it.
 # Plain copy instead of `git mv`: git mv fails on files ignored by the scaffold's .gitignore (e.g. ngrok.yml)
 import_scaffold() {
+  local generated
+  generated=$(cd "corvina-app-$app_name" && find . -type f -printf '%P\n' | sort)
   cp -a "corvina-app-$app_name/." .
   rm -rf "corvina-app-$app_name"
   git add -A .
+  # stage only the generated files: the files the app ignores (binaries, keys, .env...) stay in the working tree
+  # and are no longer ignored once its .gitignore files are removed
+  comm -13 <(echo "$generated") <(git ls-files | sort) | xargs -r -d '\n' git rm -q --cached --
 }
 
 # Set the trap to call the cleanup function on ERR signal
@@ -54,6 +59,7 @@ if ! git show-ref --quiet refs/heads/create-corvina-app ; then
     if git ls-remote --exit-code --heads origin create-corvina-app ; then
         git fetch origin create-corvina-app
         git checkout -b create-corvina-app origin/create-corvina-app
+        cd ..
     else
         echo "Scaffold branch not detected. Initializing scaffold branch..."
 
