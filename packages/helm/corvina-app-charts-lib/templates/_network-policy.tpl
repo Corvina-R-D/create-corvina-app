@@ -222,10 +222,17 @@ Policies of the infrastructure pods of the namespace: istio gateway, istiod, rab
 {{- define "corvina-app-charts-lib.networkPolicy.gateway" -}}
 {{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" . | fromYaml }}
 {{- $platform := .Values.networkPolicy.platform }}
+{{- /* policies match the pod port: the targetPort of the gateway Service port */}}
+{{- $listenerPort := .Values.gateway.port }}
+{{- range (index .Values "istio-gateway").service.ports }}
+{{- if eq (int .port) (int $.Values.gateway.port) }}
+{{- $listenerPort = .targetPort | default .port }}
+{{- end }}
+{{- end }}
 {{- $spec := dict
   "from" (list
-    (dict "name" "clients" "cidr" "0.0.0.0/0" "ports" (list .Values.gateway.port))
-    (dict "name" "device-ext-authz" "namespace" $platform.coreNamespace "podLabels" $platform.deviceExtAuthzLabels "ports" (list .Values.gateway.port)))
+    (dict "name" "clients" "cidr" "0.0.0.0/0" "ports" (list $listenerPort))
+    (dict "name" "device-ext-authz" "namespace" $platform.coreNamespace "podLabels" $platform.deviceExtAuthzLabels "ports" (list $listenerPort)))
   "metricsPorts" (list 15090 15020)
   "peers" (list
     (dict "name" "frontend" "podLabels" (dict "app" "app") "ports" (list 8080))
