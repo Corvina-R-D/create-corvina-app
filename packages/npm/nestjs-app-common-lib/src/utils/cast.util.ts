@@ -38,11 +38,12 @@ export function toBoolean(value: string | boolean): boolean {
   return !!(valueLC === 'true' || valueLC === '1');
 }
 
-/** integer of value (default when missing or not a number), clamped to min and max */
-export function toNumber(value: string | undefined, opts: IToNumberOptions & { default: number }): number;
-export function toNumber(value: string | undefined, opts?: IToNumberOptions): number | undefined;
-export function toNumber(value: string | undefined, opts: IToNumberOptions = {}): number | undefined {
-  let newValue: number | undefined = Number.parseInt(value || String(opts.default), 10);
+/** integer of value (default when missing or not a number), clamped to min and max; 0 is a value, not a missing one */
+export function toNumber(value: string | number | null | undefined, opts: IToNumberOptions & { default: number }): number;
+export function toNumber(value: string | number | null | undefined, opts?: IToNumberOptions): number | undefined;
+export function toNumber(value: string | number | null | undefined, opts: IToNumberOptions = {}): number | undefined {
+  const isMissing = value === undefined || value === null || value === '';
+  let newValue: number | undefined = isMissing ? Number.NaN : Number.parseInt(String(value), 10);
 
   if (Number.isNaN(newValue)) {
     newValue = opts.default;
