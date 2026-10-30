@@ -47,11 +47,11 @@
     "node": ">=20"
   },
   "dependencies": {
-    "iso8601-duration": "^2.1.4",
+    "iso8601-duration": "^2.2.0",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^3.2.2",
-    "match-url-wildcard": "^0.0.4",
-    "pino": "^10.3.0"
+    "match-url-wildcard": "^0.0.5",
+    "pino": "^10.4.0"
   },
   "peerDependencies": {
     "@nestjs/common": "^11.0.0",
