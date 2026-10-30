@@ -3,6 +3,7 @@ import { CORVINA_JWT_SERVICE, ICorvinaJwtService } from './corvinaJwt.service';
 import { ICorvinaRequest, ICorvinaResponse } from './corvinaRequest';
 import { extractBearerToken } from './extractBearerToken';
 import { Logger } from '../utils/logger';
+import { CORVINA_EVENT_TYPE, InstallationNotFoundError } from './installation';
 
 /** installation of the request, or the openid configuration to validate the token with */
 export interface ICorvinaIds {
@@ -33,8 +34,27 @@ export class CorvinaAuthGuard implements CanActivate {
     return extractBearerToken(request.headers?.authorization);
   }
 
-  /** request fields set by a previous middleware, body.openIdConfigurationUrl (e.g. /installed), or /<x>/<instanceId>/<organizationId> */
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  /** event of the lifecycle API (POST /v1/<eventType>) sent by core, its installation ids are in the body */
+  // eslint-disable-next-line class-methods-use-this
+  protected getLifecycleEvent(request: ICorvinaRequest): CORVINA_EVENT_TYPE | undefined {
+    const eventType = request.body?.eventType;
+
+    if (
+      request.method === 'POST' &&
+      Object.values<string>(CORVINA_EVENT_TYPE).includes(eventType) &&
+      request.url.split('?')[0].replace(/\/+$/, '') === `/v1/${eventType}`
+    ) {
+      return eventType;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * request fields set by a previous middleware, the body of a lifecycle event, or /<x>/<instanceId>/<organizationId>.
+   * The token is validated against the openid configuration of the installation, never against one of the request.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected extractIds(request: ICorvinaRequest, _context?: ExecutionContext): ICorvinaIds {
     const { instanceId, organizationId, openIdConfigurationUrl } = request;
 
@@ -46,8 +66,14 @@ export class CorvinaAuthGuard implements CanActivate {
       return { instanceId, organizationId, openIdConfigurationUrl: null };
     }
 
-    if (request.body?.openIdConfigurationUrl) {
-      return { instanceId, organizationId, openIdConfigurationUrl: request.body.openIdConfigurationUrl };
+    if (this.getLifecycleEvent(request)) {
+      const { body } = request;
+
+      return {
+        instanceId: body.instanceId,
+        organizationId: body.organizationId != null ? String(body.organizationId) : undefined,
+        openIdConfigurationUrl: null,
+      };
     }
 
     const { url } = request;
@@ -57,6 +83,20 @@ export class CorvinaAuthGuard implements CanActivate {
       organizationId: url.split('/')[3],
       openIdConfigurationUrl,
     };
+  }
+
+  /**
+   * openid configuration to validate the token with when its installation does not exist:
+   * the one of the body for the installed event (and for an uninstalled event, that has nothing to remove)
+   */
+  protected getOpenIdConfigurationUrlOfNewInstallation(request: ICorvinaRequest): string | undefined {
+    const event = this.getLifecycleEvent(request);
+
+    if (event === CORVINA_EVENT_TYPE.INSTALLED || event === CORVINA_EVENT_TYPE.UNINSTALLED) {
+      return request.body.openIdConfigurationUrl || undefined;
+    }
+
+    return undefined;
   }
 
   /** error thrown when the token is not valid */
@@ -88,7 +128,17 @@ export class CorvinaAuthGuard implements CanActivate {
     let corvinaToken;
 
     try {
-      corvinaToken = await this._corvinaJwtService.validateBearerToken({ token: bearerToken, instanceId, organizationId, openIdConfigurationUrl });
+      try {
+        corvinaToken = await this._corvinaJwtService.validateBearerToken({ token: bearerToken, instanceId, organizationId, openIdConfigurationUrl });
+      } catch (error) {
+        const newInstallationUrl = error instanceof InstallationNotFoundError ? this.getOpenIdConfigurationUrlOfNewInstallation(request) : undefined;
+
+        if (!newInstallationUrl) {
+          throw error;
+        }
+
+        corvinaToken = await this._corvinaJwtService.validateBearerToken({ token: bearerToken, openIdConfigurationUrl: newInstallationUrl });
+      }
     } catch (error) {
       throw this.onError(error, request);
     }

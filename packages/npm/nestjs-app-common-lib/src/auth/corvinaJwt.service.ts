@@ -12,9 +12,9 @@ import { ICorvinaToken } from './corvinaToken';
 /** DI token of the ICorvinaJwtService */
 export const CORVINA_JWT_SERVICE = 'ICorvinaJwtService';
 
-const verify = async (token: string, secretOrPublicKey: jwt.Secret | jwt.GetPublicKeyOrSecret): Promise<ICorvinaToken> => {
+const verify = async (token: string, getKey: jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions): Promise<ICorvinaToken> => {
   return new Promise<ICorvinaToken>((resolve, reject) => {
-    jwt.verify(token, secretOrPublicKey, (err, decoded) => {
+    jwt.verify(token, getKey, options, (err, decoded) => {
       if (err) {
         reject(err);
       } else {
@@ -43,7 +43,12 @@ export interface ICorvinaJwtService {
   getOpenIdConfiguration(openIdConfigurationUrl: string): Promise<IOpenIDConfiguration>;
 }
 
-const ONE_WEEK = 60 * 60 * 24 * 7;
+const ONE_DAY = 60 * 60 * 24;
+const ONE_WEEK = ONE_DAY * 7;
+/** ms to wait for the openid configuration and the JWKS of a realm */
+const FETCH_TIMEOUT = 5000;
+/** JWKS requests per minute of a realm: a token with an unknown kid cannot flood the identity provider */
+const JWKS_REQUESTS_PER_MINUTE = 10;
 
 @Injectable()
 export class CorvinaJwtService implements ICorvinaJwtService {
@@ -55,6 +60,9 @@ export class CorvinaJwtService implements ICorvinaJwtService {
   private readonly _installationService: ICorvinaInstallationService;
 
   private readonly _cacheService: ICacheService;
+
+  /** one client per realm, so its rate limit applies to all the requests */
+  private readonly _jwksClients = new Map<string, jwksClient.JwksClient>();
 
   constructor(
     @Inject(Logger) logger: Logger,
@@ -81,7 +89,7 @@ export class CorvinaJwtService implements ICorvinaJwtService {
     let response: Response;
 
     try {
-      response = await fetch(openIdConfigurationUrl);
+      response = await fetch(openIdConfigurationUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
     } catch (error) {
       const { message, cause } = error as Error;
       this._logger.error(`Error getting open id conf client for ${openIdConfigurationUrl}: ${message} : ${cause}`);
@@ -130,49 +138,68 @@ export class CorvinaJwtService implements ICorvinaJwtService {
     token: string;
     openIdConfigurationUrl: string;
   }): Promise<ICorvinaToken> {
-    const { jwks_uri: jwksUri } = await this.getOpenIdConfiguration(openIdConfigurationUrl);
+    const { issuer, jwks_uri: jwksUri } = await this.getOpenIdConfiguration(openIdConfigurationUrl);
 
-    this._logger.debug(`Creating jwksClient with jwksUri ${jwksUri}`);
+    const getKey = (header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) => {
+      this.getSigningKey(jwksUri, header.kid).then(
+        (key) => callback(null, key),
+        (error) => callback(error)
+      );
+    };
 
-    const client = jwksClient({ jwksUri });
-    const cacheService = this._cacheService;
-    const logger = this._logger;
-
-    function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
-      cacheService.get<string>(`jwks-${header.kid}`).then((value) => {
-        if (value) {
-          logger.debug(`Found key for ${header.kid} in cache`);
-          return callback(null, value);
-        }
-
-        client.getSigningKey(header.kid, function getSigningKey(err: Error | null, key?: jwksClient.SigningKey) {
-          logger.debug(`Getting key ${key} for ${header.kid} from jwks client`);
-
-          if (err) {
-            logger.error(err);
-            callback(err);
-          } else if (!key) {
-            const message = `Unable to find key for kid ${header.kid}`;
-            logger.error(message);
-            callback(new Error(message));
-          } else {
-            const signingKey = key.getPublicKey();
-
-            cacheService.set(`jwks-${header.kid}`, signingKey, ONE_WEEK);
-
-            callback(null, signingKey);
-          }
-        });
-
-        return undefined;
-      });
-    }
-
-    const decoded = await verify(token, getKey);
+    // the realm of the token must be the one of the installation: its keys could be cached for another realm
+    const decoded = await verify(token, getKey, { issuer, algorithms: ['RS256'] });
 
     this._logger.trace(`Token verified : ${JSON.stringify(decoded)}`);
 
     return decoded;
+  }
+
+  /** public key of the realm, cached for a day */
+  private async getSigningKey(jwksUri: string, kid: string | undefined): Promise<string> {
+    const cacheKey = `jwks-${jwksUri}-${kid}`;
+
+    try {
+      const cached = await this._cacheService.get<string>(cacheKey);
+
+      if (cached) {
+        this._logger.debug(`Found key for ${kid} of ${jwksUri} in cache`);
+        return cached;
+      }
+    } catch (error) {
+      this._logger.warn({ msg: `Unable to read the key ${kid} of ${jwksUri} from cache`, error });
+    }
+
+    const key = await this.getJwksClient(jwksUri).getSigningKey(kid);
+    const publicKey = key.getPublicKey();
+
+    try {
+      await this._cacheService.set(cacheKey, publicKey, ONE_DAY);
+    } catch (error) {
+      this._logger.warn({ msg: `Unable to cache the key ${kid} of ${jwksUri}`, error });
+    }
+
+    return publicKey;
+  }
+
+  private getJwksClient(jwksUri: string): jwksClient.JwksClient {
+    let client = this._jwksClients.get(jwksUri);
+
+    if (!client) {
+      this._logger.debug(`Creating jwksClient with jwksUri ${jwksUri}`);
+
+      client = jwksClient({
+        jwksUri,
+        cache: true,
+        cacheMaxAge: ONE_DAY * 1000,
+        rateLimit: true,
+        jwksRequestsPerMinute: JWKS_REQUESTS_PER_MINUTE,
+        timeout: FETCH_TIMEOUT,
+      });
+      this._jwksClients.set(jwksUri, client);
+    }
+
+    return client;
   }
 
   private validateAgainstWhitelist(url: string): void {
