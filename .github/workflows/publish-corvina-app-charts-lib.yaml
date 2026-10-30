@@ -19,7 +19,7 @@ jobs:
     uses: Corvina-R-D/corvina-github-actions/.github/workflows/publish-helm-chart.yaml@v5.8.0
     with:
       chart-path: packages/helm/corvina-app-charts-lib
-      oci-repository: europe-docker.pkg.dev/corvina-exorint/charts-public
+      oci-repository: europe-west1-docker.pkg.dev/corvina-exorint/charts-public
       gcp-project-id: corvina-exorint
       # tag corvina-app-charts-lib-X.Y.Z, matching appVersion in Chart.yaml, publishes version X.Y.Z
       tag-prefix: corvina-app-charts-lib-

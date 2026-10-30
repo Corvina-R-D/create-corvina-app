@@ -16,7 +16,7 @@ dependencies:
   # https://github.com/Corvina-R-D/create-corvina-app/tree/master/packages/helm/corvina-app-charts-lib
   - name: corvina-app-charts-lib
     version: "~1.0.0"
-    repository: oci://europe-docker.pkg.dev/corvina-exorint/charts-public
+    repository: oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public
     # library defaults at the root of the values
     import-values:
       - child: defaults

@@ -9,7 +9,7 @@ a one-line include, so a template fix or a new default reaches the apps with a d
 dependencies:
   - name: corvina-app-charts-lib
     version: "~1.0.0"
-    repository: oci://europe-docker.pkg.dev/corvina-exorint/charts-public
+    repository: oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public
     # library defaults at the root of the values
     import-values:
       - child: defaults
@@ -130,7 +130,7 @@ The other values (`gateway`, `cors`, `postgresql`, `redis`, `rabbitmq`, `service
 ## Release
 
 Bump `version` and `appVersion` in `Chart.yaml`, then push the `corvina-app-charts-lib-X.Y.Z` tag: the
-`publish-corvina-app-charts-lib.yaml` workflow pushes the chart to `oci://europe-docker.pkg.dev/corvina-exorint/charts-public`.
+`publish-corvina-app-charts-lib.yaml` workflow pushes the chart to `oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public`.
 
 To try a change on an app before releasing, copy this folder to the app chart as `charts/corvina-app-charts-lib` and render
 with `helmfile template --skip-deps`.
