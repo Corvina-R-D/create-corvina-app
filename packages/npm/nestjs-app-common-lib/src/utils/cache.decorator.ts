@@ -42,7 +42,14 @@ export function CacheMethod({ prefix, ttl, keyBuilder }: ICacheMethodOptions = {
 
       const key = keyBuilder ? keyBuilder(args) : `${prefix || ''}${propertyKey}(${args.map((arg) => JSON.stringify(arg)).join(',')})`;
 
-      const cachedValue = await this._cacheService.get<Awaited<ReturnType<T>>>(key);
+      let cachedValue: Awaited<ReturnType<T>> | undefined;
+
+      // a cache failure (e.g. redis down) calls the method instead of failing it
+      try {
+        cachedValue = await this._cacheService.get<Awaited<ReturnType<T>>>(key);
+      } catch (error) {
+        this._logger.warn({ msg: `CacheMethod: ${key} - unable to read the cache`, error });
+      }
 
       if (cachedValue) {
         this._logger.debug(`CacheMethod: ${key} - cache hit`);
@@ -54,7 +61,11 @@ export function CacheMethod({ prefix, ttl, keyBuilder }: ICacheMethodOptions = {
       if (result) {
         this._logger.debug(`CacheMethod: ${key} - cache miss`);
 
-        await this._cacheService.set(key, result, ttl);
+        try {
+          await this._cacheService.set(key, result, ttl);
+        } catch (error) {
+          this._logger.warn({ msg: `CacheMethod: ${key} - unable to write the cache`, error });
+        }
       }
 
       return result;

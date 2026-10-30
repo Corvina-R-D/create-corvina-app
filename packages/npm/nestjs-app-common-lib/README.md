@@ -39,6 +39,12 @@ providers: [
 `INSTALLATION_HOSTS_WHITELIST` (comma separated url patterns of the allowed openid configurations, `*` for any) is required.
 `'ICorvinaJwtService'` also gives the (cached) openid configuration of a realm: `getOpenIdConfiguration(url)`.
 
+The token is validated against the realm of the installation: its signature (RS256) with the keys of the realm and its `iss`
+with the `issuer` of the realm. The openid configuration is cached for a week, the keys for a day (per realm); a JWKS
+fetch is rate limited per realm, the openid configuration and JWKS requests time out after 5 seconds, and a cache failure falls back to the identity provider.
+The `openIdConfigurationUrl` of a lifecycle event body (`POST /v1/<eventType>`) is used only when the installation does
+not exist: for the `installed` event, and for an `uninstalled` event that has nothing to remove.
+
 | Guard | |
 |---|---|
 | `CorvinaAuthGuard` | validates the bearer token against the openid configuration of the installation; sets `corvinaToken`, `instanceId`, `organizationId` in the request and in `response.locals` |
@@ -56,7 +62,7 @@ export class CorvinaAuthGuardFromHeaders extends CorvinaAuthGuard {
 }
 ```
 
-- `CorvinaAuthGuard`: `extractToken(request)`, `extractIds(request, context)`, `onError(error, request)`;
+- `CorvinaAuthGuard`: `extractToken(request)`, `extractIds(request, context)`, `getLifecycleEvent(request)`, `getOpenIdConfigurationUrlOfNewInstallation(request)`, `onError(error, request)`;
   the JWT service throws `InstallationNotFoundError` when the app is not installed (401 by default)
 - `CorvinaInstallationRoleGuard`: `authorize(token, installation, context)`
 - `GlobalExceptionFilter`: override `catch` and call `super.catch` for the errors the app does not handle
