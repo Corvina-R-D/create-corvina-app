@@ -25,6 +25,8 @@ export * from './auth/corvinaAuth.guard';
 export * from './auth/corvinaCore.guard';
 export * from './auth/corvinaInstallationRole.guard';
 export * from './auth/corvinaJwt.service';
+export * from './auth/corvinaRequest';
+export * from './auth/corvinaToken';
 export * from './auth/decorators';
 export * from './auth/extractBearerToken';
 export * from './auth/installation';

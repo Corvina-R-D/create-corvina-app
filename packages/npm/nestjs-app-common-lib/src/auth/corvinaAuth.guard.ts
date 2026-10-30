@@ -1,12 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject, HttpException } from '@nestjs/common';
 import { CORVINA_JWT_SERVICE, ICorvinaJwtService } from './corvinaJwt.service';
+import { ICorvinaRequest, ICorvinaResponse } from './corvinaRequest';
 import { extractBearerToken } from './extractBearerToken';
 import { Logger } from '../utils/logger';
 
+/** installation of the request, or the openid configuration to validate the token with */
 export interface ICorvinaIds {
-  instanceId: string;
-  organizationId: string;
-  openIdConfigurationUrl?: string;
+  instanceId?: string;
+  organizationId?: string;
+  openIdConfigurationUrl?: string | null;
 }
 
 /**
@@ -27,13 +29,13 @@ export class CorvinaAuthGuard implements CanActivate {
 
   /** bearer token of the Authorization header */
   // eslint-disable-next-line class-methods-use-this
-  protected extractToken(request: any): string | undefined {
+  protected extractToken(request: ICorvinaRequest): string | undefined {
     return extractBearerToken(request.headers?.authorization);
   }
 
   /** request fields set by a previous middleware, body.openIdConfigurationUrl (e.g. /installed), or /<x>/<instanceId>/<organizationId> */
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected extractIds(request: any, _context?: ExecutionContext): ICorvinaIds {
+  protected extractIds(request: ICorvinaRequest, _context?: ExecutionContext): ICorvinaIds {
     const { instanceId, organizationId, openIdConfigurationUrl } = request;
 
     if (openIdConfigurationUrl) {
@@ -58,15 +60,19 @@ export class CorvinaAuthGuard implements CanActivate {
   }
 
   /** error thrown when the token is not valid */
-  protected onError(error: Error, request: any): HttpException {
+  protected onError(error: unknown, request: ICorvinaRequest): HttpException {
     this._logger.warn({ msg: 'Invalid bearer token', error, api: request.url });
 
-    return error instanceof UnauthorizedException ? error : new UnauthorizedException(error.message);
+    if (error instanceof UnauthorizedException) {
+      return error;
+    }
+
+    return new UnauthorizedException(error instanceof Error ? error.message : String(error));
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
+    const request = context.switchToHttp().getRequest<ICorvinaRequest>();
+    const response = context.switchToHttp().getResponse<ICorvinaResponse>();
 
     const bearerToken = this.extractToken(request);
 

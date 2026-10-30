@@ -3,7 +3,7 @@ import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from
 const DEFAULT_VALUE = 10;
 
 const parseValue = (value: string | undefined | null) => {
-  const parsedValue = parseInt(value, 10);
+  const parsedValue = parseInt(value ?? '', 10);
 
   if (Number.isNaN(parsedValue)) {
     return DEFAULT_VALUE;
@@ -23,7 +23,7 @@ const parseValue = (value: string | undefined | null) => {
 @Injectable()
 export class ParsePageSizePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any, metadata: ArgumentMetadata): number | Record<string, unknown> {
     const { type } = metadata;
 
     if (type === 'query') {

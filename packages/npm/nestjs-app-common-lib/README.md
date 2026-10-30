@@ -61,6 +61,10 @@ export class CorvinaAuthGuardFromHeaders extends CorvinaAuthGuard {
 - `CorvinaInstallationRoleGuard`: `authorize(token, installation, context)`
 - `GlobalExceptionFilter`: override `catch` and call `super.catch` for the errors the app does not handle
 
+Types: `ICorvinaToken`, `ICorvinaRequest`/`ICorvinaResponse` (what the guards read and set, without depending on express),
+`IServiceContext<TInstallation>`, `CustomError<TContext>`. The package is built with `strict` and ships its sources with
+source and declaration maps, so stack traces and go to definition point to the TypeScript code.
+
 Tests: `@corvina/nestjs-app-common-lib/testing` exports `CorvinaJwtServiceMock` and `INVALID_TOKEN`.
 
 ## Release

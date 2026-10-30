@@ -8,12 +8,12 @@ export interface IRetryOptions {
   logger?: ILogger;
   name?: string;
   // if you want to handle the error yourself and decide if you want to continue or not
-  handleError?: (nRetries: number, err: Error) => { continue: boolean; avoidRethrow?: boolean };
+  handleError?(nRetries: number, err: unknown): { continue: boolean; avoidRethrow?: boolean };
 }
 
 const DEFAULT_ERROR_HANDLER = () => ({ continue: true, avoidRethrow: false });
 
-export async function retry(fn: Function, { nRetries, ms, applyRandomToMs, logger, handleError, name }: IRetryOptions) {
+export async function retry(fn: () => unknown, { nRetries, ms, applyRandomToMs, logger, handleError, name }: IRetryOptions): Promise<void> {
   const handleErrorFn = handleError || DEFAULT_ERROR_HANDLER;
   const fnId = name || fn.name;
   if (nRetries > 0) {

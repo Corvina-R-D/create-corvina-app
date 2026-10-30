@@ -1,8 +1,9 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { ICorvinaAuthResult, ICorvinaRequest, ICorvinaResponse } from './corvinaRequest';
 
-const fromRequest = (field: string, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
-  const response = ctx.switchToHttp().getResponse();
+const fromRequest = <K extends keyof ICorvinaAuthResult>(field: K, ctx: ExecutionContext): ICorvinaAuthResult[K] => {
+  const request = ctx.switchToHttp().getRequest<ICorvinaRequest>();
+  const response = ctx.switchToHttp().getResponse<ICorvinaResponse>();
   return request[field] ?? response.locals?.[field];
 };
 

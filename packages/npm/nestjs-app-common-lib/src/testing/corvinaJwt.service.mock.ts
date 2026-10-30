@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ICorvinaJwtService, ICorvinaToken } from '../auth/corvinaJwt.service';
+import { ICorvinaJwtService } from '../auth/corvinaJwt.service';
+import { ICorvinaToken } from '../auth/corvinaToken';
 import { IOpenIDConfiguration } from '../auth/openIdConfiguration';
 
 export const INVALID_TOKEN = 'invalid-token';

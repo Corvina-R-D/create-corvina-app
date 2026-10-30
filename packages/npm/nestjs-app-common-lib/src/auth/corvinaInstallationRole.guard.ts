@@ -1,7 +1,8 @@
 import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
-import { ICorvinaToken } from './corvinaJwt.service';
+import { ICorvinaToken } from './corvinaToken';
 import { ICorvinaInstallation, ICorvinaInstallationService, INSTALLATION_SERVICE } from './installation';
 import { IServiceContext } from './serviceContext';
+import { ICorvinaRequest, ICorvinaResponse } from './corvinaRequest';
 import { Logger } from '../utils/logger';
 
 const SERVICE_ACCOUNT_PREFIX = 'service-account-user-service-';
@@ -41,11 +42,11 @@ export class CorvinaInstallationRoleGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
-    const corvinaToken: ICorvinaToken = request.corvinaToken ?? response.locals?.corvinaToken;
-    const instanceId: string = request.instanceId ?? response.locals?.instanceId;
-    const organizationId: string = request.organizationId ?? response.locals?.organizationId;
+    const request = context.switchToHttp().getRequest<ICorvinaRequest>();
+    const response = context.switchToHttp().getResponse<ICorvinaResponse>();
+    const corvinaToken = request.corvinaToken ?? response.locals?.corvinaToken;
+    const instanceId = request.instanceId ?? response.locals?.instanceId;
+    const organizationId = request.organizationId ?? response.locals?.organizationId;
 
     if (!corvinaToken) {
       throw new Error('No corvinaToken, this guard should be used after CorvinaAuthGuard');

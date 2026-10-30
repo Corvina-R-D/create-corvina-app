@@ -22,7 +22,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "!src/**/*.spec.ts"
   ],
   "scripts": {
     "clean": "rm -rf dist",

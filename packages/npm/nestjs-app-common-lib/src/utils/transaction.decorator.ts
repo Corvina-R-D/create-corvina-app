@@ -1,55 +1,56 @@
 /* eslint-disable no-param-reassign */
 import { Inject } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
-import { Transaction } from 'sequelize/types';
-import { Transaction as Tr } from 'sequelize';
+import { Transaction } from 'sequelize';
+import { isAsyncFunction } from './isAsyncFunction';
 
 export interface ITransactionOptions {
   transaction?: Transaction;
 }
 
 export interface ISequelizeTransactionOptions {
-  isolationLevel?: Tr.ISOLATION_LEVELS;
+  isolationLevel?: Transaction.ISOLATION_LEVELS;
 }
 
 /**
- * This decorator is used to inject an opject with a property that is a sequelize transaction as last argument in the method.
+ * Runs an async method in a transaction, passed as { transaction } in its argument; a transaction already in the argument is reused.
  */
 export function SequelizeTransaction(options: ISequelizeTransactionOptions = {}) {
   const { isolationLevel } = options;
   const injectSequelize = Inject(Sequelize);
 
-  return function injectTransaction(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function injectTransaction<T extends (...args: any[]) => Promise<any>>(target: object, _propertyKey: string, descriptor: TypedPropertyDescriptor<T>) {
     injectSequelize(target, '_sequelize');
 
-    if (typeof descriptor?.value !== 'function' || descriptor.value[Symbol.toStringTag] !== 'AsyncFunction') {
+    const original = descriptor?.value;
+
+    if (!original || !isAsyncFunction(original)) {
       throw new Error('transaction(): decorator can only be used on async methods');
     }
 
-    const original = descriptor.value;
-
-    descriptor.value = async function pushTransactionArgument(arg?: ITransactionOptions) {
+    descriptor.value = async function pushTransactionArgument(this: { _sequelize?: Sequelize }, arg?: ITransactionOptions) {
       if (!this._sequelize) {
         throw new Error(`Sequelize is not defined`);
       }
 
-      const a = arg ? { ...arg } : {};
+      const a: ITransactionOptions = arg ? { ...arg } : {};
 
       if (a.transaction) {
         const result = await original.apply(this, [a]);
         return result;
       }
 
-      a.transaction = await this._sequelize.transaction({ isolationLevel });
+      const transaction = await this._sequelize.transaction({ isolationLevel });
+      a.transaction = transaction;
 
       try {
         const result = await original.apply(this, [a]);
-        await a.transaction.commit();
+        await transaction.commit();
         return result;
       } catch (error) {
-        await a.transaction.rollback();
+        await transaction.rollback();
         throw error;
       }
-    };
+    } as T;
   };
 }

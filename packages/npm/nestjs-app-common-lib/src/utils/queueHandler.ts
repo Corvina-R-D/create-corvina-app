@@ -4,13 +4,14 @@ export interface IQueueHandlerOptions {
   numberOfParallelPromises?: number;
 }
 
-const fnWrapper = async (i: number | null, index: number, fn: Function) => {
+const fnWrapper = async (i: number | null, index: number, fn: () => unknown): Promise<number> => {
   const temp = i === null ? index : i;
   await fn();
   return temp;
 };
 
-export const queueHandler = async (queue: Array<Function>, options: IQueueHandlerOptions) => {
+/** runs the functions of the queue (emptying it), at most numberOfParallelPromises (default 5) at a time */
+export const queueHandler = async (queue: Array<() => unknown>, options: IQueueHandlerOptions = {}): Promise<void> => {
   const { numberOfParallelPromises } = {
     numberOfParallelPromises: NUMBER_OF_PARALLEL_PROMISES,
     ...options,
@@ -19,14 +20,14 @@ export const queueHandler = async (queue: Array<Function>, options: IQueueHandle
   if (numberOfParallelPromises <= 0 || Number.isNaN(numberOfParallelPromises))
     throw new Error(`not enough numberOfParallelPromises ${numberOfParallelPromises}`);
 
-  const promises = [];
-  let i = 0;
-  let index;
+  const promises: Promise<number>[] = [];
+  let i: number | null = 0;
+  let index = 0;
 
   do {
     while (promises.length < numberOfParallelPromises && queue.length > 0) {
       // remove first element of queue
-      const fn = queue.shift();
+      const fn = queue.shift() as () => unknown;
 
       promises.splice(i === null ? index : i, 0, fnWrapper(i, index, fn));
 

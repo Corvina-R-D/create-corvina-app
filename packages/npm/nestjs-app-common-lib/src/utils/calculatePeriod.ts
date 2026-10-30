@@ -1,10 +1,10 @@
 import { parse, toSeconds } from 'iso8601-duration';
 
-const isLeapYear = (year): boolean => {
+const isLeapYear = (year: number): boolean => {
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 };
 
-const getDaysInMonth = (year, month): number => {
+const getDaysInMonth = (year: number, month: number): number => {
   return [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
 };
 
