@@ -160,7 +160,7 @@ parking lots that nothing consumes on purpose
 {{- define "corvina-app-charts-lib.prometheusRule.rabbitmq" -}}
 {{- if include "corvina-app-charts-lib.rabbitmqEnabled" . }}
 {{- $ignoredQueues := "" }}
-{{- range (.Values.prometheus | default dict).rabbitmqIgnoredQueues }}
+{{- range .Values.prometheus.rabbitmqIgnoredQueues }}
 {{- $ignoredQueues = printf "%s, queue!=%q" $ignoredQueues (tpl . $) }}
 {{- end }}
 kind: PrometheusRule
@@ -243,7 +243,7 @@ spec:
             summary: It looks like services are accumulating messages
 
         - alert: {{ .Values.prometheus.appName }}-RabbitMQReadyMessages
-          expr: min_over_time(rabbitmq_queue_messages_ready{ namespace="{{ .Release.Namespace }}" }[5m]) > {{ .Values.prometheus.rabbitmqReadyMessagesThreshold | default 1000 }}
+          expr: min_over_time(rabbitmq_queue_messages_ready{ namespace="{{ .Release.Namespace }}" }[5m]) > {{ .Values.prometheus.rabbitmqReadyMessagesThreshold }}
           for: 5m
           labels:
             severity: pre-fail
@@ -251,7 +251,7 @@ spec:
             summary: There are too many Ready messages on queues
 
         - alert: {{ .Values.prometheus.appName }}-RabbitMQUnacknowledgedMessages
-          expr: ( ( (min_over_time(rabbitmq_queue_messages_unacked{ namespace="{{ .Release.Namespace }}" }[5m]) > bool 0 ) * on(namespace, service, queue) ( min_over_time(rabbitmq_queue_messages_unacked{ namespace="{{ .Release.Namespace }}" }[5m]) / on(namespace, service, queue) sum by (namespace, service, queue) (irate(rabbitmq_queue_messages_published_total{ namespace="{{ .Release.Namespace }}" }[5m]) ) ) ) ) > {{ .Values.prometheus.rabbitmqUnacknowledgedMessagesThreshold | default 1000 }}
+          expr: ( ( (min_over_time(rabbitmq_queue_messages_unacked{ namespace="{{ .Release.Namespace }}" }[5m]) > bool 0 ) * on(namespace, service, queue) ( min_over_time(rabbitmq_queue_messages_unacked{ namespace="{{ .Release.Namespace }}" }[5m]) / on(namespace, service, queue) sum by (namespace, service, queue) (irate(rabbitmq_queue_messages_published_total{ namespace="{{ .Release.Namespace }}" }[5m]) ) ) ) ) > {{ .Values.prometheus.rabbitmqUnacknowledgedMessagesThreshold }}
           for: 5m
           labels:
             severity: fail

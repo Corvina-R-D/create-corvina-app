@@ -4,7 +4,7 @@ Env vars of the backend ConfigMap, as a dict: the defaults below, then .Values.s
 .Values.service.pgEnv: false drops the PG_* defaults, for apps that read the connection from other variables.
 */}}
 {{- define "corvina-app-charts-lib.serviceConfig" -}}
-{{- $envVar := .Values.service.envVar | default dict }}
+{{- $envVar := .Values.service.envVar }}
 {{- $baseUrl := printf "%s://%s:%v" .Values.gateway.protocol (.Values.gateway.appHost | required ".gateway.appHost is required") .Values.gateway.port }}
 {{- $config := dict
   "LOG_LEVEL" $envVar.LOG_LEVEL
@@ -113,7 +113,7 @@ Usage: {{ include "corvina-app-charts-lib.backend" (dict "context" $ "name" "ser
 {{- $ := .context }}
 {{- $name := .name | default "service" }}
 {{- $sa := printf "%s-sa" $name }}
-{{- $healthPath := $.Values.service.healthPath | default "/v1/health" }}
+{{- $healthPath := $.Values.service.healthPath }}
 {{- $automountToken := eq (toString $.Values.service.automountServiceAccountToken) "true" }}
 apiVersion: apps/v1
 kind: Deployment
@@ -182,7 +182,7 @@ spec:
             - configMapRef:
                 name: service-config
           env:
-            {{- include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" ($.Values.service.envVar.START_FEATURES | default "app.listen") "context" $) | nindent 12 }}
+            {{- include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" $.Values.service.envVar.START_FEATURES "context" $) | nindent 12 }}
             {{- if include "corvina-app-charts-lib.rabbitmqEnabled" $ }}
             - name: RABBITMQ_PASSWORD
               valueFrom:

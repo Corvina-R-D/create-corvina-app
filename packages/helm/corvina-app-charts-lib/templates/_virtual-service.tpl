@@ -2,13 +2,13 @@
 VirtualService routing the backend prefixes to the backend Service and everything else to the frontend
 Values:
   gateway.appHost, cors.*
-  virtualService.servicePrefixes: URI prefixes served by the backend (default /v1 and /swagger-ui)
+  virtualService.servicePrefixes: URI prefixes served by the backend
   virtualService.extraRoutes: Istio HTTP routes evaluated before the default ones (tpl allowed); a route with
     enabled: '{{ .Values.feature.enabled }}' is left out when it renders false
 */}}
 {{- define "corvina-app-charts-lib.virtualService" -}}
 {{- $cors := .Values.cors }}
-{{- $virtualService := .Values.virtualService | default dict }}
+{{- $virtualService := .Values.virtualService }}
 {{- $appHost := .Values.gateway.appHost | required ".gateway.appHost is required" }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -29,7 +29,7 @@ spec:
   {{- end }}
   {{- end }}
   - match:
-    {{- range ($virtualService.servicePrefixes | default (list "/v1" "/swagger-ui")) }}
+    {{- range $virtualService.servicePrefixes }}
     - uri:
         prefix: {{ . }}
     {{- end }}

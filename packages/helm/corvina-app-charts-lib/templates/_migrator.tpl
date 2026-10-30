@@ -68,7 +68,7 @@ spec:
           {{- tpl (toYaml .) $ | nindent 10 }}
           {{- end }}
       restartPolicy: Never # prevent pod removal on job failure so that we can inspect logs
-  backoffLimit: {{ .Values.migrator.backoffLimit | default 100 }}
+  backoffLimit: {{ .Values.migrator.backoffLimit }}
 {{- end }}
 
 {{/*

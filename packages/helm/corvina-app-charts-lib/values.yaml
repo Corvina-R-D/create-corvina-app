@@ -1,113 +1,143 @@
-# Reference only: Helm does not merge the values of a library chart into the app chart. The templates read these
-# values from the app chart, usually from ../base.yaml.gotmpl and, for the app-specific knobs, from the app chart
-# values.yaml, where the values marked (tpl) may contain templates (helmfile would render them in base.yaml.gotmpl).
+# Defaults of the library values, imported by the app chart (import-values in Chart.yaml, see README).
+# Commented: values without a default; (tpl): templates allowed.
+# redis and rabbitmq are not here: their presence turns them on.
+defaults:
+  # the templates fail without it: the app chart doesn't import these defaults
+  corvinaAppChartsLibDefaults: true
 
-# images overrides the default images of templates/_images.tpl (k8sWaitFor, rabbitmq, registration) by repository and
-# tag. Leave it unset so that a library release bumps the images
-# images:
-#   k8sWaitFor:
-#     # e.g. another mirror; the tag stays the library default
-#     repository: docker.io/groundnuty/k8s-wait-for
+  # gateway, certificate and issuer names; default: chart name without "corvina-app-"
+  # appName: ota
 
-# appName is the short app name used by the gateway, certificate and issuer names.
-# Defaults to the chart name without "corvina-app-"
-# appName: ota
+  global:
+    # registry of the Docker Hub images: library images and bitnami charts (postgresql, redis)
+    imageRegistry: europe-docker.pkg.dev/corvina-exorint/corvina-docker-connector/corvina-exorint/corvina-docker-virtual
 
-# service:
-#   # serviceName is the backend Service, also the VirtualService destination
-#   serviceName: service-service
-#   # healthPath is the path of the backend readiness and liveness probes
-#   healthPath: /v1/health
-#   # probeInitialDelaySeconds delays the backend probes
-#   probeInitialDelaySeconds: 30
-#   # pgEnv: false drops the PG_* variables from the backend ConfigMap
-#   pgEnv: true
-#   # postgresHost (tpl) is PG_HOST and the service the migrator waits for
-#   postgresHost: '{{ .Release.Name }}-postgresql'
-#   # postgresPasswordEnv is the env var with the postgresql password
-#   postgresPasswordEnv: PG_PASS
-#   # config (tpl) adds variables to the backend ConfigMap, overriding the defaults
-#   config:
-#     MANIFEST_BRAND: '{{ .Values.service.envVar.BRAND }}'
-#   # automountServiceAccountToken: true mounts the ServiceAccount token in the backend container, for backends
-#   # calling the Kubernetes API (by default only the init container waiting for the migrator mounts it)
-#   automountServiceAccountToken: false
-#   # extraVolumes and extraVolumeMounts (tpl) add volumes to the backend pod and mount them
-#   extraVolumes:
-#     - name: scratch
-#       emptyDir: {}
-#   extraVolumeMounts:
-#     - name: scratch
-#       mountPath: /tmp
-#   # extraEnv (tpl) adds env vars to the backend container
-#   extraEnv:
-#     - name: FOO
-#       value: bar
+  # images of the library containers; without a registry, from global.imageRegistry
+  images:
+    # runs as its own non-root USER (1100): an override must be a non-root image too
+    k8sWaitFor:
+      repository: groundnuty/k8s-wait-for
+      tag: no-root-v2.0
+    rabbitmq:
+      registry: eu.gcr.io/corvina-exorint
+      repository: rabbitmq
+      tag: v2
+    registration:
+      # automatic registration is expected only in dev environments, so :develop is acceptable
+      registry: eu.gcr.io/corvina-exorint
+      repository: corvina-devops-utils
+      tag: develop
 
-# migrator:
-#   # backoffLimit is the number of retries of the migrator Job
-#   backoffLimit: 100
-#   # extraEnv (tpl) adds env vars to the migrator container
-#   extraEnv: []
-#   # postgresService (tpl) is the postgresql service to wait for, by default service.postgresHost
-#   postgresService: '{{ .Release.Name }}-postgresql-hl'
-#   # waitFor (tpl) adds init containers waiting for a service, or with other k8s-wait-for args
-#   waitFor:
-#     - name: redis-wait
-#       service: '{{ .Release.Name }}-redis-headless'
-#     - name: harbor-wait
-#       args: [pod-we, -lapp=harbor]
+  service:
+    # backend Service, also the VirtualService destination
+    serviceName: service-service
+    # backend readiness and liveness probes
+    healthPath: /v1/health
+    # probeInitialDelaySeconds: 30
+    # false drops the PG_* variables from the backend ConfigMap
+    pgEnv: true
+    # (tpl) PG_HOST, also the service the migrator waits for
+    postgresHost: '{{ .Release.Name }}-postgresql'
+    # env var with the postgresql password
+    postgresPasswordEnv: PG_PASS
+    envVar:
+      START_FEATURES: app.listen
+    # (tpl) extra backend ConfigMap variables
+    # config:
+    #   MANIFEST_BRAND: '{{ .Values.service.envVar.BRAND }}'
+    # true mounts the ServiceAccount token in the backend container, to call the Kubernetes API
+    automountServiceAccountToken: false
+    # (tpl) extra volumes of the backend pod and their mounts
+    # extraVolumes:
+    #   - name: scratch
+    #     emptyDir: {}
+    # extraVolumeMounts:
+    #   - name: scratch
+    #     mountPath: /tmp
+    # (tpl) extra env vars of the backend container
+    # extraEnv:
+    #   - name: FOO
+    #     value: bar
 
-# virtualService:
-#   # servicePrefixes are the URI prefixes routed to the backend
-#   servicePrefixes:
-#     - /v1
-#     - /swagger-ui
-#   # extraRoutes (tpl) are Istio HTTP routes evaluated before the default ones; enabled leaves a route out when false
-#   extraRoutes:
-#     - enabled: '{{ .Values.converter.enabled }}'
-#       match:
-#         - uri:
-#             prefix: /converter
-#       route:
-#         - destination:
-#             host: converter-service
-#             port:
-#               number: 80
+  migrator:
+    # retries of the migrator Job
+    backoffLimit: 100
+    # (tpl) extra env vars of the migrator container
+    # extraEnv: []
+    # (tpl) postgresql service to wait for; default: service.postgresHost
+    # postgresService: '{{ .Release.Name }}-postgresql-hl'
+    # (tpl) more services to wait for, or other k8s-wait-for args
+    # waitFor:
+    #   - name: redis-wait
+    #     service: '{{ .Release.Name }}-redis-headless'
+    #   - name: harbor-wait
+    #     args: [pod-we, -lapp=harbor]
 
-# networkPolicy:
-#   # control plane, required: kubeApiServerCidr of envs/<env>.yaml
-#   apiServer:
-#     cidr: 192.168.0.64/28
-#   # excluded from the internet rules
-#   privateCidrs: [10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
-#   # minikube: the in-cluster ingress the Corvina hosts resolve to, egress of every backend
-#   corvinaIngress:
-#     namespace: prod
-#     podLabels:
-#       app.kubernetes.io/name: haproxy-ingress
-#     ports: [443]
-#   # the platform the policies refer to
-#   platform:
-#     coreNamespace: prod
-#     deviceExtAuthzLabels:
-#       istio: corvina-device-ext-authz-ingress
-#     rabbitmqOperatorNamespace: rabbitmq-system
-#   # per workload (app, service, migrator, gateway, istiod, rabbitmq, and the extra frontends and backends):
-#   # additions and overrides; peers keyed by name merge across values files
-#   service:
-#     extraPeers:
-#       converter:
-#         podLabels:
-#           app: converter
-#         ports: [8080]
-#     internetPorts: [443, 8883]
+  backup:
+    ttl: 72h30m0s
 
+  virtualService:
+    # URI prefixes routed to the backend
+    servicePrefixes:
+      - /v1
+      - /swagger-ui
+    # (tpl) Istio HTTP routes before the default ones; enabled: false leaves one out
+    # extraRoutes:
+    #   - enabled: '{{ .Values.converter.enabled }}'
+    #     match:
+    #       - uri:
+    #           prefix: /converter
+    #     route:
+    #       - destination:
+    #           host: converter-service
+    #           port:
+    #             number: 80
+
+  networkPolicy:
+    # cidr is required: kubeApiServerCidr of envs/<env>.yaml
+    apiServer:
+      # cidr: 192.168.0.64/28
+      port: 443
+    # excluded from the internet rules
+    privateCidrs: [10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
+    prometheus:
+      namespace: prometheus-system
+      podLabels:
+        app.kubernetes.io/name: prometheus
+    platform:
+      coreNamespace: prod
+      deviceExtAuthzLabels:
+        istio: corvina-device-ext-authz-ingress
+      rabbitmqOperatorNamespace: rabbitmq-system
+    # minikube: in-cluster ingress the Corvina hosts resolve to
+    # corvinaIngress:
+    #   namespace: prod
+    #   podLabels:
+    #     app.kubernetes.io/name: haproxy-ingress
+    #   ports: [443]
+    # per workload additions and overrides
+    # service:
+    #   extraPeers:
+    #     converter:
+    #       podLabels:
+    #         app: converter
+    #       ports: [8080]
+    #   internetPorts: [443, 8883]
+
+  prometheus:
+    rabbitmqReadyMessagesThreshold: 1000
+    rabbitmqUnacknowledgedMessagesThreshold: 1000
+    # (tpl) queues left out of the RabbitMQ alerts, e.g. parking lots
+    # rabbitmqIgnoredQueues:
+    #   - '{{ .Values.rabbitmq.myDeadLetterQueue }}'
+
+# rabbitmq values read by the templates (no defaults):
 # rabbitmq:
-#   # additionalConfig adds lines to rabbitmq.conf
+#   # extra rabbitmq.conf lines
 #   additionalConfig: |
 #     consumer_timeout: 14000000
-#   # topology (tpl) declares queues, exchanges and bindings on the app cluster
+#   # image: whole image override; default: images.rabbitmq
+#   # (tpl) queues, exchanges and bindings
 #   topology:
 #     queues:
 #       - name: my.queue
@@ -122,8 +152,3 @@
 #         destination: my.queue
 #         # destinationType defaults to queue
 #         routingKey: ""
-
-# prometheus:
-#   # rabbitmqIgnoredQueues (tpl) are left out of the growing queues and no consumer alerts, e.g. parking lots
-#   rabbitmqIgnoredQueues:
-#     - '{{ .Values.rabbitmq.myDeadLetterQueue }}'

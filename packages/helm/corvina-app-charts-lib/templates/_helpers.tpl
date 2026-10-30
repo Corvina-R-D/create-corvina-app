@@ -1,7 +1,16 @@
 {{/*
+Fails when the app chart doesn't import the library defaults
+*/}}
+{{- define "corvina-app-charts-lib.requireDefaults" -}}
+{{- if not .Values.corvinaAppChartsLibDefaults }}
+{{- fail "corvina-app-charts-lib: add import-values [{child: defaults, parent: .}] to the corvina-app-charts-lib dependency in Chart.yaml" }}
+{{- end }}
+{{- end }}
+{{/*
 Short app name, e.g. "ota" for the chart "corvina-app-ota". Override with .Values.appName
 */}}
 {{- define "corvina-app-charts-lib.appName" -}}
+{{- include "corvina-app-charts-lib.requireDefaults" . }}
 {{- .Values.appName | default (trimPrefix "corvina-app-" .Chart.Name) }}
 {{- end }}
 {{/*
@@ -66,19 +75,19 @@ Usage: {{ if include "corvina-app-charts-lib.redisEnabled" . }}
 Backend Kubernetes Service name (.Values.service.serviceName)
 */}}
 {{- define "corvina-app-charts-lib.serviceName" -}}
-{{- .Values.service.serviceName | default "service-service" }}
+{{- .Values.service.serviceName }}
 {{- end }}
 {{/*
 Postgresql service the backend connects to and the migrator waits for (.Values.service.postgresHost, tpl allowed)
 */}}
 {{- define "corvina-app-charts-lib.postgresHost" -}}
-{{- tpl (.Values.service.postgresHost | default "{{ .Release.Name }}-postgresql") . }}
+{{- tpl .Values.service.postgresHost . }}
 {{- end }}
 {{/*
 Env var holding the postgresql password (.Values.service.postgresPasswordEnv)
 */}}
 {{- define "corvina-app-charts-lib.postgresPasswordEnv" -}}
-{{- .Values.service.postgresPasswordEnv | default "PG_PASS" }}
+{{- .Values.service.postgresPasswordEnv }}
 {{- end }}
 {{/*
 Security context of the containers of the app images

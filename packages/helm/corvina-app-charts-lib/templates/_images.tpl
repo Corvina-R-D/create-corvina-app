@@ -1,30 +1,26 @@
 {{/*
-Default images of the containers the library adds and of the RabbitMQ cluster, in a single place: a library release
-bumps them in every app. Each one is overridable, by repository and tag, with .Values.images.<name>.
-The images of the third-party charts (bitnami postgresql and redis, istio, stasher) keep the versions of their charts.
+Registry of the Docker Hub images (.Values.global.imageRegistry)
 */}}
-{{- define "corvina-app-charts-lib.images" -}}
-# runs as its own non-root USER (1100): an override must be a non-root image too
-k8sWaitFor:
-  repository: europe-docker.pkg.dev/corvina-exorint/corvina-docker-connector/corvina-exorint/corvina-docker-virtual/groundnuty/k8s-wait-for
-  tag: no-root-v2.0
-rabbitmq:
-  repository: eu.gcr.io/corvina-exorint/rabbitmq
-  tag: v2
-registration:
-  # automatic registration is expected only in dev environments, so :develop is acceptable
-  repository: eu.gcr.io/corvina-exorint/corvina-devops-utils
-  tag: develop
+{{- define "corvina-app-charts-lib.dockerhubRegistry" -}}
+{{- .Values.global.imageRegistry | required "global.imageRegistry is required" }}
 {{- end }}
 
 {{/*
-<repository>:<tag> of a default image, with .Values.images.<name>.repository and .tag overrides
+A Docker Hub image from global.imageRegistry
+Usage: {{ include "corvina-app-charts-lib.dockerhubImage" (dict "context" $ "image" "bitnami/kubectl:1.31") }}
+*/}}
+{{- define "corvina-app-charts-lib.dockerhubImage" -}}
+{{ include "corvina-app-charts-lib.dockerhubRegistry" .context }}/{{ .image }}
+{{- end }}
+
+{{/*
+<registry>/<repository>:<tag> of .Values.images.<name>; without a registry, from global.imageRegistry
 Usage: {{ include "corvina-app-charts-lib.image" (dict "context" $ "name" "rabbitmq") }}
 */}}
 {{- define "corvina-app-charts-lib.image" -}}
-{{- $default := index (include "corvina-app-charts-lib.images" .context | fromYaml) .name }}
-{{- $override := index (.context.Values.images | default dict) .name | default dict }}
-{{- $override.repository | default $default.repository }}:{{ $override.tag | default $default.tag }}
+{{- include "corvina-app-charts-lib.requireDefaults" .context }}
+{{- $image := index .context.Values.images .name | required (printf "images.%s is required" .name) }}
+{{- $image.registry | default (include "corvina-app-charts-lib.dockerhubRegistry" .context) }}/{{ $image.repository }}:{{ $image.tag }}
 {{- end }}
 
 {{- define "corvina-app-charts-lib.image.k8sWaitFor" -}}

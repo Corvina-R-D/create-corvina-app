@@ -18,7 +18,7 @@ spec:
         argocd.argoproj.io/instance: none
     includedNamespaces:
       - {{ .Release.Namespace }}
-    ttl: {{ .Values.backup.ttl | default "72h30m0s" }}
+    ttl: {{ .Values.backup.ttl }}
     storageLocation: {{ .Values.backup.storageLocation }}
     volumeSnapshotLocations:
       - {{ .Values.backup.snapshotLocation }}
