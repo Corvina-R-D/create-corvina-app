@@ -126,7 +126,7 @@ export class CorvinaJwtService implements ICorvinaJwtService {
 
     this.validateAgainstWhitelist(openIdConfigurationUrl);
 
-    this._logger.debug({ token, openIdConfigurationUrl }, `Validating bearer token against`);
+    this._logger.debug({ openIdConfigurationUrl }, `Validating bearer token against`);
 
     return this.validateBearerTokenWithOpenIdConfigurationUrl({ token, openIdConfigurationUrl });
   }
