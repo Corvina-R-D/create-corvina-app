@@ -17,6 +17,8 @@ permissions:
 
 jobs:
   publish:
+    # `corvina-app-charts-lib-X.Y.Z` releases are published by publish-corvina-app-charts-lib.yaml
+    if: ${{ !startsWith(github.event.release.tag_name, 'corvina-app-charts-lib-') }}
     uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/npm-publish.yaml@v5.2
     with:
       default-branch: master
