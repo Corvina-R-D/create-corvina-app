@@ -38,11 +38,18 @@ export function toBoolean(value: string | boolean): boolean {
   return !!(valueLC === 'true' || valueLC === '1');
 }
 
-export function toNumber(value: string, opts: IToNumberOptions = {}): number {
-  let newValue: number = Number.parseInt(value || String(opts.default), 10);
+/** integer of value (default when missing or not a number), clamped to min and max */
+export function toNumber(value: string | undefined, opts: IToNumberOptions & { default: number }): number;
+export function toNumber(value: string | undefined, opts?: IToNumberOptions): number | undefined;
+export function toNumber(value: string | undefined, opts: IToNumberOptions = {}): number | undefined {
+  let newValue: number | undefined = Number.parseInt(value || String(opts.default), 10);
 
   if (Number.isNaN(newValue)) {
     newValue = opts.default;
+  }
+
+  if (newValue === undefined) {
+    return newValue;
   }
 
   if (opts.min !== undefined && newValue < opts.min) {

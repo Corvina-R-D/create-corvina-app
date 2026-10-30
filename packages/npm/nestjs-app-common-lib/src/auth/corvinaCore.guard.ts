@@ -1,7 +1,16 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
-import { ICorvinaToken } from './corvinaJwt.service';
+import { ICorvinaToken } from './corvinaToken';
 import { CORVINA_EVENT_TYPE as EVENT_TYPE, ICorvinaInstallationService, INSTALLATION_SERVICE } from './installation';
 import { Logger } from '../utils/logger';
+import { ICorvinaRequest, ICorvinaResponse } from './corvinaRequest';
+
+/** body fields of the lifecycle events the guard reads */
+interface ILifecycleEventBody {
+  eventType?: string;
+  instanceId?: string;
+  organizationId?: string | number;
+  orgResourceId?: string;
+}
 
 /**
  * After CorvinaAuthGuard, on the lifecycle API: allows only core, with the event and app scopes of the request
@@ -10,7 +19,7 @@ import { Logger } from '../utils/logger';
 @Injectable()
 export class CorvinaCoreGuard implements CanActivate {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private readonly _MANIFEST_ID: string = process.env.MANIFEST_ID;
+  private readonly _MANIFEST_ID: string | undefined = process.env.MANIFEST_ID;
 
   private readonly _logger: Logger;
 
@@ -21,19 +30,22 @@ export class CorvinaCoreGuard implements CanActivate {
     this._installationService = installationService;
   }
 
-  private async getOrgResourceId(body: any): Promise<string> {
+  private async getOrgResourceId(body: ILifecycleEventBody): Promise<string | undefined> {
     if (body.eventType === EVENT_TYPE.INSTALLED) return body.orgResourceId;
 
-    const installation = await this._installationService.getInstallation({ instanceId: body.instanceId, organizationId: String(body.organizationId) });
+    const installation = await this._installationService.getInstallation({
+      instanceId: body.instanceId as string,
+      organizationId: String(body.organizationId),
+    });
 
     return installation?.orgResourceId;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
+    const request = context.switchToHttp().getRequest<ICorvinaRequest & { body: ILifecycleEventBody }>();
+    const response = context.switchToHttp().getResponse<ICorvinaResponse>();
 
-    const corvinaToken: ICorvinaToken = request.corvinaToken ?? response.locals?.corvinaToken;
+    const corvinaToken: ICorvinaToken | undefined = request.corvinaToken ?? response.locals?.corvinaToken;
 
     if (!corvinaToken) {
       this._logger.error({ msg: `No validated bearer token in ${request.url}` });

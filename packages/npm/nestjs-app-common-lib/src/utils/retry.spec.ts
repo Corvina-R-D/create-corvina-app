@@ -19,7 +19,7 @@ it('fail after 3 retries', async () => {
   }
 
   expect(err).not.toBeNull();
-  expect(err.message).toBe('retry fn: Failed retrying too many attempts');
+  expect((err as Error).message).toBe('retry fn: Failed retrying too many attempts');
 });
 
 it('success with 0 retries', async () => {
@@ -33,7 +33,7 @@ it('success with 0 retries', async () => {
   }
 
   expect(err).not.toBeNull();
-  expect(err.message).toBe('retry fn: Failed retrying too many attempts');
+  expect((err as Error).message).toBe('retry fn: Failed retrying too many attempts');
 });
 
 it('handle error and stop retrying', async () => {
@@ -47,13 +47,13 @@ it('handle error and stop retrying', async () => {
       ms: 10,
       handleError: (nRetries: number, err: Error) => {
         expect(nRetries).toBe(3);
-        expect(err.message).toBe('testing...');
+        expect((err as Error).message).toBe('testing...');
         return { continue: false };
       },
     });
   } catch (error) {
     // original error is thrown
-    expect(error.message).toBe('testing...');
+    expect((error as Error).message).toBe('testing...');
   }
 });
 
@@ -67,7 +67,7 @@ it('handle error, stop retrying and avoid error rethrow', async () => {
     ms: 10,
     handleError: (nRetries: number, err: Error) => {
       expect(nRetries).toBe(3);
-      expect(err.message).toBe('testing...');
+      expect((err as Error).message).toBe('testing...');
       return { continue: false, avoidRethrow: true };
     },
   });

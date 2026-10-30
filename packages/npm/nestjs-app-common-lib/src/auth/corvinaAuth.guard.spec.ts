@@ -5,7 +5,7 @@ import { CorvinaAuthGuard } from './corvinaAuth.guard';
 import { Logger } from '../utils/logger';
 import { ICorvinaJwtService } from './corvinaJwt.service';
 
-const getMockContext = (authorizationHeader?: string, request: any = {}, response: any = { locals: {} }): ExecutionContext =>
+const getMockContext = (authorizationHeader?: string | null, request: any = {}, response: any = { locals: {} }): ExecutionContext =>
   ({
     switchToHttp(): any {
       return {

@@ -3,7 +3,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
-    "inlineSources": true,
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -12,9 +11,14 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "strict": true,
+    "declarationMap": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

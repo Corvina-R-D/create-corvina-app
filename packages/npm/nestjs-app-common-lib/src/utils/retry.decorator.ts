@@ -2,10 +2,12 @@
 import { Inject } from '@nestjs/common';
 import { Logger } from './logger';
 import { IRetryOptions, retry } from './retry';
+import { isAsyncFunction } from './isAsyncFunction';
 
-export const continueWhenCouldNotSerializeAccessDueToConcurrentUpdate = (nRetries: number, err: any) => {
+/** handleError of Retry: retries the postgres serialization failures (40001) only */
+export const continueWhenCouldNotSerializeAccessDueToConcurrentUpdate = (_nRetries: number, err: unknown) => {
   return {
-    continue: err?.original?.code === '40001',
+    continue: (err as { original?: { code?: string } } | undefined)?.original?.code === '40001',
   };
 };
 
@@ -13,21 +15,21 @@ export function Retry(options: IRetryOptions) {
   const { ms, nRetries, handleError, applyRandomToMs, name } = options || {};
   const injectLogger = Inject(Logger);
 
-  return function injectCache(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function injectRetry<T extends (...args: any[]) => Promise<any>>(target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<T>) {
     injectLogger(target, '_logger');
 
-    if (typeof descriptor?.value !== 'function') {
+    const original = descriptor?.value;
+
+    if (typeof original !== 'function') {
       throw new Error('retry(): decorator can only be used on methods');
     }
 
-    if (descriptor.value[Symbol.toStringTag] !== 'AsyncFunction') {
+    if (!isAsyncFunction(original)) {
       throw new Error('retry(): decorator can only be used on async methods');
     }
 
-    const original = descriptor.value;
-
-    descriptor.value = async function execRetry(...args: any[]) {
-      let result;
+    descriptor.value = async function execRetry(this: { _logger: Logger }, ...args: Parameters<T>) {
+      let result: Awaited<ReturnType<T>> | undefined;
 
       const execOriginalAndSaveResult = async () => {
         result = await original.apply(this, args);
@@ -36,6 +38,6 @@ export function Retry(options: IRetryOptions) {
       await retry(execOriginalAndSaveResult, { ms, nRetries, handleError, logger: this._logger, name: name || propertyKey, applyRandomToMs });
 
       return result;
-    };
+    } as T;
   };
 }

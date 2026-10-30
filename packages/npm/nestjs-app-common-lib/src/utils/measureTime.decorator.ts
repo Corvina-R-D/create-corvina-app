@@ -3,11 +3,11 @@ import { Inject } from '@nestjs/common';
 import { Logger } from './logger';
 
 function getCircularReplacer() {
-  const ancestors = [];
+  const ancestors: unknown[] = [];
   /**
    * Prevents circular references in JSON.stringify and removes useless Sequelize transaction objects
    */
-  return function replacerFn(key, value) {
+  return function replacerFn(this: unknown, _key: string, value: unknown) {
     if (value instanceof Transaction) {
       return '[Transaction]';
     }
@@ -28,11 +28,12 @@ function getCircularReplacer() {
   };
 }
 
+/** logs the execution time of the method (also async), with its arguments unless logArgs is false */
 export function MeasureTime(input?: { logArgs?: boolean }) {
   const injectLogger = Inject(Logger);
 
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const original: (...args: Array<unknown>) => unknown = descriptor.value;
+  return <T extends (...args: any[]) => any>(target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<T>) => {
+    const original = descriptor.value as T;
     injectLogger(target, '_logger');
 
     const { logArgs = true } = input || {};
@@ -40,7 +41,7 @@ export function MeasureTime(input?: { logArgs?: boolean }) {
     const timeLabelPrefix = `MeasureTime ${target.constructor.name}.${propertyKey}`;
 
     // eslint-disable-next-line no-param-reassign
-    descriptor.value = async function wrapFunctionWithTimeMonitoring(...args: Array<unknown>) {
+    descriptor.value = function wrapFunctionWithTimeMonitoring(this: { _logger: Logger }, ...args: Parameters<T>) {
       const timeLabel: string = logArgs ? `${timeLabelPrefix}(${JSON.stringify(args, getCircularReplacer())})` : timeLabelPrefix;
       const now = Date.now();
       const value: unknown = original.apply(this, args);
@@ -56,6 +57,6 @@ export function MeasureTime(input?: { logArgs?: boolean }) {
       this._logger.info({ executionTime: Date.now() - now, msg: timeLabel });
 
       return value;
-    };
+    } as T;
   };
 }

@@ -2,20 +2,20 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginatedDto<TData> {
   @ApiProperty()
-  content: TData[];
+  content!: TData[];
 
   @ApiProperty()
-  totalPages: number;
+  totalPages!: number;
 
   @ApiProperty()
-  totalElements: number;
+  totalElements!: number;
 
   @ApiProperty()
-  last: boolean;
+  last!: boolean;
 
   @ApiProperty()
-  number: number;
+  number!: number;
 
   @ApiProperty()
-  size: number;
+  size!: number;
 }

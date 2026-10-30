@@ -1,13 +1,20 @@
 /* eslint-disable no-param-reassign */
 import { Inject } from '@nestjs/common';
 import { Logger } from './logger';
-import { CACHE_SERVICE } from './cacheService';
+import { CACHE_SERVICE, ICacheService } from './cacheService';
+import { isAsyncFunction } from './isAsyncFunction';
 
 export interface ICacheMethodOptions {
   prefix?: string;
   /** seconds */
   ttl?: number;
   keyBuilder?: (args: any[]) => string;
+}
+
+/** fields the decorator injects in the class */
+interface ICacheMethodHost {
+  _cacheService?: ICacheService;
+  _logger: Logger;
 }
 
 /**
@@ -18,39 +25,39 @@ export function CacheMethod({ prefix, ttl, keyBuilder }: ICacheMethodOptions = {
   const injectCacheManager = Inject(CACHE_SERVICE);
   const injectLogger = Inject(Logger);
 
-  return function injectCache(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function injectCache<T extends (...args: any[]) => Promise<any>>(target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<T>) {
     injectCacheManager(target, '_cacheService');
     injectLogger(target, '_logger');
 
-    if (typeof descriptor?.value === 'function' && descriptor.value[Symbol.toStringTag] === 'AsyncFunction') {
-      const original = descriptor.value;
+    const original = descriptor?.value;
 
-      descriptor.value = async function pushTransactionArgument(...args: any[]) {
-        if (!this._cacheService) {
-          throw new Error(`CacheManager is not defined`);
-        }
-
-        const key = keyBuilder ? keyBuilder(args) : `${prefix || ''}${propertyKey}(${args.map((arg) => JSON.stringify(arg)).join(',')})`;
-
-        const cachedValue = await this._cacheService.get(key);
-
-        if (cachedValue) {
-          this._logger.debug(`CacheMethod: ${key} - cache hit`);
-
-          return cachedValue;
-        }
-        const result = await original.apply(this, args);
-
-        if (result) {
-          this._logger.debug(`CacheMethod: ${key} - cache miss`);
-
-          await this._cacheService.set(key, result, ttl);
-        }
-
-        return result;
-      };
-    } else {
+    if (!original || !isAsyncFunction(original)) {
       throw new Error('cache decorator can only be used on async methods');
     }
+
+    descriptor.value = async function cachedMethod(this: ICacheMethodHost, ...args: Parameters<T>) {
+      if (!this._cacheService) {
+        throw new Error(`CacheManager is not defined`);
+      }
+
+      const key = keyBuilder ? keyBuilder(args) : `${prefix || ''}${propertyKey}(${args.map((arg) => JSON.stringify(arg)).join(',')})`;
+
+      const cachedValue = await this._cacheService.get<Awaited<ReturnType<T>>>(key);
+
+      if (cachedValue) {
+        this._logger.debug(`CacheMethod: ${key} - cache hit`);
+
+        return cachedValue;
+      }
+      const result = await original.apply(this, args);
+
+      if (result) {
+        this._logger.debug(`CacheMethod: ${key} - cache miss`);
+
+        await this._cacheService.set(key, result, ttl);
+      }
+
+      return result;
+    } as T;
   };
 }

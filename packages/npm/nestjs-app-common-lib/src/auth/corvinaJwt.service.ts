@@ -7,6 +7,7 @@ import { CacheMethod } from '../utils/cache.decorator';
 import { CACHE_SERVICE, ICacheService } from '../utils/cacheService';
 import { ICorvinaInstallationService, INSTALLATION_SERVICE, InstallationNotFoundError } from './installation';
 import { IOpenIDConfiguration } from './openIdConfiguration';
+import { ICorvinaToken } from './corvinaToken';
 
 /** DI token of the ICorvinaJwtService */
 export const CORVINA_JWT_SERVICE = 'ICorvinaJwtService';
@@ -17,45 +18,29 @@ const verify = async (token: string, secretOrPublicKey: jwt.Secret | jwt.GetPubl
       if (err) {
         reject(err);
       } else {
-        resolve(decoded as ICorvinaToken);
+        resolve(decoded as unknown as ICorvinaToken);
       }
     });
   });
 };
 
-type ValidateBearerTokenInputOpenId = { token: string; openIdConfigurationUrl: string };
-type ValidateBearerTokenInputInstanceIdOrgId = { token: string; instanceId: string; organizationId: string };
+export interface IValidateBearerTokenInput {
+  token: string;
+  /** installation of the token realm, without openIdConfigurationUrl */
+  instanceId?: string;
+  organizationId?: string;
+  /** openid configuration of the token realm: instanceId and organizationId are not needed */
+  openIdConfigurationUrl?: string | null;
+}
 
-export type ValidateBearerTokenInput = ValidateBearerTokenInputInstanceIdOrgId | ValidateBearerTokenInputOpenId;
+/** @deprecated use IValidateBearerTokenInput */
+export type ValidateBearerTokenInput = IValidateBearerTokenInput;
 
 export interface ICorvinaJwtService {
   /** the decoded token; rejects when the token is not valid for the installation */
-  validateBearerToken(input: ValidateBearerTokenInput): Promise<ICorvinaToken>;
+  validateBearerToken(input: IValidateBearerTokenInput): Promise<ICorvinaToken>;
   /** openid configuration of an installation realm (e.g. its token_endpoint) */
   getOpenIdConfiguration(openIdConfigurationUrl: string): Promise<IOpenIDConfiguration>;
-}
-
-export interface ICorvinaToken {
-  iss: string;
-  aud: string;
-  sub: string;
-  azp: string;
-  realm_access: {
-    roles: string[];
-  };
-  resource_access?: {
-    [key: string]: {
-      roles: string[];
-    };
-  };
-  scope?: string;
-  exp: number;
-  iat: number;
-  jti: string;
-  typ: string;
-  email?: string;
-  email_verified: boolean;
-  preferred_username: string;
 }
 
 const ONE_WEEK = 60 * 60 * 24 * 7;
@@ -63,7 +48,7 @@ const ONE_WEEK = 60 * 60 * 24 * 7;
 @Injectable()
 export class CorvinaJwtService implements ICorvinaJwtService {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private readonly _INSTALLATION_HOSTS_WHITELIST: string[];
+  private readonly _INSTALLATION_HOSTS_WHITELIST: string[] | null;
 
   private readonly _logger: Logger;
 
@@ -93,27 +78,29 @@ export class CorvinaJwtService implements ICorvinaJwtService {
   public async getOpenIdConfiguration(openIdConfigurationUrl: string): Promise<IOpenIDConfiguration> {
     this._logger.debug(`Getting open id conf client for ${openIdConfigurationUrl}`);
 
-    const response = await fetch(openIdConfigurationUrl).catch((error) => {
-      this._logger.error(`Error getting open id conf client for ${openIdConfigurationUrl}: ${error.message} : ${error.cause}`);
+    let response: Response;
 
-      return { ok: false, status: 500, statusText: error.message, json: () => undefined };
-    });
+    try {
+      response = await fetch(openIdConfigurationUrl);
+    } catch (error) {
+      const { message, cause } = error as Error;
+      this._logger.error(`Error getting open id conf client for ${openIdConfigurationUrl}: ${message} : ${cause}`);
+      throw new Error(`Error calling ${openIdConfigurationUrl} : unable to retrieve open id conf 500 ${message}`);
+    }
 
     if (!response.ok) {
       throw new Error(`Error calling ${openIdConfigurationUrl} : unable to retrieve open id conf ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as IOpenIDConfiguration;
   }
 
-  async validateBearerToken(input: ValidateBearerTokenInput): Promise<ICorvinaToken> {
-    const { token } = input;
+  async validateBearerToken(input: IValidateBearerTokenInput): Promise<ICorvinaToken> {
+    const { token, instanceId, organizationId } = input;
 
-    let { openIdConfigurationUrl } = input as ValidateBearerTokenInputOpenId;
+    let { openIdConfigurationUrl } = input;
 
     if (!openIdConfigurationUrl) {
-      const { instanceId, organizationId } = input as ValidateBearerTokenInputInstanceIdOrgId;
-
       if (!instanceId || !organizationId) {
         throw new Error(`Unable to validate bearer token, not enough information provided`);
       }
@@ -151,14 +138,14 @@ export class CorvinaJwtService implements ICorvinaJwtService {
     const cacheService = this._cacheService;
     const logger = this._logger;
 
-    function getKey(header, callback) {
-      cacheService.get(`jwks-${header.kid}`).then((value) => {
+    function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
+      cacheService.get<string>(`jwks-${header.kid}`).then((value) => {
         if (value) {
           logger.debug(`Found key for ${header.kid} in cache`);
           return callback(null, value);
         }
 
-        client.getSigningKey(header.kid, function getSigningKey(err: Error, key: jwksClient.SigningKey) {
+        client.getSigningKey(header.kid, function getSigningKey(err: Error | null, key?: jwksClient.SigningKey) {
           logger.debug(`Getting key ${key} for ${header.kid} from jwks client`);
 
           if (err) {
