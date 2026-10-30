@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType } from 'redis';
+import { Logger } from '@corvina/nestjs-app-common-lib';
 import { IRedisService } from './redis.service';
-import { Logger } from '../utils/logger';
 
 export interface IRateLimiterService {
   incr(identifier: string, options: IRateLimiterServiceOptions): Promise<{ count: number; canDo: boolean }>;

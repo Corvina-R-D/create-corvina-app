@@ -2,6 +2,7 @@ name: Publish
 
 # Registered as trusted publisher on npmjs.com: keep the filename.
 # Release tag: `1.2.3` (or `v1.2.3`); `1.2.3-beta.1`, marked as pre-release, goes to `beta`.
+# Tags of the packages/npm libraries have their own workflow.
 on:
   release:
     types: [published]
@@ -17,8 +18,8 @@ permissions:
 
 jobs:
   publish:
-    # `corvina-app-charts-lib-X.Y.Z` releases are published by publish-corvina-app-charts-lib.yaml
-    if: ${{ !startsWith(github.event.release.tag_name, 'corvina-app-charts-lib-') }}
+    # `corvina-app-charts-lib-X.Y.Z` and `nestjs-app-common-lib-vX.Y.Z` releases have their own workflows
+    if: ${{ !startsWith(github.event.release.tag_name, 'corvina-app-charts-lib-') && !startsWith(github.event.release.tag_name, 'nestjs-app-common-lib-') }}
     uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/npm-publish.yaml@v5.2
     with:
       default-branch: master

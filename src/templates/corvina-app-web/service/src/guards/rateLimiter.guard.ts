@@ -2,7 +2,7 @@
 import { CanActivate, ExecutionContext, HttpException, Inject, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Request, Response } from 'express';
-import { Logger } from '../utils/logger';
+import { Logger } from '@corvina/nestjs-app-common-lib';
 import { IRateLimiterService } from '../services/rateLimiter.service';
 
 export interface IRateLimiterGuardOptions {
