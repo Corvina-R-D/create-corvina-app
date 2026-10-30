@@ -1,17 +1,1 @@
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  labels:
-    app: kube-prometheus-stack
-  name: {{ .Values.prometheus.appName }}-prometheus-infraalerts.rules
-  namespace: {{ .Release.Namespace }}
-spec:
-  groups:
-    - name: {{ .Values.prometheus.appName }}-PrometheusInfraAlerts
-      rules:
-        - alert: {{ .Values.prometheus.appName }}-Restarts
-          expr: increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[5m])>0
-          labels:
-            severity: critical
-          annotations:
-            summary: "Container  {{`{{ $labels.k8sNamespace }}`}}/{{`{{ $labels.pod }}`}}/({{`{{ $labels.container }}`}}) restarted"
+{{ include "corvina-app-charts-lib.prometheusRule.infraAlerts" . }}

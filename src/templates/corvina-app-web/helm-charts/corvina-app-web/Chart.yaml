@@ -12,6 +12,15 @@ version: 0.0.11
 # It is recommended to use it with quotes.
 appVersion: "chart-1.0.0"
 dependencies:
+  # shared templates: the files in templates/ include them, see
+  # https://github.com/Corvina-R-D/create-corvina-app/tree/master/packages/helm/corvina-app-charts-lib
+  - name: corvina-app-charts-lib
+    version: "~1.0.0"
+    repository: oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public
+    # library defaults at the root of the values
+    import-values:
+      - child: defaults
+        parent: .
   - name: postgresql
     version: "15.2.5"
     repository: oci://europe-docker.pkg.dev/corvina-exorint/dockeroci-remote/bitnamicharts

@@ -3,6 +3,11 @@ global:
 # client TLS parameters in the ingress access logs
 tlsClientLogging: {{ .StateValues | get "tlsClientLogging" false }}
 
+# NetworkPolicies (corvina-app-charts-lib)
+networkPolicy:
+  apiServer:
+    cidr: {{ .StateValues | get "kubeApiServerCidr" "" | quote }}
+
 
 istio-gateway:
   revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
@@ -54,9 +59,27 @@ cors:
 
 postgresql:
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
+    {{- toYaml .StateValues.images.postgresql | nindent 4 }}
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
+    # admit the pods of the namespace and prometheus
+    networkPolicy:
+      allowExternal: false
+      allowExternalEgress: false
+      extraIngress:
+        - from:
+            - podSelector: {}
+          ports:
+            - port: 5432
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: prometheus-system
+              podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: prometheus
+          ports:
+            - port: 9187
     persistence:
       size: 10Gi
     resources:
@@ -78,8 +101,7 @@ postgresql:
   metrics:
     enabled: true
     image:
-      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
-      repository: bitnamilegacy/postgres-exporter
+      {{- toYaml .StateValues.images.postgresqlExporter | nindent 6 }}
     serviceMonitor:
       enabled: true
 
@@ -121,9 +143,7 @@ migrator:
 [| if .RedisEnabled -|]
 redis:
   image:
-    registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
-    repository: bitnamilegacy/redis
-    tag: 7.0.9-debian-11-r1
+    {{- toYaml .StateValues.images.redis | nindent 4 }}
   clusterDomain: {{ .StateValues.clusterDomain }}
   auth:
     enabled: true
@@ -133,11 +153,24 @@ redis:
     storageClass: "ssd-retain"
     defaultStorageClass: "ssd-retain"
   architecture: standalone
+  # admit the pods of the namespace; egress limited to DNS
+  networkPolicy:
+    enabled: true
+    allowExternal: false
+    extraIngress:
+      - from:
+          - podSelector: {}
+        ports:
+          - port: 6379
+    extraEgress:
+      - ports:
+          - port: 53
+            protocol: UDP
+          - port: 53
+            protocol: TCP
   metrics:
     image:
-      registry: europe-docker.pkg.dev/corvina-exorint/dockerhub-remote
-      repository: bitnamilegacy/redis-exporter
-      tag: 1.47.0-debian-11-r1
+      {{- toYaml .StateValues.images.redisExporter | nindent 6 }}
     enabled: true
     serviceMonitor:
       enabled: true
@@ -184,7 +217,6 @@ redis:
 rabbitmq:
   clusterName: {{ .StateValues.releaseName }}-rabbitmq
   replicas: 1
-  image: eu.gcr.io/corvina-exorint/rabbitmq:v2
   storageClass: "ssd-retain"
   storageSize: 7Gi
   resources:
@@ -229,7 +261,6 @@ backup:
 registration:
   enabled: false
   namespace: prod
-  image: eu.gcr.io/corvina-exorint/corvina-devops-utils:develop   # automatic registration is expected only in dev environment, so :develop is acceptable
   appName: {{ .StateValues.appName }}
   core:
     service: corvina-core

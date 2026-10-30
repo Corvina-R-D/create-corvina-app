@@ -77,3 +77,12 @@ backup:
 
 cors:
   additionalOrigins: []
+
+networkPolicy:
+  # the Corvina hosts (auth, app...) resolve to the haproxy ingress (corvina-k8s minikube-patch-corefile.sh)
+  corvinaIngress:
+    namespace: prod
+    podLabels:
+      app.kubernetes.io/name: haproxy-ingress
+      app.kubernetes.io/instance: corvina-prod-http
+    ports: [443]

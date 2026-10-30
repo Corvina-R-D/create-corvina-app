@@ -1,0 +1,17 @@
+# repositories of the third-party chart images; tags come from the charts. The registry is global.imageRegistry of
+# corvina-app-charts-lib; istio-discovery is a separate release and doesn't see it.
+images:
+  istio:
+    # istiod and proxies
+    hub: europe-docker.pkg.dev/corvina-exorint/corvina-docker-connector/corvina-exorint/corvina-docker-virtual/istio
+  # bitnami charts: the bitnami/* images left Docker Hub, their old tags are in bitnamilegacy/*
+  postgresql:
+    repository: bitnamilegacy/postgresql
+  postgresqlExporter:
+    repository: bitnamilegacy/postgres-exporter
+[|- if .RedisEnabled |]
+  redis:
+    repository: bitnamilegacy/redis
+  redisExporter:
+    repository: bitnamilegacy/redis-exporter
+[|- end |]

@@ -5,6 +5,7 @@ environments:
 {{- $cfg := index $envMap $envName }}
   {{ $envName }}:
     values:
+      - envs/images.yaml
       - envs/common-defaults.yaml
       - envs/{{ $envName }}.yaml
       - kubeContext: {{ index $cfg "hosting" | quote }}
