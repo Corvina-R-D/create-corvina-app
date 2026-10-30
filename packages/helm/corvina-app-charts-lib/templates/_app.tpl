@@ -31,6 +31,8 @@ spec:
   template:
     metadata:
       labels:
+        # not in the mesh: the NetworkPolicies don't allow the sidecar traffic
+        sidecar.istio.io/inject: "false"
         app: {{ $name }}
     spec:
       serviceAccountName: {{ $name }}-sa

@@ -18,6 +18,7 @@ spec:
   template:
     metadata:
       labels:
+        sidecar.istio.io/inject: "false"
         app: registration
     spec:
       automountServiceAccountToken: false
