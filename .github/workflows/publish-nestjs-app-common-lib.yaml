@@ -1,0 +1,25 @@
+name: Publish nestjs-app-common-lib
+
+# Registered as trusted publisher of @corvina/nestjs-app-common-lib on npmjs.com: keep the filename.
+# Release tag: `nestjs-app-common-lib-v1.2.3`; `nestjs-app-common-lib-v1.2.3-beta.1`, marked as pre-release, goes to `beta`.
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  publish:
+    if: startsWith(github.event.release.tag_name, 'nestjs-app-common-lib-')
+    uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/npm-publish.yaml@v5.2
+    with:
+      default-branch: master
+      working-directory: packages/npm/nestjs-app-common-lib
+      tag-prefix: nestjs-app-common-lib-

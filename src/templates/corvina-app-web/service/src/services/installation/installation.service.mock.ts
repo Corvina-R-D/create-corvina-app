@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { Transaction } from 'sequelize';
 import { Installation } from '../../entities/installation.entity';
-import { IOpenIDConfiguration } from './IOpenIdConfiguration';
 import {
   IInstallInstallationInput,
   IInstallationDeleteInput,
@@ -33,13 +32,6 @@ export class InstallationServiceMock implements IInstallationService {
     return Promise.resolve(
       this._installations.find((installation) => installation.instanceId === instanceId && installation.organizationId === organizationId)
     );
-  }
-  getOpenIdConfiguration(input: string): Promise<IOpenIDConfiguration> {
-    return Promise.resolve({
-      jwks_uri: 'https://[| .Name |].test/jwks.json',
-      issuer: 'https://[| .Name |].test',
-      authorization_endpoint: 'https://[| .Name |].test/oauth2/authorize',
-    } as unknown as IOpenIDConfiguration);
   }
   create(input: IInstallInstallationInput): Promise<Installation> {
     const installation = {

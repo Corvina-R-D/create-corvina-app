@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
+import { Logger } from '@corvina/nestjs-app-common-lib';
 import { Installation } from '../../entities/installation.entity';
 import { getSequelizeModule } from '../../modules/sequelize.module';
-import { Logger } from '../../utils/logger';
 import { CacheService } from '../cache.service';
 import { InstallationService } from './installation.service';
 import { RedisService } from '../redis.service';

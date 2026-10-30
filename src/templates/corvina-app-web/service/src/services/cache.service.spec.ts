@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '../utils/logger';
-import { CacheService, ICacheService } from './cache.service';
+import { ICacheService, Logger } from '@corvina/nestjs-app-common-lib';
+import { CacheService } from './cache.service';
 import { RedisService } from './redis.service';
 
 let app: TestingModule;

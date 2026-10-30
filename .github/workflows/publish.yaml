@@ -2,6 +2,7 @@ name: Publish
 
 # Registered as trusted publisher on npmjs.com: keep the filename.
 # Release tag: `1.2.3` (or `v1.2.3`); `1.2.3-beta.1`, marked as pre-release, goes to `beta`.
+# Tags of the packages/npm libraries have their own workflow.
 on:
   release:
     types: [published]
@@ -17,6 +18,7 @@ permissions:
 
 jobs:
   publish:
+    if: ${{ !startsWith(github.event.release.tag_name, 'nestjs-app-common-lib-') }}
     uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/npm-publish.yaml@v5.2
     with:
       default-branch: master

@@ -1,9 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { CorvinaAuthGuard } from '../guards/corvinaAuth.guard';
-import { CorvinaInstallationRoleGuard } from '../guards/corvinaInstallationRole.guard';
-import { LoggingInterceptor } from '../interceptors/logging.interceptor';
+import { CorvinaAuthGuard, CorvinaInstallationRoleGuard, LoggingInterceptor } from '@corvina/nestjs-app-common-lib';
 import { RateLimiter } from '../guards/rateLimiter.guard';
 
 @Controller('v1/')

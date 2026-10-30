@@ -1,12 +1,7 @@
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { RedisClientType } from 'redis';
+import { ICacheService } from '@corvina/nestjs-app-common-lib';
 import { IRedisService } from './redis.service';
-
-export interface ICacheService {
-  get<T>(key: string): Promise<T | undefined>;
-  set<T>(key: string, value: T, ttl?: number): Promise<void>;
-  del(key: string): Promise<void>;
-}
 
 const { CACHE_DEFAULT_TTL } = process.env;
 

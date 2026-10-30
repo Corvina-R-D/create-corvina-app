@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { Logger, provideCorvinaAuth } from '@corvina/nestjs-app-common-lib';
 import { getSequelizeModule } from './modules/sequelize.module';
-import { CorvinaJwtService } from './services/corvinaJwt.service';
 import { InstallationService } from './services/installation/installation.service';
-import { Logger } from './utils/logger';
 import { HealthCheckController } from './controllers/healthcheck.controller';
 import { LifecycleController } from './controllers/lifecycle.controller';
 import { ManifestController } from './controllers/manifest.controller';
@@ -38,10 +37,7 @@ import { InMemoryCacheService } from './services/inMemoryCache.service';
       useClass: InMemoryCacheService,
 [|- end |]
     },
-    {
-      provide: 'ICorvinaJwtService',
-      useClass: CorvinaJwtService,
-    },
+    ...provideCorvinaAuth(),
 [|- if .RedisEnabled |]
     {
       provide: 'IRedisService',

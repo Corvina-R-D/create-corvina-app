@@ -1,15 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from 'sequelize/types';
+import { Logger, SequelizeTransaction, CacheMethod, CustomError, ICacheService, addPeriod } from '@corvina/nestjs-app-common-lib';
 import { Installation } from '../../entities/installation.entity';
-import { Logger } from '../../utils/logger';
-import { SequelizeTransaction } from '../../utils/transaction.decorator';
-import { CacheMethod } from '../../utils/cache.decorator';
-import { CustomError } from '../../utils/CustomError';
-import { ICacheService } from '../cache.service';
-import { IOpenIDConfiguration } from './IOpenIdConfiguration';
 import { getPaymentPlans, IPaymentPlanDTO } from '../../dtos/general-info/paymentPlan.dto';
-import { addPeriod } from '../../utils/calculatePeriod';
 
 export interface IGetInstallationInput {
   corvinaHost: string;
@@ -61,7 +55,6 @@ export interface IInstallationService {
     organizationId: string;
     transaction?: Transaction;
   }): Promise<Installation>;
-  getOpenIdConfiguration(input: string): Promise<IOpenIDConfiguration>;
   create(input: IInstallInstallationInput): Promise<Installation>;
   delete(input: IInstallationDeleteInput): Promise<IInstallationDeleteOutput>;
   renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput>;
@@ -218,24 +211,5 @@ export class InstallationService implements IInstallationService {
       },
       transaction,
     });
-  }
-
-  @CacheMethod({ ttl: ONE_WEEK })
-  public async getOpenIdConfiguration(openIdConfigurationUrl: string): Promise<IOpenIDConfiguration> {
-    this._logger.debug(`Getting open id conf client for ${openIdConfigurationUrl}`);
-
-    const response = await fetch(openIdConfigurationUrl).catch((error) => {
-      this._logger.error(`Error getting open id conf client for ${openIdConfigurationUrl}: ${error.message} : ${error.cause}`);
-
-      return { ok: false, status: 500, statusText: error.message, json: () => undefined };
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error calling ${openIdConfigurationUrl} : unable to retrieve open id conf ${response.status} ${response.statusText}`);
-    }
-
-    const responseBody = await response.json();
-
-    return responseBody;
   }
 }
