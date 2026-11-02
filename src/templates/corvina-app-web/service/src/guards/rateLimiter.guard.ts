@@ -56,6 +56,8 @@ export const RateLimiter = (options: IRateLimiterGuardOptions): any => {
       return this._rateLimiterService.incr(identifier, { max }).then(({ canDo, count }) => {
         if (!canDo) {
           this._logger.warn(`Rate limit exceeded for ${identifier} (${count}/${max})`);
+          // the window resets at the next second boundary
+          response.setHeader('Retry-After', '1');
           throw new HttpException({ errorMessage: `Rate limit exceeded for ${identifier} (${count}/${max})` }, 429);
         }
 
