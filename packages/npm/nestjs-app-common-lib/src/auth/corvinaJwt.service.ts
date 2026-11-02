@@ -44,7 +44,6 @@ export interface ICorvinaJwtService {
 }
 
 const ONE_DAY = 60 * 60 * 24;
-const ONE_WEEK = ONE_DAY * 7;
 /** ms to wait for the openid configuration and the JWKS of a realm */
 const FETCH_TIMEOUT = 5000;
 /** JWKS requests per minute of a realm: a token with an unknown kid cannot flood the identity provider */
@@ -81,8 +80,8 @@ export class CorvinaJwtService implements ICorvinaJwtService {
     this._cacheService = cacheService;
   }
 
-  /** openid configuration of the installation realm, cached for a week */
-  @CacheMethod({ ttl: ONE_WEEK })
+  /** openid configuration of the installation realm, cached for a day */
+  @CacheMethod({ ttl: ONE_DAY })
   public async getOpenIdConfiguration(openIdConfigurationUrl: string): Promise<IOpenIDConfiguration> {
     this._logger.debug(`Getting open id conf client for ${openIdConfigurationUrl}`);
 
