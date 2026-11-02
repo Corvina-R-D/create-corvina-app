@@ -1,7 +1,7 @@
 import { Controller, Get, OnApplicationBootstrap } from '@nestjs/common';
+import { Logger } from '@corvina/nestjs-app-common-lib';
 import { getManifestJson, setManifestJson, IManifestDTO } from '../dtos/general-info/manifest.dto';
 import { setPaymentPlans } from '../dtos/general-info/paymentPlan.dto';
-import { Logger } from '../utils/logger';
 
 @Controller('v1/')
 export class ManifestController implements OnApplicationBootstrap {

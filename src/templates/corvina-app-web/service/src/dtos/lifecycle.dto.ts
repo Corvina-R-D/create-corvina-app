@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDate, IsEnum, IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { toBoolean, toDate } from '@corvina/nestjs-app-common-lib';
 import { Installation } from '../entities/installation.entity';
-import { toBoolean, toDate } from '../utils/cast.util';
 
 export enum EVENT_TYPE {
   INSTALLED = 'installed',

@@ -1,6 +1,6 @@
+import { Logger } from '@corvina/nestjs-app-common-lib';
 import { Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { RedisClientType, createClient } from 'redis';
-import { Logger } from '../utils/logger';
 
 const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB, REDIS_POOL_MIN, REDIS_POOL_MAX } = process.env;
 

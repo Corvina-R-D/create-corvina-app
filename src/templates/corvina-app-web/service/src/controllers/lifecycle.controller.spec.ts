@@ -1,13 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
-import { CorvinaJwtServiceMock } from '../services/corvinaJwt.service.mock';
-import { Logger } from '../utils/logger';
+import { Logger, CustomError } from '@corvina/nestjs-app-common-lib';
+import { CorvinaJwtServiceMock } from '@corvina/nestjs-app-common-lib/testing';
 import { InstallationService } from '../services/installation/installation.service';
 import { LifecycleController } from './lifecycle.controller';
 import { EVENT_TYPE, InstalledInputDTO, RenewInputDTO, UninstalledInputDTO } from '../dtos/lifecycle.dto';
 import { getSequelizeModule } from '../modules/sequelize.module';
 import { CacheService } from '../services/cache.service';
-import { CustomError } from '../utils/CustomError';
 import { RedisService } from '../services/redis.service';
 
 describe('LifecycleController', () => {
@@ -20,6 +19,7 @@ describe('LifecycleController', () => {
       imports: [...getSequelizeModule()],
       providers: [
         InstallationService,
+        { provide: 'IInstallationService', useExisting: InstallationService },
         Logger,
         {
           provide: 'ICorvinaJwtService',

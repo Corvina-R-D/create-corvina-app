@@ -1,5 +1,5 @@
 import { Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
-import { ICacheService } from './cache.service';
+import { ICacheService } from '@corvina/nestjs-app-common-lib';
 
 const CLEANUP_EXPIRED_INTERVAL = 10000;
 
