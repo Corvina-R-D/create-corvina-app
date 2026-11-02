@@ -1,5 +1,10 @@
 on:
   workflow_dispatch:
+    inputs:
+      arm64:
+        description: Also build linux/arm64 images (always built for hotfix branches)
+        type: boolean
+        default: false
   create:
   push:
     paths:
