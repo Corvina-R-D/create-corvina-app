@@ -114,8 +114,8 @@ async getDevice(id: string) { ... }
 
 | Export | Description |
 |---|---|
-| `ParsePagePipe` | `page` of a query param or body: default 0, 400 when not an integer or negative |
-| `ParsePageSizePipe` | `pageSize` of a query param or body: default 10, 400 when not an integer or less than 1 |
+| `ParsePagePipe` | `page` of a query param or body: 0 when missing (or empty), otherwise a whole number ≥ 0; 400 for anything else (`abc`, `1.5`, `10abc`, `-1`) |
+| `ParsePageSizePipe` | `pageSize` of a query param or body: 10 when missing (or empty), otherwise a whole number ≥ 1; 400 for anything else (`abc`, `1.5`, `10abc`, `0`) |
 | `getOffsetAndLimit({ offset?, limit? })` | defaults `offset` 0 and `limit` 10; `CustomError` when `limit` is not in 1..1000 |
 | `PaginatedDto<T>` | page response: `content`, `totalPages`, `totalElements`, `last`, `number`, `size` |
 | `mapToPaginatedResponse({ rows, count, page, pageSize })` | `PaginatedDto` of a sequelize `findAndCountAll` page |

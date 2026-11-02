@@ -1,39 +1,20 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
+import { parsePageParam } from './parsePageParam';
 
-const DEFAULT_VALUE = 10;
+const parseValue = (value: unknown) => parsePageParam(value, { name: 'pageSize', defaultValue: 10, min: 1, minMessage: 'Page size must not be less than one' });
 
-const parseValue = (value: string | undefined | null) => {
-  const parsedValue = parseInt(value ?? '', 10);
-
-  if (Number.isNaN(parsedValue)) {
-    return DEFAULT_VALUE;
-  }
-
-  if (!Number.isSafeInteger(parsedValue)) {
-    throw new BadRequestException("Invalid type for parameter 'pageSize'");
-  }
-
-  if (parsedValue < 1) {
-    throw new BadRequestException('Page size must not be less than one');
-  }
-
-  return parsedValue;
-};
-
+/** page size of a query param or body field: 10 when missing, 400 when not an integer or less than 1 */
 @Injectable()
 export class ParsePageSizePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   transform(value: any, metadata: ArgumentMetadata): number | Record<string, unknown> {
     const { type } = metadata;
-
     if (type === 'query') {
       return parseValue(value);
     }
-
     if (type === 'body') {
       return { ...value, pageSize: parseValue(value?.pageSize) };
     }
-
     throw new Error('Invalid metadata type');
   }
 }
