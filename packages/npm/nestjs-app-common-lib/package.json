@@ -43,6 +43,9 @@
     "nestjs"
   ],
   "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },
