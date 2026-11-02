@@ -1,6 +1,6 @@
 {
   "name": "@corvina/nestjs-app-common-lib",
-  "version": "0.1.0",
+  "version": "1.0.0-beta.0",
   "description": "Shared NestJS code of the Corvina apps: utils, decorators and Corvina JWT auth",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
