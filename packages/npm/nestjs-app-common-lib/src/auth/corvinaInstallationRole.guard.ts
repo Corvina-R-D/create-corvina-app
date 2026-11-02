@@ -6,9 +6,13 @@ import { ICorvinaRequest, ICorvinaResponse } from './corvinaRequest';
 import { Logger } from '../utils/logger';
 
 const SERVICE_ACCOUNT_PREFIX = 'service-account-user-service-';
+const DEVICE_PREFIX = 'device:';
 
 /** user name of the token, without the service account prefix */
 export const getCorvinaUsername = (corvinaToken: ICorvinaToken): string => {
+  if (corvinaToken.preferred_username.startsWith(DEVICE_PREFIX)) {
+    return corvinaToken.preferred_username;
+  }
   if (corvinaToken.preferred_username.startsWith(SERVICE_ACCOUNT_PREFIX)) {
     return corvinaToken.preferred_username.replace(SERVICE_ACCOUNT_PREFIX, '');
   }
