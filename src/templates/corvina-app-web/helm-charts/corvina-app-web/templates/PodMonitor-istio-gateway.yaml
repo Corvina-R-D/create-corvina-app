@@ -1,0 +1,1 @@
+{{ include "corvina-app-charts-lib.podMonitor.istioGateway" . }}
