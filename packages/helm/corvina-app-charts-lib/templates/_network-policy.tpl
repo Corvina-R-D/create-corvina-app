@@ -173,10 +173,9 @@ Values: networkPolicy.inClusterGateways.{appNamespaceLabel, podSelectors}, netwo
 Policies of the app workloads: frontends and backends (corvina-app-charts-lib.frontend / .backend), migrator
 */}}
 {{- define "corvina-app-charts-lib.networkPolicy.gatewayPeer" -}}
-{{- $istioGateway := index .Values "istio-gateway" -}}
 name: istio-gateway
 podLabels:
-  istio: {{ $istioGateway.name | replace "istio-" "" | quote }}
+  gateway.networking.k8s.io/gateway-name: {{ include "corvina-app-charts-lib.gatewayName" . }}
 {{- end }}
 
 {{- define "corvina-app-charts-lib.networkPolicy.dataPeers" -}}
@@ -259,13 +258,8 @@ Policies of the infrastructure pods of the namespace: istio gateway, istiod, rab
 {{- define "corvina-app-charts-lib.networkPolicy.gateway" -}}
 {{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" . | fromYaml }}
 {{- $platform := .Values.networkPolicy.platform }}
-{{- /* policies match the pod port: the targetPort of the gateway Service port */}}
+{{- /* the generated gateway pod listens on the port of the listener */}}
 {{- $listenerPort := .Values.gateway.port }}
-{{- range (index .Values "istio-gateway").service.ports }}
-{{- if eq (int .port) (int $.Values.gateway.port) }}
-{{- $listenerPort = .targetPort | default .port }}
-{{- end }}
-{{- end }}
 {{- $from := list
     (dict "name" "clients" "cidr" "0.0.0.0/0" "ports" (list $listenerPort))
     (dict "name" "device-ext-authz" "namespace" $platform.coreNamespace "podLabels" $platform.deviceExtAuthzLabels "ports" (list $listenerPort)) }}
