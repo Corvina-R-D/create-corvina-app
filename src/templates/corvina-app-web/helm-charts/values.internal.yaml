@@ -1,4 +1,4 @@
-istio-gateway:
+gateway:
   service:
     externalTrafficPolicy: Local
 
