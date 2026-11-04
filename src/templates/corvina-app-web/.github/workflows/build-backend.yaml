@@ -7,6 +7,9 @@ on:
         default: false
   create:
   push:
+    # the scaffold branch only tracks create-corvina-app output: never build it
+    branches-ignore:
+      - create-corvina-app
     paths:
       - 'service/**'
 
