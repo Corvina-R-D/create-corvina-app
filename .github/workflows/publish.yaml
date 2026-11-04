@@ -20,7 +20,7 @@ jobs:
   publish:
     # `corvina-app-charts-lib-X.Y.Z` and `nestjs-app-common-lib-vX.Y.Z` releases have their own workflows
     if: ${{ !startsWith(github.event.release.tag_name, 'corvina-app-charts-lib-') && !startsWith(github.event.release.tag_name, 'nestjs-app-common-lib-') }}
-    uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/npm-publish.yaml@v5.2
+    uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/publish-npm.yaml@v5.4
     with:
       default-branch: master
       go-version-file: go.mod
