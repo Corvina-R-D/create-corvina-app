@@ -10,23 +10,110 @@ concurrency:
 name: Publish corvina-app-charts-lib Helm chart
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
   publish-chart:
     name: Publish Helm chart
-    uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/publish-helm-chart.yaml@v5.3
+    uses: Corvina-R-D/corvina-github-public-actions/.github/workflows/publish-helm-chart.yaml@v5.4
     with:
       chart-path: packages/helm/corvina-app-charts-lib
       oci-repository: europe-west1-docker.pkg.dev/corvina-exorint/charts-public
       gcp-project-id: corvina-exorint
-      # tag corvina-app-charts-lib-X.Y.Z, matching appVersion in Chart.yaml, publishes version X.Y.Z
+      # tag corvina-app-charts-lib-X.Y.Z publishes version X.Y.Z, then Chart.yaml is bumped to it on master
       tag-prefix: corvina-app-charts-lib-
+      default-branch: master
+
+  # The template's Chart.yaml holds template directives (not valid YAML): only the version range
+  # of the lib dependency is rewritten, with sed.
+  bump-template:
+    name: Bump the lib in the app template
+    needs: publish-chart
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ needs.publish-chart.outputs.version }}
+      TEMPLATE_CHART: src/templates/corvina-app-web/helm-charts/corvina-app-web/Chart.yaml
+      DEP_START: '/^[[:space:]]*- name: corvina-app-charts-lib[[:space:]]*$/'
+      DEP_RE: '^([[:space:]]*version:[[:space:]]*"[~^]?)([^"]*)"'
+    steps:
+      # Same rules as the publish workflow: prereleases are left out.
+      - name: Check version
+        id: version
+        run: |
+          if [[ "$VERSION" == *-* ]]; then
+            echo "::notice::${VERSION} is a prerelease, leaving the template as is"
+            exit 0
+          fi
+          echo "needed=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout default branch
+        if: steps.version.outputs.needed == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: master
+
+      # Only moves forward. The range is the first `version:` after the lib's `- name:`.
+      - name: Set version in the template
+        id: bump
+        if: steps.version.outputs.needed == 'true'
+        run: |
+          CURRENT="$(sed -nE "${DEP_START},/version:/ s#${DEP_RE}#\2#p" "${TEMPLATE_CHART}")"
+          if [ -z "${CURRENT}" ]; then
+            echo "::error::No corvina-app-charts-lib dependency in ${TEMPLATE_CHART}"
+            exit 1
+          fi
+          if [ "$(printf '%s\n' "${CURRENT}" "${VERSION}" | sort -V | tail -n1)" != "${VERSION}" ] || [ "${CURRENT}" = "${VERSION}" ]; then
+            echo "::notice::The template is already at ${CURRENT}, not moving it to ${VERSION}"
+            exit 0
+          fi
+          sed -i -E "${DEP_START},/version:/ s#${DEP_RE}#\1${VERSION}\"#" "${TEMPLATE_CHART}"
+          echo "needed=true" >> "${GITHUB_OUTPUT}"
+
+      # Org rulesets require a PR and an `ECC-` branch prefix.
+      - name: Commit version bump
+        if: steps.bump.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BUMP_BRANCH="ECC-template-bump-corvina-app-charts-lib-${VERSION}"
+          gh pr list --state open --head "${BUMP_BRANCH}" --json number --jq '.[0].number' \
+            | xargs -r -I{} gh pr close {} --delete-branch
+          git push origin --delete "${BUMP_BRANCH}" 2>/dev/null || true
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BUMP_BRANCH}"
+          git add "${TEMPLATE_CHART}"
+          git commit -m "chore: bump corvina-app-charts-lib to ${VERSION} in the app template"
+          git push origin "${BUMP_BRANCH}"
+          echo "BUMP_BRANCH=${BUMP_BRANCH}" >> "${GITHUB_ENV}"
+
+      # Doesn't fail where approvals are required: the PR is left for a maintainer to merge.
+      - name: Open and merge version bump PR
+        if: steps.bump.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="chore: bump corvina-app-charts-lib to ${VERSION} in the app template"
+          if ! PR_URL="$(gh pr create \
+            --base master \
+            --head "${BUMP_BRANCH}" \
+            --title "${TITLE}" \
+            --body "Automated template bump after publishing corvina-app-charts-lib ${VERSION}.")"; then
+            COMPARE_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/master...${BUMP_BRANCH}?expand=1"
+            echo "::warning::Could not open the template bump PR, open it from ${COMPARE_URL}"
+            echo "Template bump to open and merge: [${BUMP_BRANCH}](${COMPARE_URL})" >> "${GITHUB_STEP_SUMMARY}"
+          elif ! gh pr merge "${PR_URL}" --squash --delete-branch \
+            --subject "${TITLE} [skip ci]"; then
+            echo "::warning::Could not merge the template bump PR, it needs approval: ${PR_URL}"
+            echo "Template bump PR to approve and merge: ${PR_URL}" >> "${GITHUB_STEP_SUMMARY}"
+          fi
 
   notify_failure:
     runs-on: ubuntu-24.04
-    needs: publish-chart
+    needs: [publish-chart, bump-template]
     if: failure()
     steps:
       - name: Notify on failure
