@@ -107,4 +107,6 @@ The first time the script will initialize a branch named `create-corvina-app` ru
 
 Afterwards, the script will rebase the branch on the latest version of the create-corvina-app command.
 
+The build workflows of the template ignore pushes to the `create-corvina-app` branch, so pushing it never builds images.
+
 You can use this branch to cherry-pick the changes you want to apply to your app, or to contribute back changes to create-corvina-app.
