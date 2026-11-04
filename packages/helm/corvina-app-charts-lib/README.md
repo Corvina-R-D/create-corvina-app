@@ -129,8 +129,10 @@ The other values (`gateway`, `cors`, `postgresql`, `redis`, `rabbitmq`, `service
 
 ## Release
 
-Bump `version` and `appVersion` in `Chart.yaml`, then push the `corvina-app-charts-lib-X.Y.Z` tag: the
-`publish-corvina-app-charts-lib.yaml` workflow pushes the chart to `oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public`.
+Push the `corvina-app-charts-lib-X.Y.Z` tag: the `publish-corvina-app-charts-lib.yaml` workflow pushes the chart
+version `X.Y.Z` to `oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public`, then bumps, through PRs on
+`master`, `version` and `appVersion` in `Chart.yaml` and the `corvina-app-charts-lib` dependency of the app template.
+Prereleases (`X.Y.Z-beta.1`) are pushed but leave `master` as is.
 
 To try a change on an app before releasing, copy this folder to the app chart as `charts/corvina-app-charts-lib` and render
 with `helmfile template --skip-deps`.
