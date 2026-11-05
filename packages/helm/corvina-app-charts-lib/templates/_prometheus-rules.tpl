@@ -61,7 +61,7 @@ spec:
   - name: {{ .Values.prometheus.appName }}-istioAlerts
     rules:
       - alert: {{ .Values.prometheus.appName }}-HighErrorRate
-        expr: increase(istio_requests_total{namespace="{{ .Release.Namespace }}", response_code=~"5.."}[5m]) / increase(istio_requests_total{namespace="{{ .Release.Namespace }}"}[5m]) > 0.05
+        expr: sum(increase(istio_requests_total{namespace="{{ .Release.Namespace }}", response_code=~"5.."}[5m])) / sum(increase(istio_requests_total{namespace="{{ .Release.Namespace }}"}[5m])) > 0.05
         for: 2m
         labels:
           severity: warning
