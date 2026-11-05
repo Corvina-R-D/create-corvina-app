@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import * as jwksClient from 'jwks-rsa';
+import { JwksClient } from 'jwks-rsa';
 import * as jwt from 'jsonwebtoken';
 import { Logger } from '../utils/logger';
 import { matchUrl } from '../utils/matchUrl';
@@ -61,7 +61,7 @@ export class CorvinaJwtService implements ICorvinaJwtService {
   private readonly _cacheService: ICacheService;
 
   /** one client per realm, so its rate limit applies to all the requests */
-  private readonly _jwksClients = new Map<string, jwksClient.JwksClient>();
+  private readonly _jwksClients = new Map<string, JwksClient>();
 
   constructor(
     @Inject(Logger) logger: Logger,
@@ -181,13 +181,13 @@ export class CorvinaJwtService implements ICorvinaJwtService {
     return publicKey;
   }
 
-  private getJwksClient(jwksUri: string): jwksClient.JwksClient {
+  private getJwksClient(jwksUri: string): JwksClient {
     let client = this._jwksClients.get(jwksUri);
 
     if (!client) {
       this._logger.debug(`Creating jwksClient with jwksUri ${jwksUri}`);
 
-      client = jwksClient({
+      client = new JwksClient({
         jwksUri,
         cache: true,
         cacheMaxAge: ONE_DAY * 1000,
