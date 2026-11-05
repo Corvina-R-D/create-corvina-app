@@ -1,4 +1,4 @@
-import { merge } from 'lodash';
+import { deepMerge } from '@corvina/nestjs-app-common-lib';
 import { getPaymentPlans, IPaymentPlanDTO } from './paymentPlan.dto';
 
 export interface IManifestLocalizable {
@@ -134,7 +134,7 @@ export function getManifestJson(): IManifestDTO {
 }
 
 export function setManifestJson(manifestBrand: object): void {
-  manifestJson = merge(
+  manifestJson = deepMerge(
     {
       key: process.env.MANIFEST_ID,
       name: '[| .Name |]',

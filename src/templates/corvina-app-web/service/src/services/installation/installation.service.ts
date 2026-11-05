@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Transaction } from 'sequelize/types';
+import { Transaction } from 'sequelize';
 import { Logger, SequelizeTransaction, CacheMethod, CustomError, ICacheService, addPeriod } from '@corvina/nestjs-app-common-lib';
 import { Installation } from '../../entities/installation.entity';
 import { getPaymentPlans, IPaymentPlanDTO } from '../../dtos/general-info/paymentPlan.dto';

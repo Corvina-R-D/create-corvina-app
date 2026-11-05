@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { setTimeout } from 'timers/promises';
-import { RedisClientType } from 'redis';
+import { RedisClientType } from '@redis/client';
 import { Logger } from '@corvina/nestjs-app-common-lib';
 import { IRateLimiterService, RateLimiterService, getRateLimiterKey } from './rateLimiter.service';
 import { RedisService } from './redis.service';

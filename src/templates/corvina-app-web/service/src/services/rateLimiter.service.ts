@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RedisClientType } from 'redis';
+import { RedisClientType } from '@redis/client';
 import { Logger } from '@corvina/nestjs-app-common-lib';
 import { IRedisService } from './redis.service';
 
@@ -48,15 +48,10 @@ export class RateLimiterService implements IRateLimiterService {
 
     await this.initClient();
 
-    const multi = await this._redisClient.multi();
-
     const key = getRateLimiterKey(identifier);
 
-    await multi.incr(key);
-
-    await multi.pExpire(key, 999);
-
-    const [value] = await multi.exec(true);
+    // MULTI/EXEC: the counter and its expiration are set atomically
+    const [value] = await this._redisClient.multi().incr(key).pExpire(key, 999).exec();
 
     const count = Number(value);
 

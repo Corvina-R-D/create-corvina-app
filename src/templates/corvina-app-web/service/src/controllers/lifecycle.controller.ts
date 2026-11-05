@@ -1,7 +1,6 @@
 import { Controller, Body, Post, UseInterceptors, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import * as semver from 'semver';
-import { LoggingInterceptor, matchUrl, CorvinaAuthGuard, CorvinaCoreGuard, Logger, CustomError } from '@corvina/nestjs-app-common-lib';
+import { LoggingInterceptor, matchUrl, CorvinaAuthGuard, CorvinaCoreGuard, Logger, CustomError, isValidSemver, semverMajor } from '@corvina/nestjs-app-common-lib';
 import { createInstallation, EVENT_TYPE, InstalledInputDTO, UninstalledInputDTO, RenewInputDTO, BaseLifecycleDTO } from '../dtos/lifecycle.dto';
 import { IInstallationDeleteInput, InstallationService } from '../services/installation/installation.service';
 
@@ -41,11 +40,11 @@ export class LifecycleController {
     }
 
     const version = body.apiVersion;
-    if (!semver.valid(version)) {
+    if (!isValidSemver(version)) {
       throw new CustomError(502, `Invalid version ${version}, does not match the semver format`, { version });
     }
 
-    if (semver.major(version) !== semver.major(this._MANIFEST_API_VERSION)) {
+    if (semverMajor(version) !== semverMajor(this._MANIFEST_API_VERSION)) {
       throw new CustomError(503, `Invalid version ${version}, does not match the current major qversion ${this._MANIFEST_API_VERSION}`, {
         version,
         _MANIFEST_API_VERSION: this._MANIFEST_API_VERSION,
