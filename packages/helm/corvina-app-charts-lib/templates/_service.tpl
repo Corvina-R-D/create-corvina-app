@@ -170,7 +170,6 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 100m
               memory: 64Mi
       containers:
         - name: {{ $name }}
