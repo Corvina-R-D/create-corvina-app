@@ -94,6 +94,7 @@ async getDevice(id: string) { ... }
 | `queueHandler(queue, { numberOfParallelPromises? })` | runs (and empties) an array of async functions, at most `numberOfParallelPromises` (default 5) at a time |
 | `matchUrl(url, rule)` | whether `url` matches a wildcard rule (`https://*.corvina.io/*`) |
 | `removeDuplicates(array)` | the strings of `array` without duplicates |
+| `chunk(array, size)` | `array` split into chunks of at most `size` items, the last one shorter (native replacement of lodash `chunk`); no chunks for a `size` lower than 1 |
 | `deepMerge(target, ...sources)` | new object with the plain objects of `sources` deep merged into `target` (native replacement of lodash `merge`); `undefined` values are skipped, arrays and other values are replaced, not merged by index |
 | `isValidSemver(version)`, `semverMajor(version)` | native replacements of `semver.valid` / `semver.major` (a leading `v` is accepted); `semverMajor` throws a `TypeError` for an invalid version |
 | `addPeriod(date, period, ordinal?)` | `date` plus an ISO 8601 duration (`P1M`, `1Y`, …), `ordinal` times; month and year ends are clamped (Jan 31 + 1M = Feb 28/29) |
