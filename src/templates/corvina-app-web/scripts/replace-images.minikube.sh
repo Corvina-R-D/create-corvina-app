@@ -16,7 +16,11 @@ if [[ $# -eq 1 && "$1" == "--only-backend" ]]; then
     ONLYBACKEND=true
 fi
 
-eval $(minikube -p corvina-minikube docker-env)
+# minikube runs containerd, where docker-env does not work: buildx drives the buildkitd of the node
+# (the corvina-minikube container), so the images land in the containerd image store read by the kubelet
+docker buildx inspect corvina-minikube &> /dev/null \
+    || docker buildx create --name corvina-minikube --driver remote docker-container://corvina-minikube > /dev/null
+export DOCKER_BUILD_OPTS="--builder corvina-minikube --output type=image --provenance=false"
 if ! $ONLYBACKEND; then
     echo "Replacing both frontend and backend images in minikube..."
     REGISTRY=localhost TAG=minikube ./build.sh
@@ -24,7 +28,6 @@ else
     echo "Replacing only backend image in minikube..."
     REGISTRY=localhost TAG=minikube ./build.sh --only-backend
 fi
-eval $(minikube -p corvina-minikube docker-env -u)
 
 kubectl --context corvina-minikube -n corvina-app-${app_name} set image deployment service-deployment service=localhost/corvina-app-${app_name}-backend:minikube
 kubectl --context corvina-minikube -n corvina-app-${app_name} rollout restart deployment service-deployment
