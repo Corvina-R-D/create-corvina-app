@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { RedisClientType } from 'redis';
+import { RedisClientType } from '@redis/client';
 import { ICacheService } from '@corvina/nestjs-app-common-lib';
 import { IRedisService } from './redis.service';
 
@@ -20,7 +20,8 @@ export class CacheService implements ICacheService, OnApplicationBootstrap {
   }
 
   public async get<T>(key: string): Promise<T | undefined> {
-    const value = await this._client.get(key);
+    // GET replies a string (or null) with the default type mapping
+    const value = (await this._client.get(key)) as string | null;
 
     return value ? JSON.parse(value) : undefined;
   }
@@ -33,11 +34,10 @@ export class CacheService implements ICacheService, OnApplicationBootstrap {
     }
 
     const isMillis = internalTtl < 1;
-    const options = {
-      [isMillis ? 'PX' : 'EX']: isMillis ? internalTtl * 1000 : internalTtl,
-    };
 
-    await this._client.set(key, JSON.stringify(value), options);
+    await this._client.set(key, JSON.stringify(value), {
+      expiration: isMillis ? { type: 'PX', value: internalTtl * 1000 } : { type: 'EX', value: internalTtl },
+    });
   }
 
   public async del(key: string): Promise<void> {

@@ -4,6 +4,7 @@ export * from './utils/cacheService';
 export * from './utils/calculatePeriod';
 export * from './utils/cast.util';
 export * from './utils/CustomError';
+export * from './utils/deepMerge';
 export * from './utils/getOffsetAndLimit';
 export * from './utils/logger';
 export * from './utils/matchUrl';
@@ -11,6 +12,7 @@ export * from './utils/measureTime.decorator';
 export * from './utils/queueHandler';
 export * from './utils/retry';
 export * from './utils/retry.decorator';
+export * from './utils/semver';
 export * from './utils/transaction.decorator';
 
 export * from './nest/apiPaginatedResponse';
