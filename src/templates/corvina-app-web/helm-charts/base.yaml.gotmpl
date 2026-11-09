@@ -106,7 +106,7 @@ postgresql:
       enabled: true
 
 app:  
-  image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-frontend
+  image: europe-docker.pkg.dev/{{ .StateValues.gcpProject }}/images/corvina-app-{{ .StateValues.appName }}-frontend
   resources:
     limits:
       cpu: 500m
@@ -116,7 +116,7 @@ app:
       memory: 128Mi
 
 service:
-  image: europe-docker.pkg.dev/corvina-app-{{ .StateValues.appName }}/images/corvina-app-{{ .StateValues.appName }}-backend
+  image: europe-docker.pkg.dev/{{ .StateValues.gcpProject }}/images/corvina-app-{{ .StateValues.appName }}-backend
   appId: corvina-app-{{ .StateValues.appName }}
   envVar:
     MANIFEST_BRAND: corvina

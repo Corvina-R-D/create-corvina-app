@@ -50,6 +50,12 @@ You can also create the app without prompting:
 npx @corvina/create-corvina-app@latest webapp --name myapp --kubernetes
 ```
 
+The images are pushed to and pulled from the registry of the `corvina-app-{name}` GCP project. When the app uses another project, for example one shared with other apps, pass `--gcp-project`: it becomes `gcpProject` in `helm-charts/envs/common-defaults.yaml` and the project of the build workflows and of `scripts/build.sh`.
+
+```bash
+npx @corvina/create-corvina-app@latest webapp --name mobile-backoffice --gcp-project corvina-app-mobile
+```
+
 ### Meaning of helm charts ###
 
 The helm charts are used to deploy the application in a kubernetes cluster. The `corvina-app-{name}` chart is used to deploy the application in the Corvina platform. We provide this structure as an example of how we build and deploy our applications in Corvina. You can use this structure as a starting point for your own application or you can use your own structure (there is no need to deploy on kubernetes).

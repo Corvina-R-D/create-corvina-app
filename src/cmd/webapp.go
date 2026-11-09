@@ -35,6 +35,7 @@ const Devcontainer CtxKey = "devcontainer"
 const DisableNameValidation CtxKey = "disableNameValidation"
 const SkipPackageLockGeneration CtxKey = "skipPackageLockGeneration"
 const DestinationFolder CtxKey = "destinationFolder"
+const GcpProject CtxKey = "gcpProject"
 
 type RedisValue string
 
@@ -334,6 +335,7 @@ func createWebApp(ctx context.Context) error {
 	redis := ctx.Value(RedisBool).(bool)
 	k8s := ctx.Value(KubernetesBool).(bool)
 	devcontainer := ctx.Value(Devcontainer).(bool)
+	gcpProject := gcpProjectOrDefault(ctx, name)
 	options := ""
 	if redis {
 		options += "--redis "
@@ -360,6 +362,9 @@ func createWebApp(ctx context.Context) error {
 	} else {
 		options += "--devcontainer=false "
 	}
+	if gcpProject != defaultGcpProject(name) {
+		options += fmt.Sprintf("--gcp-project=%s ", gcpProject)
+	}
 
 	os.MkdirAll(destinationFolder, 0755)
 
@@ -370,6 +375,7 @@ func createWebApp(ctx context.Context) error {
 		RabbitEnabled:                   rabbit,
 		Devcontainer:                    devcontainer,
 		K8sEnabled:                      k8s,
+		GcpProject:                      gcpProject,
 		CreateCorvinaAppCreationOptions: options,
 		CreateCorvinaAppVersion:         CliVersion,
 	}
@@ -587,8 +593,21 @@ func CopyAsIs(path string, writer *os.File) error {
 	return nil
 }
 
+// defaultGcpProject is the GCP project of an app's image registry, unless --gcp-project names another one
+func defaultGcpProject(name string) string {
+	return fmt.Sprintf("corvina-app-%s", name)
+}
+
+func gcpProjectOrDefault(ctx context.Context, name string) string {
+	if gcpProject, ok := ctx.Value(GcpProject).(string); ok && gcpProject != "" {
+		return gcpProject
+	}
+	return defaultGcpProject(name)
+}
+
 type ProjectInfo struct {
 	Name                            string
+	GcpProject                      string
 	RedisEnabled                    bool
 	StasherEnabled                  bool
 	RabbitEnabled                   bool

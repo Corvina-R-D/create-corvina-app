@@ -1,5 +1,7 @@
 releaseName: corvina-app-[| .Name |]
 appName: [| .Name |]
+# GCP project of the image registry, where the build workflows push (--gcp-project of create-corvina-app)
+gcpProject: [| .GcpProject |]
 workloadIdentity:
   gcpSaLinks: {}
 # client TLS parameters in the ingress access logs

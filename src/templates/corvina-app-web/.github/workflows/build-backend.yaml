@@ -24,11 +24,11 @@ jobs:
     name: Build and push image
     uses: Corvina-R-D/corvina-github-actions/.github/workflows/build.yaml@v5
     with:
-      gcp-project-id: corvina-app-[| .Name |]
+      gcp-project-id: [| .GcpProject |]
       gcp-registry: europe-docker.pkg.dev
       context: service
       file: service/Dockerfile
-      registry-image: europe-docker.pkg.dev/corvina-app-[| .Name |]/images/corvina-app-[| .Name |]-backend
+      registry-image: europe-docker.pkg.dev/[| .GcpProject |]/images/corvina-app-[| .Name |]-backend
       app-tag-service: service
       is-app-build: true
   notify_failure:
