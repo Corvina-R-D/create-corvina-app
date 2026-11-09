@@ -100,6 +100,13 @@ func WebApp(ctx context.Context) error {
 		return err
 	}
 
+	// rendered as is in the generated shell scripts, workflows and helm values
+	if gcpProject, ok := ctx.Value(GcpProject).(string); ok && gcpProject != "" {
+		if err := validateGcpProject(gcpProject); err != nil {
+			return err
+		}
+	}
+
 	stopIfDestinationFolderIsNotEmpty(ctx)
 
 	err = createWebApp(ctx)
@@ -162,6 +169,15 @@ func validateName(name string) error {
 		return errors.New("assign a name only letters and numbers or - are allowed, but not in the first position, and with a maximum of 16 characters")
 	}
 
+	return nil
+}
+
+// validateGcpProject accepts a GCP project ID: 6 to 30 lowercase letters, digits or hyphens, starting with a letter
+// and not ending with a hyphen
+func validateGcpProject(gcpProject string) error {
+	if !regexp.MustCompile(`^[a-z][a-z0-9-]{4,28}[a-z0-9]$`).MatchString(gcpProject) {
+		return fmt.Errorf("invalid GCP project ID %q: 6 to 30 lowercase letters, digits or hyphens, starting with a letter and not ending with a hyphen", gcpProject)
+	}
 	return nil
 }
 
