@@ -64,6 +64,7 @@ func main() {
 				c.Context = context.WithValue(c.Context, cmd.DisableNameValidation, c.Bool("disable-name-validation"))
 				c.Context = context.WithValue(c.Context, cmd.SkipPackageLockGeneration, c.Bool("skip-package-lock-generation"))
 				c.Context = context.WithValue(c.Context, cmd.DestinationFolder, c.String("destinationFolder"))
+				c.Context = context.WithValue(c.Context, cmd.GcpProject, c.String("gcp-project"))
 
 				return cmd.WebApp(c.Context)
 			},
@@ -77,6 +78,10 @@ func main() {
 					Name:    "destinationFolder",
 					Aliases: []string{"o"},
 					Usage:   "Destination folder",
+				},
+				&cli.StringFlag{
+					Name:  "gcp-project",
+					Usage: "GCP project of the image registry, when not corvina-app-<name> (e.g. a project shared by several apps)",
 				},
 				&cli.BoolFlag{
 					Name:    "kubernetes",

@@ -14,7 +14,7 @@ fi
 # set default value for VITE_SERVICE_URL
 export VITE_SERVICE_URL=${VITE_SERVICE_URL:-}
 TAG=${TAG:-latest}
-REGISTRY=${REGISTRY:-europe-docker.pkg.dev/corvina-app-${app_name}/images}
+REGISTRY=${REGISTRY:-europe-docker.pkg.dev/${gcp_project}/images}
 # DOCKER_BUILD_OPTS: extra options of docker build, set by replace-images.minikube.sh to build into minikube
 
 if ! [[ $# -eq 1 && "$1" == "--only-backend" ]]; then
