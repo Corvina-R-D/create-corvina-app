@@ -242,13 +242,16 @@ Policies of the infrastructure pods of the namespace: istio gateway, istiod, rab
 {{- include "corvina-app-charts-lib.networkPolicy" (dict "context" . "workload" "gateway" "podLabels" $gateway.podLabels "spec" $spec) }}
 {{- end }}
 
+{{- /* The API server calls the injection and validation webhooks (15017) from the control plane CIDR or, on GKE,
+through the konnectivity-agent pods of kube-system: from those pod IPs, not the control plane CIDR */}}
 {{- define "corvina-app-charts-lib.networkPolicy.istiod" -}}
 {{- $gateway := include "corvina-app-charts-lib.networkPolicy.gatewayPeer" . | fromYaml }}
 {{- $apiServer := .Values.networkPolicy.apiServer }}
 {{- $spec := dict
   "from" (list
     (merge (dict "ports" (list 15012)) $gateway)
-    (dict "name" "validation-webhook" "cidr" ($apiServer.cidr | default "") "ports" (list 15017)))
+    (dict "name" "validation-webhook" "cidr" ($apiServer.cidr | default "") "ports" (list 15017))
+    (dict "name" "webhook-konnectivity" "namespace" "kube-system" "podLabels" (dict "k8s-app" "konnectivity-agent") "ports" (list 15017)))
   "metricsPorts" (list 15014)
   "apiServer" true
 }}
