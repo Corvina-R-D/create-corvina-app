@@ -39,9 +39,9 @@ dispatch_instance() {
   hosting="$(yq eval -r "explode(.) | .\"$instance\".hosting // \"\"" "$ENVIRONMENTS_FILE")"
   branch="$(yq eval -r "explode(.) | .\"$instance\".branch // \"\"" "$ENVIRONMENTS_FILE")"
 
-  if [[ ! "$branch" =~ ^master$|^chart-[0-9]+\.[0-9]+-hotfix$ ]]; then
+  if [[ ! "$branch" =~ ^(main|master)$|^chart-[0-9]+\.[0-9]+-hotfix$ ]]; then
     echo "Invalid branch '$branch' for instance '$instance'."
-    echo "Allowed values: master or chart-<version>-hotfix"
+    echo "Allowed values: main, master or chart-<version>-hotfix"
     return 1
   fi
 

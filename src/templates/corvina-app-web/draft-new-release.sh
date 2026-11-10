@@ -55,8 +55,8 @@ fi
 
 # now commit the version bump, possibly with a PR
 commit_branch=$current_branch
-if [[ $current_branch = "master" ]]; then
-  read -p "Please specify a new branch name (ECC-xxxx) to open a PR to master, with the version bump $new_app_version (leave empty to commit directly on master): " -r
+if [[ $current_branch = "main" || $current_branch = "master" ]]; then
+  read -p "Please specify a new branch name (ECC-xxxx) to open a PR to $current_branch, with the version bump $new_app_version (leave empty to commit directly on $current_branch): " -r
   if [[ -n $REPLY ]]; then
     commit_branch="$REPLY"
     git switch -c "$commit_branch"
