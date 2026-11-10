@@ -8,7 +8,7 @@ a one-line include, so a template fix or a new default reaches the apps with a d
 # Chart.yaml
 dependencies:
   - name: corvina-app-charts-lib
-    version: "~2.0.0"
+    version: "~1.1.0"
     repository: oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public
     # library defaults at the root of the values
     import-values:
