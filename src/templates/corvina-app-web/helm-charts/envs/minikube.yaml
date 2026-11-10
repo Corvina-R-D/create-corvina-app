@@ -3,3 +3,4 @@ corvinaAppHost: app.corvina.mk
 clusterDomain: corvina-minikube.local
 # control plane, called by k8s-wait-for and peer discovery: same as kubeApiServerCidr in corvina-k8s/charts/envs
 kubeApiServerCidr: 192.168.49.2/32
+kubeApiServerPort: 8443 # the minikube API server does not listen on 443
