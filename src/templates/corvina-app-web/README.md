@@ -105,7 +105,7 @@ Once the build is done, you can deploy the new version of the app with the follo
 Environment metadata is centralized in `helm-charts/envs/environments.yaml`, keyed by Helmfile environment name (`instance`), with fields:
 
 * `hosting`: Kubernetes context (cluster) where the app instance is hosted.
-* `branch`: branch used for chart rendering (`master` or `chart-<major>.<minor>-hotfix`).
+* `branch`: branch used for chart rendering (`main`, `master` or `chart-<major>.<minor>-hotfix`).
 * `additionalOrigins`: list of additional CORS origins.
 
 The `helm-charts/helmfile.yaml` file uses Helmfile templating to:
