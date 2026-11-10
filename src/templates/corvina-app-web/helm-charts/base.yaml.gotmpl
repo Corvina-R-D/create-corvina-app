@@ -226,6 +226,13 @@ rabbitmq:
     requests:
       cpu: "250m"
       memory: "256Mi"
+[|- if .StasherEnabled |]
+  # the stasher consumes from these queues but does not declare them
+  topology:
+    queues:
+      - name: stasher
+        durable: true
+[|- end |]
 [|- end |]
 
 [| if .StasherEnabled -|]
