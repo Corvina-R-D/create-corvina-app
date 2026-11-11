@@ -109,6 +109,22 @@ defaults:
       deviceExtAuthzLabels:
         istio: corvina-device-ext-authz-ingress
       rabbitmqOperatorNamespace: rabbitmq-system
+    # gateways of this cluster: the public LoadBalancer IP of a host it serves (an app, <app>.<domain>, or the
+    # platform, auth.<domain>...) is short-circuited to their pods, private addresses that the internet rules leave out.
+    # The backends reach them on their internetPorts, the app gateway admits the pods of these namespaces
+    inClusterGateways:
+      enabled: true
+      # label of the app namespaces (argocd managedNamespaceMetadata, install.minikube.sh); the platform namespace is
+      # platform.coreNamespace
+      appNamespaceLabel: corvina.io/app-namespace
+      # gateway pods: istio gateways (istio gateway chart) and Gateway API gateways
+      podSelectors:
+        - matchLabels:
+            app.kubernetes.io/part-of: istio
+            sidecar.istio.io/inject: "true"
+        - matchExpressions:
+            - key: gateway.networking.k8s.io/gateway-name
+              operator: Exists
     # minikube: in-cluster ingress the Corvina hosts resolve to
     # corvinaIngress:
     #   namespace: prod

@@ -9,10 +9,13 @@ NetworkPolicy of one workload, adapted from corvina-k8s corvina-common.networkPo
     dns               egress to the cluster DNS on port 53, true by default; the metadata server stays closed
     peers             egress to pods: [{name, podLabels, namespace, ports}]; no ports means every port
     apiServer         egress to the Kubernetes API (.Values.networkPolicy.apiServer.cidr)
-    internetPorts     egress to the public internet: 0.0.0.0/0 except .Values.networkPolicy.privateCidrs
+    internetPorts     egress to the public internet: 0.0.0.0/0 except .Values.networkPolicy.privateCidrs, and on the same
+                      ports to the gateways of this cluster (networkPolicy.inClusterGateways): a public host it serves
+                      is short-circuited to their pods, private addresses
     anywherePorts     egress to any address, private ones included
     workloadIdentity  egress to the GKE metadata server, for pods using workload identity
-    from              ingress from pods or addresses: [{name, podLabels, namespace, cidr, ports}]
+    from              ingress from pods or addresses: [{name, podLabels, namespace, cidr, ports}]; namespaceSelector
+                      and podSelector, raw, instead of namespace and podLabels
     metricsPorts      ingress from prometheus
     extraPeers, extraFrom, extraEgress, extraIngress  additions from the values (the last two raw rules)
 Peers are lists, or maps keyed by name: a map merges across values files (e.g. values.minikube.yaml adds a peer
@@ -42,6 +45,11 @@ names, or {port, endPort} ranges.
 {{- $egress = append $egress (dict
   "to" (list (dict "ipBlock" (dict "cidr" "0.0.0.0/0" "except" $np.privateCidrs)))
   "ports" (include "corvina-app-charts-lib.networkPolicy.ports" . | fromYamlArray)) }}
+{{- if dig "inClusterGateways" "enabled" false $np }}
+{{- $egress = append $egress (dict
+  "to" (include "corvina-app-charts-lib.networkPolicy.inClusterGatewayPeers" $ | fromYamlArray)
+  "ports" (include "corvina-app-charts-lib.networkPolicy.ports" . | fromYamlArray)) }}
+{{- end }}
 {{- end }}
 {{- with $spec.anywherePorts }}
 {{- $egress = append $egress (dict "to" (list (dict "ipBlock" (dict "cidr" "0.0.0.0/0"))) "ports" (include "corvina-app-charts-lib.networkPolicy.ports" . | fromYamlArray)) }}
@@ -94,9 +102,12 @@ spec:
 {{- if $peer.cidr }}
 {{- $_ := set $selector "ipBlock" (dict "cidr" $peer.cidr) }}
 {{- else }}
-{{- $_ := set $selector "podSelector" (dict "matchLabels" ($peer.podLabels | default dict)) }}
+{{- $_ := set $selector "podSelector" ($peer.podSelector | default (dict "matchLabels" ($peer.podLabels | default dict))) }}
 {{- with $peer.namespace }}
 {{- $_ := set $selector "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" .)) }}
+{{- end }}
+{{- with $peer.namespaceSelector }}
+{{- $_ := set $selector "namespaceSelector" . }}
 {{- end }}
 {{- end }}
 {{- $rule := dict .direction (list $selector) }}
@@ -104,6 +115,32 @@ spec:
 {{- $_ := set $rule "ports" (include "corvina-app-charts-lib.networkPolicy.ports" . | fromYamlArray) }}
 {{- end }}
 {{- toYaml $rule }}
+{{- end }}
+
+{{/*
+Gateways of this cluster, as `to` peers: the public LoadBalancer IP of a host the cluster serves (an app,
+<app>.<domain>, or the platform, auth.<domain>...) is short-circuited to the gateway pods inside the cluster, private
+addresses that the internet rules leave out. The istio and Gateway API gateways of the app namespaces and of the
+platform namespace, as corvina-k8s does (notification networkPolicy.appGateways).
+Values: networkPolicy.inClusterGateways.{appNamespaceLabel, podSelectors}, networkPolicy.platform.coreNamespace
+*/}}
+{{- define "corvina-app-charts-lib.networkPolicy.inClusterGatewayPeers" -}}
+{{- $np := .Values.networkPolicy -}}
+{{- $peers := list -}}
+{{- range $podSelector := $np.inClusterGateways.podSelectors }}
+{{- range $namespaceSelector := include "corvina-app-charts-lib.networkPolicy.inClusterNamespaces" $ | fromYamlArray }}
+{{- $peers = append $peers (dict "namespaceSelector" $namespaceSelector "podSelector" $podSelector) }}
+{{- end }}
+{{- end }}
+{{- toYaml $peers }}
+{{- end }}
+
+{{- /* namespace selectors of the app namespaces and of the platform namespace */}}
+{{- define "corvina-app-charts-lib.networkPolicy.inClusterNamespaces" -}}
+{{- $np := .Values.networkPolicy -}}
+{{- toYaml (list
+  (dict "matchExpressions" (list (dict "key" $np.inClusterGateways.appNamespaceLabel "operator" "Exists")))
+  (dict "matchLabels" (dict "kubernetes.io/metadata.name" $np.platform.coreNamespace))) }}
 {{- end }}
 
 {{- /* TCP ports: numbers, names or {port, endPort} */}}
@@ -229,10 +266,18 @@ Policies of the infrastructure pods of the namespace: istio gateway, istiod, rab
 {{- $listenerPort = .targetPort | default .port }}
 {{- end }}
 {{- end }}
-{{- $spec := dict
-  "from" (list
+{{- $from := list
     (dict "name" "clients" "cidr" "0.0.0.0/0" "ports" (list $listenerPort))
-    (dict "name" "device-ext-authz" "namespace" $platform.coreNamespace "podLabels" $platform.deviceExtAuthzLabels "ports" (list $listenerPort)))
+    (dict "name" "device-ext-authz" "namespace" $platform.coreNamespace "podLabels" $platform.deviceExtAuthzLabels "ports" (list $listenerPort)) }}
+{{- /* the pods of this cluster calling the app host: its public LoadBalancer IP is short-circuited to this gateway,
+and an ipBlock doesn't match pods on every network plugin (inClusterGateways in the backend policies) */}}
+{{- if dig "inClusterGateways" "enabled" false .Values.networkPolicy }}
+{{- range $i, $namespaceSelector := include "corvina-app-charts-lib.networkPolicy.inClusterNamespaces" . | fromYamlArray }}
+{{- $from = append $from (dict "name" (printf "in-cluster-%d" $i) "namespaceSelector" $namespaceSelector "ports" (list $listenerPort)) }}
+{{- end }}
+{{- end }}
+{{- $spec := dict
+  "from" $from
   "metricsPorts" (list 15090 15020)
   "peers" (list
     (dict "name" "frontend" "podLabels" (dict "app" "app") "ports" (list 8080))
