@@ -31,7 +31,7 @@ adds new files next to the includes, using the [public helpers](#public-helpers)
 | `app` | frontend Deployment, Service, ServiceAccount |
 | `service` | backend Deployment, ConfigMap, Service, ServiceAccount, RoleBinding to wait for the migrator |
 | `migrator` | migration Job, ServiceAccount, Role, RoleBinding |
-| `gateway` | Istio Gateway, Telemetry, EnvoyFilter removing the `server` response header, TLS fingerprints EnvoyFilter (`tlsClientLogging`) |
+| `gateway` | Istio Gateway, Telemetry, EnvoyFilter removing the `server` and `x-envoy-*` response headers, TLS fingerprints EnvoyFilter (`tlsClientLogging`) |
 | `virtualService` | Istio VirtualService |
 | `certificate` | cert-manager Issuer and Certificate |
 | `secrets` | ExternalSecrets password generator, postgresql and redis passwords |

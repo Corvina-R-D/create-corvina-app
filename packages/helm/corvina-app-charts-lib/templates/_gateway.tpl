@@ -1,5 +1,5 @@
 {{/*
-Istio Gateway for the app host, access logging, no server response header and the optional TLS fingerprints in the access log
+Istio Gateway for the app host, access logging, no proxy response headers and the optional TLS fingerprints in the access log
 Values: gateway.appHost, gateway.port, gateway.protocol, gateway.certificateSecretName, istio-gateway.name, tlsClientLogging
 */}}
 {{- define "corvina-app-charts-lib.gateway" -}}
@@ -40,12 +40,13 @@ spec:
     - providers:
       - name: envoy
 ---
-# no server header on the responses: the gateway doesn't add `server: istio-envoy` (PASS_THROUGH, with
-# the default OVERWRITE it would be set again after the route removes it) and removes the upstream one
+# no proxy headers on the responses: no `server: istio-envoy` (PASS_THROUGH, with the default OVERWRITE it would be
+# set again after the route removes it) nor the upstream server header, no x-envoy-* headers of the router
+# (x-envoy-upstream-service-time...) nor of the Istio metadata exchange
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: remove-server-header
+  name: remove-proxy-headers
   namespace: {{ .Release.Namespace }}
 spec:
   configPatches:
@@ -62,6 +63,21 @@ spec:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
           server_header_transformation: PASS_THROUGH
+  - applyTo: HTTP_FILTER
+    match:
+      context: GATEWAY
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+            subFilter:
+              name: envoy.filters.http.router
+    patch:
+      operation: MERGE
+      value:
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+          suppress_envoy_headers: true
   - applyTo: ROUTE_CONFIGURATION
     match:
       context: GATEWAY
@@ -70,6 +86,10 @@ spec:
       value:
         response_headers_to_remove:
         - server
+        - x-envoy-upstream-service-time
+        - x-envoy-decorator-operation
+        - x-envoy-peer-metadata
+        - x-envoy-peer-metadata-id
 {{- if .Values.tlsClientLogging }}
 ---
 # TLS client fingerprints for the access log (%TLS_JA4_FINGERPRINT%)
