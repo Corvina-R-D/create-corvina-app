@@ -106,13 +106,13 @@ Environment metadata is centralized in `helm-charts/envs/environments.yaml`, key
 
 * `hosting`: Kubernetes context (cluster) where the app instance is hosted.
 * `branch`: branch used for chart rendering (`main`, `master` or `chart-<major>.<minor>-hotfix`).
-* `additionalOrigins`: list of additional CORS origins.
+* `additionalOrigins`: list of additional CORS origins, as `<scheme>://<host>[:<port>]` (the host may start with a wildcard, e.g. `https://*.example.com`).
 
 The `helm-charts/helmfile.yaml` file uses Helmfile templating to:
 
 * generate the `environments:` list dynamically from the YAML map;
 * inject `hosting` as `kubeContext`;
-* inject `additionalOrigins` as `cors.additionalOrigins` (consumed by `virtual-service.yaml`).
+* inject `additionalOrigins` as `cors.additionalOrigins` (consumed by `http-route.yaml`).
 
 ### Trigger rendering
 

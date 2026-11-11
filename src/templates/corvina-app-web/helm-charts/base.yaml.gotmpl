@@ -10,28 +10,6 @@ networkPolicy:
     port: {{ .StateValues | get "kubeApiServerPort" 443 }}
 
 
-istio-gateway:
-  revision: {{ .StateValues.releaseName }} # must match the istio-discovery revision
-  name: istio-{{ .StateValues.appName }}gateway
-  service:
-    type: LoadBalancer
-    ports:
-    - name: https
-      port: 443
-      protocol: TCP
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: "1"
-      memory: 512Mi
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
-
 imagePullPolicy: Always
 
 {{- $additionalOrigins := index .StateValues "additionalOrigins" | default (list) }}
@@ -48,10 +26,13 @@ gateway:
 
 cors:
   enabled: true
+  # <scheme>://<host>[:<port>], the host may start with a wildcard
   allowOrigins:
-    - regex: '^https://{{ replace "." "\\." .StateValues.appHost }}$'
-    - regex: '^https://([a-zA-Z0-9]+\.)?{{ replace "." "\\." .StateValues.corvinaAppHost }}$'
-    - regex: '^http(s?)://localhost:5173$'
+    - https://{{ .StateValues.appHost }}
+    - https://{{ .StateValues.corvinaAppHost }}
+    - https://*.{{ .StateValues.corvinaAppHost }}
+    - http://localhost:5173
+    - https://localhost:5173
   additionalOrigins:
 {{ toYaml $additionalOrigins | nindent 4 }}
   exposeHeaders:

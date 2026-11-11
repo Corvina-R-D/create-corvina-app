@@ -1,6 +1,7 @@
 repositories:
   - name: istio
-    url: https://istio-release.storage.googleapis.com/charts
+    url: ghcr.io/istio/release/charts
+    oci: true
 
 helmDefaults:
   timeout: 1800
@@ -13,8 +14,7 @@ helmDefaults:
 releases:
   - name: istio-discovery
     chart: istio/istiod
-    # same version as the gateway dependency of corvina-app-web/Chart.yaml
-    version: 1.29.0
+    version: 1.31.3
     kubeContext: {{ .StateValues.kubeContext }}
     namespace: {{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
     labels:

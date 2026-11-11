@@ -1,7 +1,7 @@
 fakeExternalSecrets:
   password: password
 
-istio-gateway:
+gateway:
   service:
     type: ClusterIP
   resources:
@@ -79,10 +79,9 @@ cors:
   additionalOrigins: []
 
 networkPolicy:
-  # the Corvina hosts (auth, app...) resolve to the haproxy ingress (corvina-k8s minikube-patch-corefile.sh)
+  # the Corvina hosts (auth, app...) resolve to the http gateway (corvina-k8s minikube-patch-corefile.sh)
   corvinaIngress:
     namespace: prod
     podLabels:
-      app.kubernetes.io/name: haproxy-ingress
-      app.kubernetes.io/instance: corvina-prod-http
+      gateway.networking.k8s.io/gateway-name: corvina-http-gateway
     ports: [443]

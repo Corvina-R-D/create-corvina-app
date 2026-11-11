@@ -8,7 +8,7 @@ a one-line include, so a template fix or a new default reaches the apps with a d
 # Chart.yaml
 dependencies:
   - name: corvina-app-charts-lib
-    version: "~1.0.0"
+    version: "~1.1.0"
     repository: oci://europe-west1-docker.pkg.dev/corvina-exorint/charts-public
     # library defaults at the root of the values
     import-values:
@@ -31,8 +31,8 @@ adds new files next to the includes, using the [public helpers](#public-helpers)
 | `app` | frontend Deployment, Service, ServiceAccount |
 | `service` | backend Deployment, ConfigMap, Service, ServiceAccount, RoleBinding to wait for the migrator |
 | `migrator` | migration Job, ServiceAccount, Role, RoleBinding |
-| `gateway` | Istio Gateway, Telemetry, TLS fingerprints EnvoyFilter (`tlsClientLogging`) |
-| `virtualService` | Istio VirtualService |
+| `gateway` | Gateway API Gateway (class `istio`, one HTTPS listener for the host and one for its subdomains) and its settings ConfigMap, Telemetry, TLS fingerprints EnvoyFilter (`tlsClientLogging`) |
+| `httpRoute` | Gateway API HTTPRoute with the CORS filter |
 | `certificate` | cert-manager Issuer and Certificate |
 | `secrets` | ExternalSecrets password generator, postgresql and redis passwords |
 | `rabbitmq` | RabbitmqCluster, PodDisruptionBudget, fake default user, queues, exchanges and bindings |
@@ -40,7 +40,8 @@ adds new files next to the includes, using the [public helpers](#public-helpers)
 | `backup` | Velero Schedule |
 | `watchJobRole` | Role to watch Jobs |
 | `prometheusRule.{healthAlerts,istio,resourceQuotas,infraAlerts,rabbitmq,redis}` | PrometheusRules |
-| `serviceMonitor.{istio,rabbitmq}` | ServiceMonitors |
+| `serviceMonitor.rabbitmq` | ServiceMonitor |
+| `podMonitor.istioGateway` | PodMonitor of the generated gateway |
 | `networkPolicy.{app,service,migrator,gateway,istiod,rabbitmq}` | NetworkPolicies |
 
 ## Public helpers
@@ -65,9 +66,9 @@ The templates read their defaults from the values: without the `import-values` o
 ## NetworkPolicies
 
 Every workload gets ingress and egress rules (adapted from `corvina-common.networkPolicy` in corvina-k8s): the
-frontend only receives from the istio gateway; the backend reaches DNS, postgres, redis, rabbitmq, the Kubernetes API
+frontend only receives from the gateway; the backend reaches DNS, postgres, redis, rabbitmq, the Kubernetes API
 and the public internet on 443 (the metadata server only with a workload identity link; on minikube, where the
-Corvina hosts resolve to the in-cluster haproxy ingress, `values.minikube.yaml` sets it as `networkPolicy.corvinaIngress`); the migrator reaches DNS,
+Corvina hosts resolve to the in-cluster http gateway, `values.minikube.yaml` sets it as `networkPolicy.corvinaIngress`); the migrator reaches DNS,
 postgres and the Kubernetes API; istiod, the gateway and rabbitmq only talk to each other, to the app pods, to the
 operators and to prometheus. The gateway also admits the Corvina device ext-authz ingress (`prod`), which forwards the
 device calls to the app host: an `ipBlock` doesn't match pods on every network plugin (GKE Dataplane V2). postgres and
@@ -99,7 +100,7 @@ examples. Maps merge with the defaults (`null` drops a key), lists replace them.
 | `appName` | chart name without `corvina-app-` | gateway, certificate and issuer names |
 | `global.imageRegistry` | [`values.yaml`](values.yaml) | registry of the Docker Hub images, also of the bitnami charts; leave it unset so that a library release changes it |
 | `images.{k8sWaitFor,rabbitmq,registration}.registry`, `.repository`, `.tag` | [`values.yaml`](values.yaml) | override a default image; leave them unset so that a library release bumps the image. `rabbitmq.image` and `registration.image` still override the whole image |
-| `service.serviceName` | `service-service` | backend Service, also the VirtualService destination |
+| `service.serviceName` | `service-service` | backend Service, also the HTTPRoute destination |
 | `service.healthPath` | `/v1/health` | backend readiness and liveness probes |
 | `service.probeInitialDelaySeconds` | | |
 | `service.pgEnv` | `true` | `false` drops the `PG_*` variables from the ConfigMap |
@@ -115,8 +116,12 @@ examples. Maps merge with the defaults (`null` drops a key), lists replace them.
 | `migrator.backoffLimit` | `100` | retries of the migrator Job |
 | `backup.ttl` | `72h30m0s` | ttl of the Velero backups |
 | `migrator.waitFor` _tpl_ | | `[{name, service}]` more services the migrator waits for besides postgresql, or `[{name, args}]` with other `k8s-wait-for` args |
-| `virtualService.servicePrefixes` | `[/v1, /swagger-ui]` | URI prefixes routed to the backend |
-| `virtualService.extraRoutes` _tpl_ | | Istio HTTP routes before the default ones; `enabled: '{{ .Values.x.enabled }}'` leaves a route out when false |
+| `httpRoute.servicePrefixes` | `[/v1, /swagger-ui]` | URI prefixes routed to the backend |
+| `httpRoute.extraRules` _tpl_ | | HTTPRoute rules; Gateway API picks the longest matching prefix; `enabled: '{{ .Values.x.enabled }}'` leaves a rule out when false |
+| `gateway.service` | `{type: LoadBalancer}` | spec of the Service of the gateway, e.g. `externalTrafficPolicy: Local` |
+| `gateway.resources` | | resources of the `istio-proxy` container of the gateway |
+| `gateway.autoscaling` | `1`-`3` replicas, 80% CPU | HorizontalPodAutoscaler of the gateway, `~` turns it off |
+| `cors.allowOrigins`, `cors.additionalOrigins` | | origins as `<scheme>://<host>[:<port>]`; the host may start with a wildcard (`https://*.example.com`). Regular expressions are not possible |
 | `rabbitmq.additionalConfig` | | extra `rabbitmq.conf` lines, e.g. `consumer_timeout: 14000000` |
 | `prometheus.rabbitmqIgnoredQueues` _tpl_ | | queues left out of the growing queues and no consumer alerts, e.g. parking lots |
 | `prometheus.rabbitmqReadyMessagesThreshold`, `prometheus.rabbitmqUnacknowledgedMessagesThreshold` | `1000` | thresholds of the RabbitMQ alerts |
@@ -126,6 +131,15 @@ examples. Maps merge with the defaults (`null` drops a key), lists replace them.
 
 The other values (`gateway`, `cors`, `postgresql`, `redis`, `rabbitmq`, `service.envVar`, `backup`,
 `registration`, `workloadIdentity`...) are the ones `base.yaml.gotmpl` already sets.
+
+## Gateway API
+
+The cluster needs the Gateway API CRDs (v1.6 or later, standard channel) and the app `istio-discovery` release
+(`helmfile.yaml`) with the same revision as the release name: the Gateway carries the label `istio.io/rev`. Istiod
+generates the Deployment and the Service `<app>-gateway-istio`; `gateway.service`, `gateway.resources` and
+`gateway.autoscaling` reach them through the `<app>-gateway-params` ConfigMap. The pods have the label
+`gateway.networking.k8s.io/gateway-name: <app>-gateway`, which the NetworkPolicies and the PodMonitor select. Routes are Gateway API
+resources; use an Istio resource (`EnvoyFilter`, `DestinationRule`, `ServiceEntry`) only for what Gateway API cannot do.
 
 ## Release
 

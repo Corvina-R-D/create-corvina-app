@@ -29,7 +29,7 @@ defaults:
       tag: develop
 
   service:
-    # backend Service, also the VirtualService destination
+    # backend Service, also the HTTPRoute destination
     serviceName: service-service
     # backend readiness and liveness probes
     healthPath: /v1/health
@@ -76,22 +76,41 @@ defaults:
   backup:
     ttl: 72h30m0s
 
-  virtualService:
+  httpRoute:
     # URI prefixes routed to the backend
     servicePrefixes:
       - /v1
       - /swagger-ui
-    # (tpl) Istio HTTP routes before the default ones; enabled: false leaves one out
-    # extraRoutes:
+    # (tpl) Gateway API HTTPRoute rules; Gateway API picks the longest matching prefix; enabled: false leaves one out
+    # extraRules:
     #   - enabled: '{{ .Values.converter.enabled }}'
-    #     match:
-    #       - uri:
-    #           prefix: /converter
-    #     route:
-    #       - destination:
-    #           host: converter-service
-    #           port:
-    #             number: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /converter
+    #     backendRefs:
+    #       - name: converter-service
+    #         port: 80
+
+  # the generated gateway (Deployment, Service and HorizontalPodAutoscaler are <app>-gateway-istio); the other
+  # gateway.* values are set by base.yaml.gotmpl
+  gateway:
+    # spec of the gateway Service, e.g. externalTrafficPolicy: Local
+    service:
+      type: LoadBalancer
+    # istio-proxy container of the gateway
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+    # null (autoscaling: ~) leaves the replicas to the Deployment
+    autoscaling:
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 800 # (1000 / 100) * 80 => 80% of the limits CPU
 
   networkPolicy:
     # cidr is required: kubeApiServerCidr of envs/<env>.yaml
@@ -107,13 +126,13 @@ defaults:
     platform:
       coreNamespace: prod
       deviceExtAuthzLabels:
-        istio: corvina-device-ext-authz-ingress
+        gateway.networking.k8s.io/gateway-name: corvina-device-ext-authz-gateway
       rabbitmqOperatorNamespace: rabbitmq-system
     # minikube: in-cluster ingress the Corvina hosts resolve to
     # corvinaIngress:
     #   namespace: prod
     #   podLabels:
-    #     app.kubernetes.io/name: haproxy-ingress
+    #     gateway.networking.k8s.io/gateway-name: corvina-http-gateway
     #   ports: [443]
     # per workload additions and overrides
     # service:
