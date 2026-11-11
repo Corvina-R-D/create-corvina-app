@@ -31,7 +31,7 @@ adds new files next to the includes, using the [public helpers](#public-helpers)
 | `app` | frontend Deployment, Service, ServiceAccount |
 | `service` | backend Deployment, ConfigMap, Service, ServiceAccount, RoleBinding to wait for the migrator |
 | `migrator` | migration Job, ServiceAccount, Role, RoleBinding |
-| `gateway` | Gateway API Gateway (class `istio`, one HTTPS listener for the host and one for its subdomains) and its settings ConfigMap, Telemetry, EnvoyFilter removing the `server` response header, TLS fingerprints EnvoyFilter (`tlsClientLogging`) |
+| `gateway` | Gateway API Gateway (class `istio`, a single HTTPS listener for the host and its subdomains, the HTTPRoutes restrict the hostnames) and its settings ConfigMap, Telemetry, EnvoyFilter removing the `server` response header, TLS fingerprints EnvoyFilter (`tlsClientLogging`) |
 | `httpRoute` | Gateway API HTTPRoute with the CORS filter |
 | `certificate` | cert-manager Issuer and Certificate |
 | `secrets` | ExternalSecrets password generator, postgresql and redis passwords |
