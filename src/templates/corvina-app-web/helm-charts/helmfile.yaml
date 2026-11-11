@@ -14,7 +14,7 @@ releases:
   - name: istio-discovery
     chart: istio/istiod
     # same version as the gateway dependency of corvina-app-web/Chart.yaml
-    version: 1.29.0
+    version: 1.29.10
     kubeContext: {{ .StateValues.kubeContext }}
     namespace: {{ if hasKey .StateValues "namespace" }}{{ .StateValues.namespace }}{{ else }}{{ .StateValues.releaseName }}{{ end }}
     labels:
