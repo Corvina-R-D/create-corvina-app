@@ -30,7 +30,7 @@ dependencies:
     repository: oci://europe-docker.pkg.dev/corvina-exorint/dockeroci-remote/bitnamicharts
 [|- end |]
   - name: gateway
-    version: "1.29.0"
+    version: "1.29.10"
     repository: "https://istio-release.storage.googleapis.com/charts"
     alias: istio-gateway
 [|- if .StasherEnabled |]
