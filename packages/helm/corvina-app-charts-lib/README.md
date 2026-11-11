@@ -70,15 +70,24 @@ and the public internet on 443 (the metadata server only with a workload identit
 Corvina hosts resolve to the in-cluster haproxy ingress, `values.minikube.yaml` sets it as `networkPolicy.corvinaIngress`); the migrator reaches DNS,
 postgres and the Kubernetes API; istiod, the gateway and rabbitmq only talk to each other, to the app pods, to the
 operators and to prometheus. The gateway also admits the Corvina device ext-authz ingress (`prod`), which forwards the
-device calls to the app host: an `ipBlock` doesn't match pods on every network plugin (GKE Dataplane V2). postgres and
+device calls to the app host: an `ipBlock` doesn't match pods on every network plugin (GKE Dataplane V2).
+
+The public LoadBalancer IP of a host served by the same cluster (another app, `<app>.<domain>`, or the platform,
+`auth.<domain>`...) is short-circuited to the gateway pods, private addresses that the internet rules leave out. So a
+workload with `internetPorts` also reaches, on those ports, the istio and Gateway API gateways of the app namespaces
+(labelled `corvina.io/app-namespace`) and of the platform namespace, and the app gateway admits the pods of those
+namespaces on its listener port: the same exposure as the public host, on any network plugin
+(`networkPolicy.inClusterGateways`, `enabled: false` turns it off). postgres and
 redis keep the bitnami policies, narrowed in `base.yaml.gotmpl` to the pods of the namespace and prometheus: every
 workload of the app reaches them without labels, the library ones only through their egress rules.
 
 Environment values: `networkPolicy.apiServer.cidr` (required, `kubeApiServerCidr` of `envs/<env>.yaml`),
-`networkPolicy.privateCidrs` (excluded from the internet rules), `networkPolicy.corvinaIngress` (`{namespace,
+`networkPolicy.privateCidrs` (excluded from the internet rules), `networkPolicy.inClusterGateways`
+(`{enabled, appNamespaceLabel, podSelectors}`), `networkPolicy.corvinaIngress` (`{namespace,
 podLabels, ports}`, egress of every backend), `networkPolicy.platform` (`coreNamespace`, `deviceExtAuthzLabels`,
 `rabbitmqOperatorNamespace`) and `networkPolicy.prometheus` (`{namespace, podLabels}`) for another platform. Per
 workload, `networkPolicy.<workload>` adds `extraPeers`, `extraFrom` (`{<name>: {podLabels, namespace, cidr, ports}}`,
+or raw `namespaceSelector` / `podSelector`,
 a map so that values files merge, or a list), raw `extraEgress` / `extraIngress`, or overrides the defaults, e.g.
 `internetPorts`.
 
