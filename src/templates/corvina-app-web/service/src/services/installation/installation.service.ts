@@ -182,7 +182,8 @@ export class InstallationService implements IInstallationService {
     let key = `getInstallation(${JSON.stringify(input.instanceId)},${JSON.stringify(input.organizationId)})`;
     await this.invalidateCache(key);
 
-    key = `getJwksUri(${JSON.stringify(input.openIdConfigurationUrl)})`;
+    // CorvinaJwtService of common-lib caches the openid configuration of the realm by its url
+    key = `getOpenIdConfiguration(${JSON.stringify(input.openIdConfigurationUrl)})`;
     await this.invalidateCache(key);
   }
 
