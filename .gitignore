@@ -4,3 +4,6 @@ __debug_bin
 
 # i use it for my tests
 corvina-app-ciao
+
+# Claude Code settings (may contain credentials)
+.claude/settings*.json
