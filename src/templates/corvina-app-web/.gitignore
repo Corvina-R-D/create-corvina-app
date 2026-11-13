@@ -3,3 +3,6 @@
 .env.local
 .env.*.local
 ngrok.yml
+
+# Claude Code settings (may contain credentials)
+.claude/settings*.json
