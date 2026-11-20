@@ -150,3 +150,11 @@ the Kubernetes API (k8s-wait-for) mount it, with this volume replicating the one
   mountPath: /var/run/secrets/kubernetes.io/serviceaccount
   readOnly: true
 {{- end }}
+
+{{/*
+Replicas of a Deployment: the given value, 1 when it is not set (0 is kept, to scale a workload down)
+Usage: {{ include "corvina-app-charts-lib.replicas" .Values.service.replicas }}
+*/}}
+{{- define "corvina-app-charts-lib.replicas" -}}
+{{- if kindIs "invalid" . }}1{{ else }}{{ int . }}{{ end }}
+{{- end }}
