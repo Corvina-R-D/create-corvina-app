@@ -6,3 +6,5 @@ gcpNetworkingProject: corvina-internal-qa
 tlsClientLogging: true
 # control plane, called by k8s-wait-for and peer discovery: same as kubeApiServerCidr in corvina-k8s/charts/envs
 kubeApiServerCidr: 192.168.0.64/28
+# VerticalPodAutoscaler objects (recommend only): the cluster has the VPA CRD
+deployVpaObjects: true

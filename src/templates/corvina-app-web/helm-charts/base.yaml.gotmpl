@@ -1,5 +1,8 @@
 global:
   argocdManagement: {{ sprigGet .Values "argocdManagement" | default false }}
+# recommend-only VerticalPodAutoscalers (templates/vpa.yaml): the cluster needs the VPA CRD
+verticalAutoscaling:
+  enabled: {{ .StateValues | get "deployVpaObjects" false }}
 # client TLS parameters in the ingress access logs
 tlsClientLogging: {{ .StateValues | get "tlsClientLogging" false }}
 
