@@ -29,6 +29,8 @@ defaults:
       tag: develop
 
   service:
+    # replicas of the backend Deployment
+    replicas: 1
     # backend Service, also the VirtualService destination
     serviceName: service-service
     # backend readiness and liveness probes

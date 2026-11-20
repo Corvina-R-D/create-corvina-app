@@ -77,7 +77,7 @@ Usage: {{ include "corvina-app-charts-lib.serviceEnv" (dict "startFeatures" "app
 {{/*
 Backend: the ConfigMap and the "service" backend workload below
 Values:
-  service.image, service.tag, service.resources, service.envVar.*, service.appId
+  service.image, service.tag, service.resources, service.replicas (default 1), service.envVar.*, service.appId
   service.serviceName (default service-service), service.healthPath (default /v1/health),
   service.probeInitialDelaySeconds, service.postgresHost, service.postgresPasswordEnv (default PG_PASS),
   service.pgEnv, service.config, service.extraEnv, service.extraCa.secret,
@@ -108,6 +108,7 @@ Usage: {{ include "corvina-app-charts-lib.backend" (dict "context" $ "name" "ser
                (default service)
   serviceName  Kubernetes Service (default <name>-service)
   extraEnv     env vars added to the container (tpl allowed), after the defaults
+  replicas     default .Values.service.replicas, 1 when not set
 */}}
 {{- define "corvina-app-charts-lib.backend" -}}
 {{- $ := .context }}
@@ -115,13 +116,14 @@ Usage: {{ include "corvina-app-charts-lib.backend" (dict "context" $ "name" "ser
 {{- $sa := printf "%s-sa" $name }}
 {{- $healthPath := $.Values.service.healthPath }}
 {{- $automountToken := eq (toString $.Values.service.automountServiceAccountToken) "true" }}
+{{- $replicas := ternary .replicas $.Values.service.replicas (hasKey . "replicas") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $name }}-deployment
   namespace: {{ $.Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ include "corvina-app-charts-lib.replicas" $replicas }}
   selector:
     matchLabels:
       app: {{ $name }}

@@ -108,6 +108,7 @@ examples. Maps merge with the defaults (`null` drops a key), lists replace them.
 | `appName` | chart name without `corvina-app-` | gateway, certificate and issuer names |
 | `global.imageRegistry` | [`values.yaml`](values.yaml) | registry of the Docker Hub images, also of the bitnami charts; leave it unset so that a library release changes it |
 | `images.{k8sWaitFor,rabbitmq,registration}.registry`, `.repository`, `.tag` | [`values.yaml`](values.yaml) | override a default image; leave them unset so that a library release bumps the image. `rabbitmq.image` and `registration.image` still override the whole image |
+| `service.replicas` | `1` | replicas of the backend Deployment |
 | `service.serviceName` | `service-service` | backend Service, also the VirtualService destination |
 | `service.healthPath` | `/v1/health` | backend readiness and liveness probes |
 | `service.probeInitialDelaySeconds` | | |
