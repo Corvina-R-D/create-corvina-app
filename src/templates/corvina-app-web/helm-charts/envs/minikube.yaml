@@ -6,3 +6,5 @@ kubeApiServerCidr: 192.168.49.2/32
 kubeApiServerPort: 8443 # the minikube API server does not listen on 443
 # VerticalPodAutoscaler objects (recommend only): the cluster has the VPA CRD
 deployVpaObjects: true
+# no CPU limits, memory request = limit (corvina-k8s standard): size the containers in values.minikube.yaml
+resourceShape: true

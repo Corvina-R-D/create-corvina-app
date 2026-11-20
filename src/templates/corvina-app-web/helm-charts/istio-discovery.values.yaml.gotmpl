@@ -9,6 +9,7 @@ global:
     clusterDomain: {{ .StateValues.clusterDomain }}
 pilot:
   autoscaleEnabled: false
+  priorityClassName: corvina-platform
   env:
     PILOT_SCOPE_GATEWAY_TO_NAMESPACE: true
   resources:

@@ -8,3 +8,5 @@ tlsClientLogging: true
 kubeApiServerCidr: 192.168.0.64/28
 # VerticalPodAutoscaler objects (recommend only): the cluster has the VPA CRD
 deployVpaObjects: true
+# no CPU limits, memory request = limit (corvina-k8s standard): size the containers in values.internal-qa.yaml
+resourceShape: true

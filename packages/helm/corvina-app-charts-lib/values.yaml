@@ -7,6 +7,13 @@ defaults:
 
   # verticalAutoscaling: {enabled: true} for recommend-only VPAs (templates/vpa.yaml of the app chart,
   #   corvina-app-charts-lib.appVpas); same keys as corvina-k8s corvina-common
+  # corvina-k8s pod policy, all off by default:
+  # priorityClassName: PriorityClass of the pods (app, service and RabbitMQ; override per component
+  #   with app.priorityClassName, service.priorityClassName, rabbitmq.priorityClassName,
+  #   gateway.priorityClassName)
+  # resourceShape: true drops the CPU limits, sets a CPU request (10m when unset) and memory request ==
+  #   limit on the containers of the library
+  # jobResources: resources of the registration Job
 
   # gateway, certificate and issuer names; default: chart name without "corvina-app-"
   # appName: ota
