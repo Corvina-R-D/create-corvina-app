@@ -137,6 +137,7 @@ spec:
     spec:
       serviceAccountName: {{ $sa }}
       automountServiceAccountToken: {{ $automountToken }}
+      {{- with include "corvina-app-charts-lib.priorityClassName" (dict "context" $ "class" $.Values.service.priorityClassName) }}{{ . | nindent 6 }}{{ end }}
       volumes:
         {{- if not $automountToken }}
         {{- include "corvina-app-charts-lib.kubeApiAccessVolume" $ | nindent 8 }}
@@ -228,7 +229,7 @@ spec:
             initialDelaySeconds: {{ . }}
             {{- end }}
           resources:
-            {{- toYaml $.Values.service.resources | nindent 12 }}
+            {{- include "corvina-app-charts-lib.resources" (dict "context" $ "resources" $.Values.service.resources) | nindent 12 }}
 ---
 apiVersion: v1
 kind: Service

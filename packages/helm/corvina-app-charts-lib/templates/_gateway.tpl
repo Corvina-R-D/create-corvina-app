@@ -64,6 +64,9 @@ data:
     spec:
       template:
         spec:
+          {{- with include "corvina-app-charts-lib.priorityClassName" (dict "context" . "class" .Values.gateway.priorityClassName) }}
+          {{- . | nindent 10 }}
+          {{- end }}
           containers:
             - name: istio-proxy
               resources:

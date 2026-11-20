@@ -32,7 +32,7 @@ spec:
           volumeMounts:
             {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" . | nindent 12 }}
           resources:
-            {{- toYaml .Values.service.resources | nindent 12 }}
+            {{- include "corvina-app-charts-lib.resources" (dict "context" . "resources" .Values.service.resources) | nindent 12 }}
         {{- range .Values.migrator.waitFor }}
         - name: {{ .name }}
           image: {{ include "corvina-app-charts-lib.image.k8sWaitFor" $ }}
@@ -49,7 +49,7 @@ spec:
           volumeMounts:
             {{- include "corvina-app-charts-lib.kubeApiAccessVolumeMount" $ | nindent 12 }}
           resources:
-            {{- toYaml $.Values.service.resources | nindent 12 }}
+            {{- include "corvina-app-charts-lib.resources" (dict "context" $ "resources" $.Values.service.resources) | nindent 12 }}
         {{- end }}
       containers:
       - name: service
@@ -58,7 +58,7 @@ spec:
           {{- include "corvina-app-charts-lib.containerSecurityContext" . | nindent 10 }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
-          {{- toYaml .Values.service.resources | nindent 10 }}
+          {{- include "corvina-app-charts-lib.resources" (dict "context" . "resources" .Values.service.resources) | nindent 10 }}
         envFrom:
         - configMapRef:
             name: service-config

@@ -37,6 +37,7 @@ spec:
     spec:
       serviceAccountName: {{ $name }}-sa
       automountServiceAccountToken: false
+      {{- with include "corvina-app-charts-lib.priorityClassName" (dict "context" $ "class" $.Values.app.priorityClassName) }}{{ . | nindent 6 }}{{ end }}
       containers:
         - name: {{ $name }}
           image: "{{ .image | default $.Values.app.image | required ".app.image is required" }}:{{ .tag | default $.Values.app.tag | required ".app.tag is required" }}"
@@ -54,7 +55,7 @@ spec:
               path: /
               port: 8080
           resources:
-            {{- toYaml $.Values.app.resources | nindent 12 }}
+            {{- include "corvina-app-charts-lib.resources" (dict "context" $ "resources" $.Values.app.resources) | nindent 12 }}
 ---
 apiVersion: v1
 kind: Service

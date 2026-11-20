@@ -27,7 +27,18 @@ spec:
         weight: 100
   {{- with .Values.rabbitmq.resources }}
   resources:
-    {{ toYaml . | nindent 4 }}
+    {{ include "corvina-app-charts-lib.resources" (dict "context" $ "resources" .) | nindent 4 }}
+  {{- end }}
+  {{- with include "corvina-app-charts-lib.priorityClassName" (dict "context" $ "class" .Values.rabbitmq.priorityClassName) }}
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            # the override schema requires containers; merged by name, so this changes nothing
+            containers:
+            - name: rabbitmq
+            {{- . | nindent 12 }}
   {{- end }}
   replicas: {{ .Values.rabbitmq.replicas }}
   image: {{ .Values.rabbitmq.image | default (include "corvina-app-charts-lib.image" (dict "context" . "name" "rabbitmq")) }}

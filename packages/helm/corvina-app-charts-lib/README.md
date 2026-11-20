@@ -108,6 +108,9 @@ examples. Maps merge with the defaults (`null` drops a key), lists replace them.
 |---|---|---|
 | `appName` | chart name without `corvina-app-` | gateway, certificate and issuer names |
 | `verticalAutoscaling.enabled` | false | recommend-only VPAs from `corvina-app-charts-lib.appVpas` (app chart `templates/vpa.yaml`): the workloads of the listed templates, postgresql, redis, RabbitMQ and the generated gateway; same keys as corvina-k8s corvina-common |
+| `priorityClassName` | none | PriorityClass of the app, service and RabbitMQ pods (corvina-k8s `charts/priority-classes`); per component `app.`, `service.`, `rabbitmq.`, `gateway.priorityClassName` |
+| `resourceShape` | false | the corvina-k8s standard on the library's containers: no CPU limit, CPU request (10m when unset), memory request = limit |
+| `jobResources` | none | resources of the registration Job |
 | `global.imageRegistry` | [`values.yaml`](values.yaml) | registry of the Docker Hub images, also of the bitnami charts; leave it unset so that a library release changes it |
 | `images.{k8sWaitFor,rabbitmq,registration}.registry`, `.repository`, `.tag` | [`values.yaml`](values.yaml) | override a default image; leave them unset so that a library release bumps the image. `rabbitmq.image` and `registration.image` still override the whole image |
 | `service.serviceName` | `service-service` | backend Service, also the HTTPRoute destination |

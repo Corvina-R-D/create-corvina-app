@@ -25,6 +25,10 @@ spec:
       containers:
       - image: {{ .image | default (include "corvina-app-charts-lib.image" (dict "context" $ "name" "registration")) }}
         name: app-registration
+        {{- with $.Values.jobResources }}
+        resources:
+          {{- include "corvina-app-charts-lib.resources" (dict "context" $ "resources" .) | nindent 10 }}
+        {{- end }}
         command:
         - /bin/bash
         - -c

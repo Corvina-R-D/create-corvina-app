@@ -3,6 +3,10 @@ global:
 # recommend-only VerticalPodAutoscalers (templates/vpa.yaml): the cluster needs the VPA CRD
 verticalAutoscaling:
   enabled: {{ .StateValues | get "deployVpaObjects" false }}
+# corvina-k8s pod policy: tier of its priority-classes chart (on the cluster before this app),
+# no CPU limits and memory request = limit where the environment sets resourceShape
+priorityClassName: corvina-standard
+resourceShape: {{ .StateValues | get "resourceShape" false }}
 # client TLS parameters in the ingress access logs
 tlsClientLogging: {{ .StateValues | get "tlsClientLogging" false }}
 
@@ -47,6 +51,7 @@ postgresql:
     {{- toYaml .StateValues.images.postgresql | nindent 4 }}
   primary:
     clusterDomain: {{ .StateValues.clusterDomain }}
+    priorityClassName: corvina-standard
     # admit the pods of the namespace and prometheus
     networkPolicy:
       allowExternal: false
@@ -179,6 +184,7 @@ redis:
   replica:
     replicaCount: 0
   master:
+    priorityClassName: corvina-standard
     containerSecurityContext:
       enabled: true
       runAsUser: 1001
