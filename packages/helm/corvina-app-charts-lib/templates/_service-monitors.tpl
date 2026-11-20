@@ -1,26 +1,25 @@
 {{/*
-Scrapes the Istio ingress gateway
+Scrapes the Envoy stats of the generated gateway
 */}}
-{{- define "corvina-app-charts-lib.serviceMonitor.istio" -}}
-{{- $istioValues := index .Values "istio-gateway" }}
-kind: ServiceMonitor
+{{- define "corvina-app-charts-lib.podMonitor.istioGateway" -}}
+{{- $gateway := include "corvina-app-charts-lib.gatewayName" . }}
+kind: PodMonitor
 apiVersion: monitoring.coreos.com/v1
 metadata:
   labels:
-    app: {{ $istioValues.name }}
-  name: {{ $istioValues.name }}
+    app: {{ $gateway }}
+  name: {{ $gateway }}
   namespace: {{ .Release.Namespace }}
 spec:
-  endpoints:
+  podMetricsEndpoints:
     - path: /stats/prometheus
-      targetPort: http-envoy-prom
+      port: http-envoy-prom
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      app: {{ $istioValues.name }}
-
+      gateway.networking.k8s.io/gateway-name: {{ $gateway }}
 {{- end }}
 
 {{/*
