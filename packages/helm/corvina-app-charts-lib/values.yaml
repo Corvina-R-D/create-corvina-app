@@ -5,6 +5,9 @@ defaults:
   # the templates fail without it: the app chart doesn't import these defaults
   corvinaAppChartsLibDefaults: true
 
+  # verticalAutoscaling: {enabled: true} for recommend-only VPAs (templates/vpa.yaml of the app chart,
+  #   corvina-app-charts-lib.appVpas); same keys as corvina-k8s corvina-common
+
   # gateway, certificate and issuer names; default: chart name without "corvina-app-"
   # appName: ota
 
