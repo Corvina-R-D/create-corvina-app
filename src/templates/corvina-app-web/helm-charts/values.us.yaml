@@ -2,7 +2,7 @@ global:
   proxy:
     clusterDomain: cluster-us.local
 
-istio-gateway:
+gateway:
   service:
     externalTrafficPolicy: Local
 
