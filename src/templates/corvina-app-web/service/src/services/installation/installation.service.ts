@@ -1,7 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from 'sequelize';
-import { Logger, SequelizeTransaction, CacheMethod, CustomError, ICacheService, addPeriod } from '@corvina/nestjs-app-common-lib';
+import {
+  Logger,
+  SequelizeTransaction,
+  CacheMethod,
+  CustomError,
+  ICacheService,
+  addPeriod,
+  installationCacheKey,
+  invalidateCacheAfterCommit,
+  openIdConfigurationCacheKey,
+} from '@corvina/nestjs-app-common-lib';
 import { Installation } from '../../entities/installation.entity';
 import { getPaymentPlans, IPaymentPlanDTO } from '../../dtos/general-info/paymentPlan.dto';
 
@@ -46,15 +56,8 @@ const ONE_WEEK = 60 * 60 * 24 * 7;
 const FAR_FUTURE_END_DATE = new Date('2999-12-31T23:59:59Z');
 
 export interface IInstallationService {
-  getInstallation({
-    instanceId,
-    organizationId,
-    transaction,
-  }: {
-    instanceId: string;
-    organizationId: string;
-    transaction?: Transaction;
-  }): Promise<Installation>;
+  /** cached: never read it inside a transaction that changes the installation, the cache would keep an uncommitted value */
+  getInstallation({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<Installation>;
   create(input: IInstallInstallationInput): Promise<Installation>;
   delete(input: IInstallationDeleteInput): Promise<IInstallationDeleteOutput>;
   renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput>;
@@ -91,7 +94,7 @@ export class InstallationService implements IInstallationService {
 
     const [outputInstallation, isCreated] = await this._installationRepository.upsert(installationInput as any, { transaction });
 
-    await this.purgeInstallationCache(input);
+    await this.purgeInstallationCacheAfterCommit(input, transaction);
 
     this._logger.debug({
       msg: isCreated ? 'installation created' : 'installation updated',
@@ -107,7 +110,7 @@ export class InstallationService implements IInstallationService {
 
     this._logger.debug(`Unistallation instanceId ${instanceId} and orgId ${organizationId}`);
 
-    const installation = await this.getInstallation({ instanceId, organizationId, transaction });
+    const installation = await this.findInstallation({ instanceId, organizationId, transaction });
 
     if (!installation) {
       return { success: true, message: `Installation not found` };
@@ -127,7 +130,7 @@ export class InstallationService implements IInstallationService {
 
     this._logger.info({ organizationId, instanceId }, `Unistallation completed successfully, ${affected} installations removed`);
 
-    await this.purgeInstallationCache(installation);
+    await this.purgeInstallationCacheAfterCommit(installation, transaction);
 
     return { success: true };
   }
@@ -136,7 +139,7 @@ export class InstallationService implements IInstallationService {
   async renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput> {
     const { instanceId, organizationId, endDate, planId, freeTrial, transaction } = input;
 
-    const installation = await this.getInstallation({ instanceId, organizationId, transaction });
+    const installation = await this.findInstallation({ instanceId, organizationId, transaction });
 
     if (!installation) {
       return { success: false, message: `Installation not found` };
@@ -154,7 +157,7 @@ export class InstallationService implements IInstallationService {
       { where: { instanceId, organizationId }, transaction }
     );
 
-    await this.purgeInstallationCache(installation);
+    await this.purgeInstallationCacheAfterCommit(installation, transaction);
 
     return { success: true };
   }
@@ -173,26 +176,26 @@ export class InstallationService implements IInstallationService {
     return { endDate: FAR_FUTURE_END_DATE, freeTrial: false };
   }
 
-  private async invalidateCache(key: string) {
-    this._logger.info({ msg: 'invalidating cache', key });
-    await this._cacheService.del(key);
+  /** the installation and the openid configuration of its realm (cached by CorvinaJwtService), once the transaction is committed */
+  private purgeInstallationCacheAfterCommit(input: Pick<Installation, 'instanceId' | 'organizationId' | 'openIdConfigurationUrl'>, transaction: Transaction) {
+    return invalidateCacheAfterCommit({
+      cacheService: this._cacheService,
+      keys: [installationCacheKey(input.instanceId, input.organizationId), openIdConfigurationCacheKey(input.openIdConfigurationUrl)],
+      logger: this._logger,
+      transaction,
+    });
   }
 
-  private async purgeInstallationCache(input: Installation) {
-    let key = `getInstallation(${JSON.stringify(input.instanceId)},${JSON.stringify(input.organizationId)})`;
-    await this.invalidateCache(key);
-
-    // CorvinaJwtService of common-lib caches the openid configuration of the realm by its url
-    key = `getOpenIdConfiguration(${JSON.stringify(input.openIdConfigurationUrl)})`;
-    await this.invalidateCache(key);
-  }
-
-  @SequelizeTransaction()
   @CacheMethod({
     ttl: ONE_WEEK,
-    keyBuilder: (args: any[]) => `getInstallation(${JSON.stringify(args[0].instanceId)},${JSON.stringify(args[0].organizationId)})`,
+    keyBuilder: (args: any[]) => installationCacheKey(args[0].instanceId, args[0].organizationId),
   })
-  public async getInstallation({
+  public async getInstallation({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<Installation> {
+    return this.findInstallation({ instanceId, organizationId });
+  }
+
+  /** not cached, to read the installation inside a transaction */
+  private async findInstallation({
     instanceId,
     organizationId,
     transaction,

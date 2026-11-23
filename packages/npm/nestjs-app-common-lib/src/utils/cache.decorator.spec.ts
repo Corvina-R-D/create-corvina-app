@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { setTimeout } from 'timers/promises';
-import { CacheMethod } from './cache.decorator';
+import { CacheMethod, cacheMethodKey } from './cache.decorator';
 import { Logger } from './logger';
 import { ICacheService } from './cacheService';
 
@@ -39,6 +39,7 @@ class MyClass {
 describe('CacheDecorator', () => {
   let app: TestingModule;
   let myClass: MyClass;
+  let cacheService: ICacheService;
 
   beforeAll(async () => {
     app = await Test.createTestingModule({
@@ -47,6 +48,7 @@ describe('CacheDecorator', () => {
     await app.init();
 
     myClass = app.get<MyClass>(MyClass);
+    cacheService = app.get<ICacheService>('ICacheService');
   });
 
   afterAll(async () => {
@@ -91,5 +93,17 @@ describe('CacheDecorator', () => {
     expect(resultAfterDelay).not.toBe(result1);
     expect(resultAfterDelay).not.toBe(result2);
     expect(resultAfterDelay).not.toBe(result3);
+  });
+
+  it('I can invalidate a cached call deleting its cacheMethodKey', async () => {
+    const input = { s: 'invalidate', n: 2 };
+
+    const result1 = await myClass.myMethod(input);
+
+    expect(await cacheService.get(cacheMethodKey('myMethod', [input]))).toBe(result1);
+
+    await cacheService.del(cacheMethodKey('myMethod', [input]));
+
+    expect(await myClass.myMethod(input)).not.toBe(result1);
   });
 });

@@ -1,1 +1,7 @@
+[|- if not .RedisEnabled -|]
+{{- /* without redis the cache is in the memory of each pod: an uninstallation would purge only the pod that receives it */}}
+{{- if gt (int (default 1 .Values.service.replicas)) 1 }}
+{{- fail "service.replicas > 1 needs redis: the in-memory cache of the other replicas would keep the installations after an uninstallation" }}
+{{- end }}
+[| end -|]
 {{ include "corvina-app-charts-lib.service" . }}

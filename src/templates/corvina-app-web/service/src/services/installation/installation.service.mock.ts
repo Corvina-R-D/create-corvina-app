@@ -1,5 +1,4 @@
 /* eslint-disable */
-import { Transaction } from 'sequelize';
 import { Installation } from '../../entities/installation.entity';
 import {
   IInstallInstallationInput,
@@ -20,15 +19,7 @@ export class InstallationServiceMock implements IInstallationService {
     throw new Error('Method not implemented.');
   }
 
-  getInstallation({
-    instanceId,
-    organizationId,
-    transaction,
-  }: {
-    instanceId: string;
-    organizationId: string;
-    transaction?: Transaction;
-  }): Promise<Installation> {
+  getInstallation({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<Installation> {
     return Promise.resolve(
       this._installations.find((installation) => installation.instanceId === instanceId && installation.organizationId === organizationId)
     );

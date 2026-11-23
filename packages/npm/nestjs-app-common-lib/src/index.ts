@@ -1,6 +1,7 @@
 export * from './utils/array';
 export * from './utils/cache.decorator';
 export * from './utils/cacheService';
+export * from './utils/cacheInvalidation';
 export * from './utils/calculatePeriod';
 export * from './utils/cast.util';
 export * from './utils/CustomError';
