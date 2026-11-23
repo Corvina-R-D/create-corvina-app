@@ -82,6 +82,29 @@ describe('InstallationService', () => {
     } as Installation);
   });
 
+  it('an uninstalled installation is not served from the cache', async () => {
+    // cached
+    expect(await installationService.getInstallation(INSTALLATION)).toMatchObject({ instanceId: INSTALLATION.instanceId });
+
+    await installationService.delete({
+      instanceId: INSTALLATION.instanceId,
+      organizationId: INSTALLATION.organizationId,
+    } as Installation);
+
+    expect(await installationService.getInstallation(INSTALLATION)).toBeNull();
+  });
+
+  it('a renewed installation is not served from the cache', async () => {
+    const endDate = new Date('3000-01-01T00:00:00Z');
+
+    // cached
+    await installationService.getInstallation(INSTALLATION);
+
+    await installationService.renew({ instanceId: INSTALLATION.instanceId, organizationId: INSTALLATION.organizationId, endDate, freeTrial: false });
+
+    expect(new Date((await installationService.getInstallation(INSTALLATION)).endDate)).toEqual(endDate);
+  });
+
   it('installation without an explicit endDate resolves one from the matching payment plan', async () => {
     setPaymentPlans(TEST_PAYMENT_PLANS);
 

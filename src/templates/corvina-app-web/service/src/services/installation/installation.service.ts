@@ -42,19 +42,19 @@ export interface IInstallationRenewOutput {
 
 const ONE_WEEK = 60 * 60 * 24 * 7;
 
+/**
+ * organizationId is a string in the requests but a BIGINT column, that the installation read from the db can carry as a number:
+ * the key uses its string, or purging the cache with the ids of the installation would miss the key cached by a request.
+ */
+const getInstallationCacheKey = (instanceId: string, organizationId: string | number) =>
+  `getInstallation(${JSON.stringify(instanceId)},${JSON.stringify(String(organizationId))})`;
+
 // Fallback expiry used when a resolved plan has neither a recurrent nor a trial period (effectively "no expiry").
 const FAR_FUTURE_END_DATE = new Date('2999-12-31T23:59:59Z');
 
 export interface IInstallationService {
-  getInstallation({
-    instanceId,
-    organizationId,
-    transaction,
-  }: {
-    instanceId: string;
-    organizationId: string;
-    transaction?: Transaction;
-  }): Promise<Installation>;
+  /** cached: never read it inside a transaction that changes the installation, the cache would keep an uncommitted value */
+  getInstallation({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<Installation>;
   create(input: IInstallInstallationInput): Promise<Installation>;
   delete(input: IInstallationDeleteInput): Promise<IInstallationDeleteOutput>;
   renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput>;
@@ -91,7 +91,7 @@ export class InstallationService implements IInstallationService {
 
     const [outputInstallation, isCreated] = await this._installationRepository.upsert(installationInput as any, { transaction });
 
-    await this.purgeInstallationCache(input);
+    this.purgeInstallationCacheAfterCommit(input, transaction);
 
     this._logger.debug({
       msg: isCreated ? 'installation created' : 'installation updated',
@@ -107,7 +107,7 @@ export class InstallationService implements IInstallationService {
 
     this._logger.debug(`Unistallation instanceId ${instanceId} and orgId ${organizationId}`);
 
-    const installation = await this.getInstallation({ instanceId, organizationId, transaction });
+    const installation = await this.findInstallation({ instanceId, organizationId, transaction });
 
     if (!installation) {
       return { success: true, message: `Installation not found` };
@@ -127,7 +127,7 @@ export class InstallationService implements IInstallationService {
 
     this._logger.info({ organizationId, instanceId }, `Unistallation completed successfully, ${affected} installations removed`);
 
-    await this.purgeInstallationCache(installation);
+    this.purgeInstallationCacheAfterCommit(installation, transaction);
 
     return { success: true };
   }
@@ -136,7 +136,7 @@ export class InstallationService implements IInstallationService {
   async renew(input: IInstallationRenewInput): Promise<IInstallationRenewOutput> {
     const { instanceId, organizationId, endDate, planId, freeTrial, transaction } = input;
 
-    const installation = await this.getInstallation({ instanceId, organizationId, transaction });
+    const installation = await this.findInstallation({ instanceId, organizationId, transaction });
 
     if (!installation) {
       return { success: false, message: `Installation not found` };
@@ -154,7 +154,7 @@ export class InstallationService implements IInstallationService {
       { where: { instanceId, organizationId }, transaction }
     );
 
-    await this.purgeInstallationCache(installation);
+    this.purgeInstallationCacheAfterCommit(installation, transaction);
 
     return { success: true };
   }
@@ -178,21 +178,38 @@ export class InstallationService implements IInstallationService {
     await this._cacheService.del(key);
   }
 
-  private async purgeInstallationCache(input: Installation) {
-    let key = `getInstallation(${JSON.stringify(input.instanceId)},${JSON.stringify(input.organizationId)})`;
-    await this.invalidateCache(key);
+  private async purgeInstallationCache(input: Pick<Installation, 'instanceId' | 'organizationId' | 'openIdConfigurationUrl'>) {
+    await this.invalidateCache(getInstallationCacheKey(input.instanceId, input.organizationId));
 
     // CorvinaJwtService of common-lib caches the openid configuration of the realm by its url
-    key = `getOpenIdConfiguration(${JSON.stringify(input.openIdConfigurationUrl)})`;
-    await this.invalidateCache(key);
+    await this.invalidateCache(`getOpenIdConfiguration(${JSON.stringify(input.openIdConfigurationUrl)})`);
   }
 
-  @SequelizeTransaction()
+  /**
+   * Purges the cache once the transaction is committed: purged before, a concurrent getInstallation could
+   * read the not yet committed change (e.g. the uninstalled installation still there) and cache it again.
+   */
+  private purgeInstallationCacheAfterCommit(input: Pick<Installation, 'instanceId' | 'organizationId' | 'openIdConfigurationUrl'>, transaction: Transaction) {
+    transaction.afterCommit(async () => {
+      // the change is committed: a cache failure must not fail it
+      try {
+        await this.purgeInstallationCache(input);
+      } catch (error) {
+        this._logger.error({ msg: 'Unable to purge the installation cache', instanceId: input.instanceId, organizationId: input.organizationId, error });
+      }
+    });
+  }
+
   @CacheMethod({
     ttl: ONE_WEEK,
-    keyBuilder: (args: any[]) => `getInstallation(${JSON.stringify(args[0].instanceId)},${JSON.stringify(args[0].organizationId)})`,
+    keyBuilder: (args: any[]) => getInstallationCacheKey(args[0].instanceId, args[0].organizationId),
   })
-  public async getInstallation({
+  public async getInstallation({ instanceId, organizationId }: { instanceId: string; organizationId: string }): Promise<Installation> {
+    return this.findInstallation({ instanceId, organizationId });
+  }
+
+  /** not cached, to read the installation inside a transaction */
+  private async findInstallation({
     instanceId,
     organizationId,
     transaction,
