@@ -90,6 +90,8 @@ async getDevice(id: string) { ... }
 | Export | Description |
 |---|---|
 | `ICacheService`, `CACHE_SERVICE` | cache the app provides under `'ICacheService'`: `get(key)`, `set(key, value, ttlSeconds?)`, `del(key)` |
+| `cacheMethodKey(method, args, prefix?)` | key `CacheMethod` caches a call under without a `keyBuilder`: delete it to invalidate the call |
+| `invalidateCacheAfterCommit({ cacheService, keys, logger, transaction? })` | deletes cache keys once `transaction` is committed (now without one): deleted before, a concurrent read could cache the old data again. Errors are logged, never thrown |
 | `retry(fn, options)` | function form of `Retry`: calls `fn` up to `nRetries` times; throws when all attempts fail. `handleError(nRetries, err)` returns `{ continue, avoidRethrow? }` to stop early, rethrowing or not |
 | `queueHandler(queue, { numberOfParallelPromises? })` | runs (and empties) an array of async functions, at most `numberOfParallelPromises` (default 5) at a time |
 | `matchUrl(url, rule)` | whether `url` matches a wildcard rule (`https://*.corvina.io/*`) |
@@ -188,6 +190,8 @@ export class CorvinaAuthGuardFromHeaders extends CorvinaAuthGuard {
 | `extractBearerToken(header)` | token of an `Authorization` header (`Bearer` prefix case insensitive) |
 | `getCorvinaUsername(token)` | `preferred_username` without the service account prefix |
 | `ICorvinaInstallationService`, `INSTALLATION_SERVICE` | installation service the app provides under `'IInstallationService'`: `getInstallation({ instanceId, organizationId })` → installation or `null` |
+| `installationCacheKey(instanceId, organizationId)` | cache key of `getInstallation`: the `keyBuilder` of its `CacheMethod` and the key to invalidate on install, renew and uninstall. `organizationId` is always a string in it, also when the installation read from the db carries a number |
+| `openIdConfigurationCacheKey(url)` | cache key of the openid configuration `CorvinaJwtService` caches for a realm, to invalidate with the installation |
 | `ICorvinaInstallation` | installation fields the auth reads: `openIdConfigurationUrl`, `realmValidationRole?`, `orgResourceId?` |
 | `InstallationNotFoundError` | thrown by the JWT service when the app is not installed (401 by default) |
 | `CORVINA_EVENT_TYPE` | lifecycle events: `installed`, `uninstalled`, `renew` |
