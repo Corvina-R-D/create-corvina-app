@@ -2,7 +2,7 @@ import { createServer, Server } from 'http';
 import { AddressInfo } from 'net';
 import { generateKeyPairSync } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { CorvinaJwtService } from './corvinaJwt.service';
+import { CorvinaJwtService, openIdConfigurationCacheKey } from './corvinaJwt.service';
 import { ICorvinaInstallation, ICorvinaInstallationService, InstallationNotFoundError } from './installation';
 import { ICacheService } from '../utils/cacheService';
 import { Logger } from '../utils/logger';
@@ -125,6 +125,14 @@ describe('CorvinaJwtService', () => {
 
   it('rejects a token issued by another realm', async () => {
     await expect(service.validateBearerToken({ token: sign(), instanceId: 'i', organizationId: 'same-keys' })).rejects.toThrow('jwt issuer invalid');
+  });
+
+  it('caches the openid configuration of a realm under openIdConfigurationCacheKey', async () => {
+    const url = installations['i/o'].openIdConfigurationUrl;
+
+    await service.validateBearerToken({ token: sign(), instanceId: 'i', organizationId: 'o' });
+
+    expect(await cache.get(openIdConfigurationCacheKey(url))).toMatchObject({ issuer: baseUrl });
   });
 
   it('caches the keys of a realm', async () => {

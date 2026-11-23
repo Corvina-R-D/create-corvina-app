@@ -3,7 +3,7 @@ import { JwksClient } from 'jwks-rsa';
 import * as jwt from 'jsonwebtoken';
 import { Logger } from '../utils/logger';
 import { matchUrl } from '../utils/matchUrl';
-import { CacheMethod } from '../utils/cache.decorator';
+import { CacheMethod, cacheMethodKey } from '../utils/cache.decorator';
 import { CACHE_SERVICE, ICacheService } from '../utils/cacheService';
 import { ICorvinaInstallationService, INSTALLATION_SERVICE, InstallationNotFoundError } from './installation';
 import { IOpenIDConfiguration } from './openIdConfiguration';
@@ -48,6 +48,12 @@ const ONE_DAY = 60 * 60 * 24;
 const FETCH_TIMEOUT = 5000;
 /** JWKS requests per minute of a realm: a token with an unknown kid cannot flood the identity provider */
 const JWKS_REQUESTS_PER_MINUTE = 10;
+
+/**
+ * Cache key of the openid configuration CorvinaJwtService caches for a realm:
+ * delete it (ICacheService.del) when an installation of that realm is created, renewed or removed.
+ */
+export const openIdConfigurationCacheKey = (openIdConfigurationUrl: string): string => cacheMethodKey('getOpenIdConfiguration', [openIdConfigurationUrl]);
 
 @Injectable()
 export class CorvinaJwtService implements ICorvinaJwtService {

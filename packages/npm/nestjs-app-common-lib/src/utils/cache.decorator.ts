@@ -18,6 +18,13 @@ interface ICacheMethodHost {
 }
 
 /**
+ * Key CacheMethod caches a call under when the method has no keyBuilder: `<prefix><method>(<JSON of each arg>,...)`.
+ * Use it to delete (invalidate) a cached call, instead of rebuilding the key by hand.
+ */
+export const cacheMethodKey = (methodName: string, args: unknown[], prefix = ''): string =>
+  `${prefix}${methodName}(${args.map((arg) => JSON.stringify(arg)).join(',')})`;
+
+/**
  * This decorator is used to cache the result of a method.
  * The cache key is the method name and the arguments. You can also specify a custom key prefix.
  */
@@ -40,7 +47,7 @@ export function CacheMethod({ prefix, ttl, keyBuilder }: ICacheMethodOptions = {
         throw new Error(`CacheManager is not defined`);
       }
 
-      const key = keyBuilder ? keyBuilder(args) : `${prefix || ''}${propertyKey}(${args.map((arg) => JSON.stringify(arg)).join(',')})`;
+      const key = keyBuilder ? keyBuilder(args) : cacheMethodKey(propertyKey, args, prefix);
 
       let cachedValue: Awaited<ReturnType<T>> | undefined;
 
