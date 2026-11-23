@@ -146,7 +146,8 @@ The other values (`gateway`, `cors`, `postgresql`, `redis`, `rabbitmq`, `service
 ## Gateway API
 
 The cluster needs the Gateway API CRDs (v1.6 or later, standard channel) and the app `istio-discovery` release
-(`helmfile.yaml`) with the same revision as the release name: the Gateway carries the label `istio.io/rev`. Istiod
+(`helmfile.yaml`) with the same revision as the release name: the Gateway and the HTTPRoute carry the label
+`istio.io/rev` (istiod writes the status only of the objects of its revision). An app's own route must carry it too. Istiod
 generates the Deployment and the Service `<app>-gateway-istio`; `gateway.service`, `gateway.resources` and
 `gateway.autoscaling` reach them through the `<app>-gateway-params` ConfigMap. The pods have the label
 `gateway.networking.k8s.io/gateway-name: <app>-gateway`, which the NetworkPolicies and the PodMonitor select. Routes are Gateway API
