@@ -18,6 +18,9 @@ kind: HTTPRoute
 metadata:
   name: app-host-route
   namespace: {{ .Release.Namespace }}
+  labels:
+    # istiod writes the route status (Accepted, ResolvedRefs) only for the objects of its revision, as the Gateway
+    istio.io/rev: {{ .Release.Name }}
 spec:
   parentRefs:
     - name: {{ include "corvina-app-charts-lib.gatewayName" . }}
