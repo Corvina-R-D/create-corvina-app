@@ -48,6 +48,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       if (status === 404) {
         const request = ctx.getRequest<{ method: string; url: string; headers: IncomingHttpHeaders }>();
         this._logger.warn({ msg: `404: ${request.method} ${request.url}`, headers: request.headers });
+      } else if (status >= 500) {
+        // a server error the app raised on purpose: returned to the client as is, but it must reach the logs too
+        const request = ctx.getRequest<{ method: string; url: string }>();
+        this._logger.error({ err: error, status, response: error.getResponse() }, `${status}: ${request.method} ${request.url}`);
       }
 
       response.status(status).json(error.getResponse());

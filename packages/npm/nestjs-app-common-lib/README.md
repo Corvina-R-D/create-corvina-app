@@ -113,7 +113,7 @@ async getDevice(id: string) { ... }
 | Export | Description |
 |---|---|
 | `CustomError<TContext>(code, message, context?)` | app error with a numeric code and an optional context |
-| `GlobalExceptionFilter` | maps `CustomError` → 400 `{ errorCode, errorMessage, errorContext }`, `PayloadTooLargeException` → 413, NestJS `HttpException` → its status and body (404s logged as warnings), anything else → 500 (logged). Extend it, handle your errors and call `super.catch()` for the rest |
+| `GlobalExceptionFilter` | maps `CustomError` → 400 `{ errorCode, errorMessage, errorContext }`, `PayloadTooLargeException` → 413, NestJS `HttpException` → its status and body (404s logged as warnings, 5xx logged as errors), anything else → 500 (logged). Extend it, handle your errors and call `super.catch()` for the rest |
 
 ## Pagination
 
