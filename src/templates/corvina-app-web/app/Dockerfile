@@ -21,5 +21,7 @@ RUN npm run build
 
 ##### production environment #####
 FROM eu.gcr.io/corvina-exorint/corvina-base-nginx-unprivileged:v1 AS prod
-COPY --from=build /app/dist /usr/share/nginx/html
+# a first step that is cached across code changes lets BuildKit take the base image layers from the
+# layer cache: with the build output first, every code change pulls the base image from the registry
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
